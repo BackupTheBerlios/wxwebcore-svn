@@ -177,9 +177,6 @@
 #endif
 #define INFNAN_CHECK
 #include "dtoa.h"
-#define strtod kjs_strtod
-#define dtoa kjs_dtoa
-#define freedtoa kjs_freedtoa
 
 
 
@@ -267,6 +264,10 @@ static double private_mem[PRIVATE_mem], *pmem_next = private_mem;
 #ifndef __MATH_H__
 #include "math.h"
 #endif
+
+#define strtod kjs_strtod
+#define dtoa kjs_dtoa
+#define freedtoa kjs_freedtoa
 
 #ifdef __cplusplus
 extern "C" {
