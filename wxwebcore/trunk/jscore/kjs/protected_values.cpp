@@ -20,6 +20,7 @@
  *
  */
 
+#include <assert.h>
 #include "protected_values.h"
 #include "simple_number.h"
 

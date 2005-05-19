@@ -19,6 +19,8 @@
  *
  */
 
+#include <assert.h>
+
 #include "scope_chain.h"
 
 #include "object.h"

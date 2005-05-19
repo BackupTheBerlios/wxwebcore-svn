@@ -29,6 +29,7 @@
 #include <cxxabi.h>
 #endif
 
+#include <assert.h>
 #include <collector.h>
 #include <value.h>
 #include <internal.h>

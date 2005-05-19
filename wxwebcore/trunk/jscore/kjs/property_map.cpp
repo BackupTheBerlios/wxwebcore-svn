@@ -19,6 +19,8 @@
  *
  */
 
+#include <assert.h>
+
 #include "property_map.h"
 
 #include "object.h"

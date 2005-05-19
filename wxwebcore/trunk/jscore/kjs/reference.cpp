@@ -20,6 +20,7 @@
  *
  */
 
+#include <assert.h>
 #include "reference.h"
 #include "internal.h"
 
