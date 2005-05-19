@@ -15,7 +15,15 @@
         <dirname>.</dirname>
 
         <include>jscore/kjs</include>
+        <include>jscore/bindings</include>
         <include>jscore/pcre</include>
+
+        <define>APPLE_CHANGES=1</define>
+
+        <if cond="FORMAT=='gnu'">
+            <!-- FIXME: we need proper configure checks -->
+            <define>HAVE_FUNC_ISNAN</define>
+        </if>
     </template>
 
     
