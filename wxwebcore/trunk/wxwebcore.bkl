@@ -1,0 +1,69 @@
+<?xml version="1.0" ?>
+<!-- $Id$ -->
+
+<makefile>
+
+    <!-- Common definitions etc.: -->
+
+    <include file="presets/simple.bkl"/>
+
+    <set var="BUILDDIR">obj-$(FORMAT)</set>
+
+    <template id="base" template="simple">
+        <threading>multi</threading>
+        <warnings>max</warnings>
+        <dirname>.</dirname>
+
+        <include>jscore/kjs</include>
+    </template>
+
+    
+    <!-- Files: -->
+
+    <set var="JSCORE_SRC">
+        jscore/kjs/array_object.cpp
+        jscore/kjs/bool_object.cpp
+        jscore/kjs/collector.cpp
+        jscore/kjs/date_object.cpp
+        jscore/kjs/debugger.cpp
+        jscore/kjs/dtoa.cpp
+        jscore/kjs/error_object.cpp
+        jscore/kjs/fpconst.cpp
+        jscore/kjs/function.cpp
+        jscore/kjs/function_object.cpp
+        jscore/kjs/grammar.cpp
+        jscore/kjs/identifier.cpp
+        jscore/kjs/internal.cpp
+        jscore/kjs/interpreter.cpp
+        jscore/kjs/interpreter_map.cpp
+        jscore/kjs/lexer.cpp
+        jscore/kjs/list.cpp
+        jscore/kjs/lookup.cpp
+        jscore/kjs/math_object.cpp
+        jscore/kjs/nodes2string.cpp
+        jscore/kjs/nodes.cpp
+        jscore/kjs/number_object.cpp
+        jscore/kjs/object.cpp
+        jscore/kjs/object_object.cpp
+        jscore/kjs/operations.cpp
+        jscore/kjs/property_map.cpp
+        jscore/kjs/protected_values.cpp
+        jscore/kjs/reference.cpp
+        jscore/kjs/reference_list.cpp
+        jscore/kjs/regexp.cpp
+        jscore/kjs/regexp_object.cpp
+        jscore/kjs/scope_chain.cpp
+        jscore/kjs/string_object.cpp
+        jscore/kjs/ustring.cpp
+        jscore/kjs/value.cpp
+    </set>
+    
+    
+    <!-- Libraries: -->
+
+    <lib id="wxwebcore" template="base">
+        <sources>$(JSCORE_SRC)</sources>
+    </lib>
+
+</makefile>
+
