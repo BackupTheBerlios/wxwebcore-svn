@@ -15,6 +15,7 @@
         <dirname>.</dirname>
 
         <include>jscore/kjs</include>
+        <include>jscore/pcre</include>
     </template>
 
     
