@@ -29,8 +29,10 @@
 #include <cxxabi.h>
 #endif
 
-#include <algorithm>
-#define MAX std::max
+#ifndef MAX
+    #include <algorithm>
+    #define MAX std::max
+#endif
 
 #include <assert.h>
 #include <collector.h>

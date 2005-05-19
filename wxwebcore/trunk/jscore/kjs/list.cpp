@@ -23,8 +23,10 @@
 
 #include "internal.h"
 
-#include <algorithm>
-#define MIN std::min
+#ifndef MIN
+    #include <algorithm>
+    #define MIN std::min
+#endif
 
 #define DUMP_STATISTICS 0
 

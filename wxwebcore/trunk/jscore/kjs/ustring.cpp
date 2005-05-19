@@ -42,8 +42,10 @@
 #include <math.h>
 #include "dtoa.h"
 
-#include <algorithm>
-#define MAX std::max
+#ifndef MAX
+    #include <algorithm>
+    #define MAX std::max
+#endif
 
 #if APPLE_CHANGES
 
