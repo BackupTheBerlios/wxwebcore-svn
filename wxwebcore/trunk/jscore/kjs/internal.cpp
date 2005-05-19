@@ -23,6 +23,7 @@
  */
 
 #include <stdio.h>
+#include <pthread.h>
 #include <math.h>
 #include <assert.h>
 #ifndef NDEBUG
@@ -94,7 +95,9 @@ static inline void lockInterpreter()
   pthread_once(&interpreterLockOnce, initializeInterpreterLock);
   pthread_mutex_lock(&interpreterLock);
   interpreterLockCount++;
+#if TEST_CONSERVATIVE_GC || USE_CONSERVATIVE_GC
   Collector::registerThread();
+#endif
 }
 
 static inline void unlockInterpreter()

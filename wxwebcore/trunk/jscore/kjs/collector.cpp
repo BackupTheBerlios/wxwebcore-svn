@@ -38,9 +38,9 @@
 #include <collector.h>
 #include <value.h>
 #include <internal.h>
+#include <pthread.h>
 
 #if APPLE_CHANGES
-#include <pthread.h>
 #include <mach/mach_port.h>
 #include <mach/task.h>
 #include <mach/thread_act.h>
