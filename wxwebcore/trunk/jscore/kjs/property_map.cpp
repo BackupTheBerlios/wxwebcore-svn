@@ -21,6 +21,9 @@
 
 #include <assert.h>
 
+#include <algorithm>
+#define MAX std::max
+
 #include "property_map.h"
 
 #include "object.h"

@@ -23,6 +23,9 @@
 
 #include "internal.h"
 
+#include <algorithm>
+#define MIN std::min
+
 #define DUMP_STATISTICS 0
 
 namespace KJS {
