@@ -45,6 +45,7 @@
 #  include <sys/param.h>
 #endif // HAVE_SYS_PARAM_H
 
+#include <errno.h>
 #include <math.h>
 #include <string.h>
 #include <stdio.h>

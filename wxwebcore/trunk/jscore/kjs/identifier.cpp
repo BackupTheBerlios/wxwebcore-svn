@@ -35,6 +35,9 @@
 
 #include "identifier.h"
 
+#include <malloc.h>
+#include <string.h>
+
 #define DUMP_STATISTICS 0
 
 namespace KJS {

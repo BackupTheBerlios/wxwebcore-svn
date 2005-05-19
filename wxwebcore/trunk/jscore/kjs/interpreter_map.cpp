@@ -21,6 +21,9 @@
 
 #include "interpreter_map.h"
 
+#include <malloc.h>
+#include <string.h>
+
 namespace KJS {
 
 const int _minTableSize = 64;

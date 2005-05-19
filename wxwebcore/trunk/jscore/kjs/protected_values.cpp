@@ -21,6 +21,7 @@
  */
 
 #include <assert.h>
+#include <malloc.h>
 #include "protected_values.h"
 #include "simple_number.h"
 
