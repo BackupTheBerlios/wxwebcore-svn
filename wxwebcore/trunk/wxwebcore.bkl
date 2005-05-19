@@ -21,7 +21,7 @@
     
     <!-- Files: -->
 
-    <set var="JSCORE_SRC">
+    <set var="JSCORE_KJS_SRC">
         jscore/kjs/array_object.cpp
         jscore/kjs/bool_object.cpp
         jscore/kjs/collector.cpp
@@ -59,11 +59,21 @@
         jscore/kjs/value.cpp
     </set>
     
-    
+    <set var="JSCORE_PCRE_SRC">
+        jscore/pcre/get.c
+        jscore/pcre/maketables.c
+        jscore/pcre/pcre.c
+        jscore/pcre/dftables.c
+    </set>
+   
+
     <!-- Libraries: -->
 
     <lib id="wxwebcore" template="base">
-        <sources>$(JSCORE_SRC)</sources>
+        <sources>
+            $(JSCORE_PCRE_SRC)
+            $(JSCORE_KJS_SRC)
+        </sources>
     </lib>
 
 </makefile>
