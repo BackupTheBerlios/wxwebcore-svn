@@ -29,14 +29,14 @@
 #include "KWQSize.h"
 #include "KWQPointArray.h"
 
-typedef struct _NSRect NSRect;
+#include "wx/wx.h"
 
 class QRect {
 public:
     QRect();
     QRect(QPoint p, QSize s);
     QRect(int, int, int, int);
-    explicit QRect(const NSRect &); // don't do this implicitly since it's lossy
+    explicit QRect(const wxRect &); // don't do this implicitly since it's lossy
 
     bool isNull() const;
     bool isValid() const;
@@ -73,7 +73,7 @@ public:
 
     inline QRect operator&(const QRect &r) const { return intersect(r); }
 
-    operator NSRect() const;
+    operator wxRect() const;
 
 #ifdef _KWQ_IOSTREAM_
     friend std::ostream &operator<<(std::ostream &, const QRect &);

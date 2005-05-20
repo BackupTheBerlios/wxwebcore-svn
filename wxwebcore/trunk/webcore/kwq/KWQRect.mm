@@ -42,7 +42,7 @@ QRect::QRect(QPoint p, QSize s) : xp(p.x()), yp(p.y()), w(s.width()), h(s.height
 {
 }
 
-QRect::QRect(const NSRect &r) : xp((int)r.origin.x), yp((int)r.origin.y), w((int)r.size.width), h((int)r.size.height)
+QRect::QRect(const wxRect &r) : xp((int)r.x), yp((int)r.y), w((int)r.width), h((int)r.height)
 {
 }
 
@@ -149,9 +149,9 @@ void QRect::inflate(int s)
     h += 2*s;
 }
 
-QRect::operator NSRect() const
+QRect::operator wxRect() const
 {
-    return NSMakeRect(xp, yp, w, h);
+    return wxRect(xp, yp, w, h);
 }
 
 bool operator==(const QRect &a, const QRect &b)
