@@ -82,7 +82,7 @@
     </set>
     <!-- Libraries: -->
 
-    <lib id="wxwebcore" template="base,wx">
+    <lib id="wxwebcore" template="base,wx-lib">
         <sources>
             $(JSCORE_PCRE_SRC)
             $(JSCORE_KJS_SRC)
