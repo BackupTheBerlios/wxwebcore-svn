@@ -6,6 +6,7 @@
     <!-- Common definitions etc.: -->
 
     <include file="presets/simple.bkl"/>
+    <include file="presets/wx.bkl"/>
 
     <set var="BUILDDIR">obj-$(FORMAT)</set>
 
@@ -74,13 +75,16 @@
         jscore/pcre/dftables.c
     </set>
    
-
+    <set var="WEBCORE_KWQ_SRC">
+        webcore/kwq/KWQRect.cpp
+    </set>
     <!-- Libraries: -->
 
-    <lib id="wxwebcore" template="base">
+    <lib id="wxwebcore" template="base,wx">
         <sources>
             $(JSCORE_PCRE_SRC)
             $(JSCORE_KJS_SRC)
+            $(WEBCORE_KWQ_SRC)
         </sources>
     </lib>
 
