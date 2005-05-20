@@ -21,7 +21,7 @@
 
 #include "interpreter_map.h"
 
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
 
 namespace KJS {

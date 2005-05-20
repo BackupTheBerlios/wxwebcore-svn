@@ -35,7 +35,7 @@
 
 #include "identifier.h"
 
-#include <malloc.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define DUMP_STATISTICS 0
