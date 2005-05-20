@@ -20,6 +20,8 @@
         <include>jscore/pcre</include>
 
         <define>APPLE_CHANGES=1</define>
+        <!-- this GC version requires Mach's thread suspend/resume: -->
+        <define>USE_CONVERVATIVE_GC=0</define>
 
         <if cond="FORMAT=='gnu'">
             <!-- FIXME: we need proper configure checks -->

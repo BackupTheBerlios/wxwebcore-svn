@@ -25,8 +25,12 @@
 #ifndef _KJS_VALUE_H_
 #define _KJS_VALUE_H_
 
-#define USE_CONSERVATIVE_GC 1
-#define TEST_CONSERVATIVE_GC 0
+#ifndef USE_CONSERVATIVE_GC
+    #define USE_CONSERVATIVE_GC 1
+#endif
+#ifndef TEST_CONSERVATIVE_GC
+    #define TEST_CONSERVATIVE_GC 0
+#endif
 
 #ifndef NDEBUG // protection against problems if committing with KJS_VERBOSE on
 
