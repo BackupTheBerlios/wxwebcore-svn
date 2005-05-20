@@ -37,6 +37,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <stdexcept>
 
 #define DUMP_STATISTICS 0
 
