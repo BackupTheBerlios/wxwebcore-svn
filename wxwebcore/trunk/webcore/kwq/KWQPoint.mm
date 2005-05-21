@@ -33,13 +33,13 @@ QPoint::QPoint(int xIn, int yIn) : xCoord(xIn), yCoord(yIn)
 {
 }
 
-QPoint::QPoint(const NSPoint &p) : xCoord((int)p.x), yCoord((int)p.y)
+QPoint::QPoint(const wxPoint &p) : xCoord((int)p.x), yCoord((int)p.y)
 {
 }
 
-QPoint::operator NSPoint() const
+QPoint::operator wxPoint() const
 {
-    return NSMakePoint(xCoord, yCoord);
+    return wxPoint(xCoord, yCoord);
 }
 
 QPoint operator+(const QPoint &a, const QPoint &b)
