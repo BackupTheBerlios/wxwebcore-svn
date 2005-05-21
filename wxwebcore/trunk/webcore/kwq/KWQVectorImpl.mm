@@ -24,6 +24,8 @@
  */
 
 #import "KWQVectorImpl.h"
+#import <stdlib.h>
+#import <string.h>
 
 KWQVectorImpl::KWQVectorImpl(void (*f)(void *))
     : m_data(0), m_size(0), m_count(0), m_deleteItemFunction(f)
