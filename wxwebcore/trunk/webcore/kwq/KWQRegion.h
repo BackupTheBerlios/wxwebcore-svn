@@ -30,17 +30,14 @@
 #include "KWQImage.h"
 #include "KWQRect.h"
 
-#ifdef __OBJC__
-@class NSBezierPath;
-#else
-class NSBezierPath;
-#endif
+#include "wx/setup.h"
+#include "wx/region.h"
 
 class QRegion {
 public:
     enum RegionType { Ellipse, Rectangle };
 
-    QRegion() : path(0) { }
+    QRegion() : m_region(0) { }
     QRegion(const QRect &);
     QRegion(int, int, int, int, RegionType = Rectangle);
     QRegion(const QPointArray &);
@@ -55,7 +52,8 @@ public:
     void translate(int deltaX, int deltaY);
 
 private:
-    NSBezierPath *path;    
+	RegionType m_regionType;
+    wxRegion *m_region;    
 };
 
 #endif

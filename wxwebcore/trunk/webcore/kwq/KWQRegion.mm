@@ -24,71 +24,67 @@
  */
 
 #import "KWQRegion.h"
-#import "KWQFoundationExtras.h"
-
-// None of the NSBezierPath calls here can possibly throw an NSException.
-// Some path calls do this when the path is empty, but we always make
-// those when the path is guaranteed non-empty.
 
 QRegion::QRegion(const QRect &rect)
-    : path(KWQRetain([NSBezierPath bezierPathWithRect:rect]))
 {
+	m_region = new wxRegion(rect);
 }
 
 QRegion::QRegion(int x, int y, int w, int h, RegionType t)
 {
-    if (t == Rectangle) {
-        path = KWQRetain([NSBezierPath bezierPathWithRect:NSMakeRect(x, y, w, h)]);
-    } else { // Ellipse
-        path = KWQRetain([NSBezierPath bezierPathWithOvalInRect:NSMakeRect(x, y, w, h)]);
-    }
+	m_regionType = t;
+	m_region = new wxRegion(x, y, w, h);
 }
 
 QRegion::QRegion(const QPointArray &arr)
 {
-    path = KWQRetainNSRelease([[NSBezierPath alloc] init]);
-    [path moveToPoint:arr[0]];
-    // the moveToPoint: guarantees the path is not empty, which means lineToPoint:
-    // can't throw.
-    for (uint i = 1; i < arr.count(); ++i) {
-        [path lineToPoint:arr[i]];
+	m_regionType = Rectangle; //I assume...
+    int len = (int)arr.size()-1;
+	wxPoint points[len];
+    for (uint i = 0; i < arr.size(); ++i) {
+        points[i] = wxPoint(arr[i].x(), arr[i].y());
     }
+	
+	//TODO: wx docs say this constructor only works with MSW and QTK
+	//double-check and see if we can impl on Mac if so.
+	m_region = new wxRegion((size_t)arr.size(), (wxPoint *)&points);
 }
 
 QRegion::~QRegion()
 {
-    KWQRelease(path);
+    if (m_region)
+		delete m_region;
 }
 
 QRegion::QRegion(const QRegion &other)
-    : path(KWQRetainNSRelease([other.path copy]))
 {
+	m_region = other.m_region;
 }
 
 QRegion &QRegion::operator=(const QRegion &other)
 {
-    if (path == other.path) {
+    if (m_region == other.m_region) {
         return *this;
     }
-    KWQRelease(path);
-    path = KWQRetainNSRelease([other.path copy]);
+    if (m_region)
+		delete m_region;
+	
+    m_region = other.m_region;
     return *this;
 }
 
 bool QRegion::contains(const QPoint &point) const
 {
-    return [path containsPoint:point];
+    return m_region->Contains(point.x(), point.y());
 }
 
 void QRegion::translate(int deltaX, int deltaY)
 {
-    NSAffineTransform *translation = [[NSAffineTransform alloc] init];
-    [translation translateXBy:deltaX yBy:deltaY];
-    [path transformUsingAffineTransform:translation];    
-    [translation release];
+    //TODO: Is this the same thing as translate?
+	m_region->Offset(deltaX, deltaY);
 }
 
 QRect QRegion::boundingRect() const
 {
-    return path ? QRect([path bounds]) : QRect();
+    return m_region ? QRect(m_region->GetBox()) : QRect();
 }
