@@ -19,6 +19,20 @@
         <include>jscore/bindings</include>
         <include>jscore/pcre</include>
 
+		<!--        
+        <include>webcore/khtml</include>
+        <include>webcore/khtml/css</include>
+        <include>webcore/khtml/dom</include>
+        <include>webcore/khtml/ecma</include>
+        <include>webcore/khtml/editing</include>
+        <include>webcore/khtml/html</include>
+        <include>webcore/khtml/misc</include>
+        <include>webcore/khtml/rendering</include>
+        <include>webcore/khtml/xbl</include>
+        <include>webcore/khtml/xml</include>
+        <include>webcore/khtml/xsl</include>
+        -->
+
         <define>APPLE_CHANGES=1</define>
         <!-- this GC version requires Mach's thread suspend/resume: -->
         <define>USE_CONSERVATIVE_GC=0</define>
@@ -78,7 +92,19 @@
     </set>
    
     <set var="WEBCORE_KWQ_SRC">
+        webcore/kwq/KWQPen.cpp
+        webcore/kwq/KWQPoint.cpp
+        webcore/kwq/KWQPointArray.cpp
         webcore/kwq/KWQRect.cpp
+        webcore/kwq/KWQRegExp.cpp
+        webcore/kwq/KWQSize.cpp
+        webcore/kwq/KWQString.cpp
+        webcore/kwq/KWQTextStream.cpp
+        webcore/kwq/KWQTextUtilities.cpp
+        webcore/kwq/KWQTimer.cpp
+        webcore/kwq/KWQValueListImpl.cpp
+        webcore/kwq/KWQVariant.cpp
+        webcore/kwq/KWQVectorImpl.cpp
     </set>
     <!-- Libraries: -->
 
