@@ -27,7 +27,7 @@
 #import "KWQLogging.h"
 
 #import <sys/types.h>
-#import <JavaScriptCore/pcre.h>
+#import "pcre.h"
 
 class QRegExp::KWQRegExpPrivate
 {
