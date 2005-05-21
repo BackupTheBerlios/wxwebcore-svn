@@ -23,11 +23,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <Foundation/Foundation.h>
-
 #import <stdio.h>
 
-#import <JavaScriptCore/dtoa.h>
+#import "dtoa.h"
 
 #import "KWQLogging.h"
 #import "KWQString.h"
@@ -748,6 +746,7 @@ QString QString::number(double n)
     return qs;
 }
 
+/*
 void QString::setBufferFromCFString(CFStringRef cfs)
 {
     if (!cfs) {
@@ -767,6 +766,7 @@ void QString::setBufferFromCFString(CFStringRef cfs)
         free(buffer);
     }
 }
+*/
 
 QString QString::fromUtf8(const char *chs)
 {
@@ -778,6 +778,7 @@ QString QString::fromUtf8(const char *chs, int len)
     return QTextCodec(kCFStringEncodingUTF8).toUnicode(chs, len);
 }
 
+/*
 QString QString::fromCFString(CFStringRef cfs)
 {
     QString qs;
@@ -809,6 +810,7 @@ NSString *QString::getNSString() const
     FATAL("invalid character cache");
     return nil;
 }
+*/
 
 inline void QString::detachIfInternal()
 {
@@ -2868,33 +2870,6 @@ QConstString::~QConstString()
 	data->_unicode = 0;
     }
 }
-
-const void *retainQString(CFAllocatorRef allocator, const void *value)
-{
-    return new QString(*(QString *)value);
-}
-
-void releaseQString(CFAllocatorRef allocator, const void *value)
-{
-    delete (QString *)value;
-}
-
-CFStringRef describeQString(const void *value)
-{
-    return ((QString *)value)->getCFString();
-}
-
-Boolean equalQString(const void *value1, const void *value2)
-{
-    return *(QString *)value1 == *(QString *)value2;
-}
-
-CFHashCode hashQString(const void *value)
-{
-    return ((QString *)value)->hash();
-}
-
-const CFDictionaryKeyCallBacks CFDictionaryQStringKeyCallBacks = { 0, retainQString, releaseQString, describeQString, equalQString, hashQString };
 
 #define NODE_BLOCK_SIZE ((vm_page_size)/sizeof(HandleNode))
 

@@ -26,21 +26,14 @@
 #ifndef QSTRING_H_
 #define QSTRING_H_
 
-#include <CoreFoundation/CoreFoundation.h>
-
 #include "KWQCString.h"
 #include "WebCoreUnicode.h"
 
 // Make htmltokenizer.cpp happy
 #define QT_VERSION 300
 
+class wxString;
 class QRegExp;
-
-#ifdef __OBJC__
-@class NSString;
-#else
-class NSString;
-#endif
 
 class QChar {
 public:
@@ -402,8 +395,8 @@ public:
     static QString fromLatin1(const char *, int len);
     static QString fromUtf8(const char *);
     static QString fromUtf8(const char *, int len);
-    static QString fromCFString(CFStringRef);
-    static QString fromNSString(NSString *);
+	//TODO: called once, in KWQDictImpl. Rewrite that in wx! :-)
+	//static QString fromCFString(CFStringRef cfs);
     
     QString &operator=(char);
     QString &operator=(QChar);
@@ -544,9 +537,9 @@ public:
     QString &operator+=(char c) { return append(c); }
 
     CFStringRef getCFString() const;
-    NSString *getNSString() const;
 
-    void setBufferFromCFString(CFStringRef);
+	//TODO: This is called once, in KWQLoader. Rewrite that portion in wx! :-)
+    //void setBufferFromCFString(CFStringRef);
 
 private:
     // Used by QConstString.
@@ -611,11 +604,6 @@ inline const char *QString::latin1() const
 inline const QChar *QString::unicode() const
 {
     return dataHandle[0]->unicode();
-}
-
-inline CFStringRef QString::getCFString() const
-{
-    return (CFStringRef)getNSString();
 }
 
 inline QString QString::fromLatin1(const char *chs)
@@ -734,7 +722,5 @@ public:
     ~QConstString();
     const QString &string() const { return *this; }
 };
-
-extern const CFDictionaryKeyCallBacks CFDictionaryQStringKeyCallBacks;
 
 #endif
