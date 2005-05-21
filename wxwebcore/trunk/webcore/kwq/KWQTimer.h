@@ -29,11 +29,8 @@
 #include "KWQObject.h"
 #include "KWQSignal.h"
 
-#ifdef __OBJC__
-@class NSTimer;
-#else
-class NSTimer;
-#endif
+#include "wx/setup.h"
+#include "wx/timer.h"
 
 class QTimer : public QObject {
 public:
@@ -43,19 +40,20 @@ public:
     bool isActive() const;
     void start(int msec, bool singleShot = false);
     void stop();
-    void fire();
+    void fire(wxTimerEvent &event);
     
     static void singleShot(int msec, QObject *receiver, const char *member);
     
     // This is just a hack used by KWQKHTMLPart. The monitor function
     // gets called when the timer starts and when it is stopped before firing,
     // but not when the timer fires.
+	// TODO: Determine if this will still be needed.
     void setMonitor(void (*monitorFunction)(void *context), void *context);
-    NSTimer *getNSTimer() { return m_timer; }
+    wxTimer *getTimer() { return m_timer; }
 
 private:    
-    NSTimer *m_timer;
-    void (*m_monitorFunction)(void *context);
+    wxTimer *m_timer;
+	void (*m_monitorFunction)(void *context);
     void *m_monitorFunctionContext;
     KWQSignal m_timeoutSignal;
 };
