@@ -25,6 +25,9 @@
 
 #import "KWQPaintDeviceMetrics.h"
 
+#include "wx/setup.h"
+#include "wx/display.h"
+
 QPaintDeviceMetrics::QPaintDeviceMetrics(const QPaintDevice *)
 {
 }
@@ -36,5 +39,7 @@ int QPaintDeviceMetrics::logicalDpiY() const
 
 int QPaintDeviceMetrics::depth() const
 {
-    return CGDisplayBitsPerPixel(kCGDirectMainDisplay);
+	//TODO: How do we get the main display cross-platform?
+	wxDisplay thisDisplay(0);
+    return thisDisplay.GetDepth();
 }
