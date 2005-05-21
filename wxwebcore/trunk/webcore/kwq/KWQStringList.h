@@ -29,12 +29,6 @@
 #include "KWQString.h"
 #include "KWQValueList.h"
 
-#ifdef __OBJC__
-@class NSArray;
-#else
-class NSArray;
-#endif
-
 class QStringList : public QValueList<QString> {
 public:
     static QStringList split(const QString &, const QString &, bool allowEmptyEntries = false);
@@ -44,7 +38,8 @@ public:
     
     QString pop_front();
     
-    NSArray *getNSArray() const;
+	//TODO: called once, in KWQKHTMLPart - reimplement in wx!
+    //NSArray *getNSArray() const;
 };
 
 #endif

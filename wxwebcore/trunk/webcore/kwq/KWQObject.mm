@@ -35,11 +35,15 @@
 const QObject *QObject::_sender;
 bool QObject::_defersTimers;
 
+/* 
 static CFMutableDictionaryRef timerDictionaries;
 static CFMutableDictionaryRef allPausedTimers;
 static NSMutableArray *deferredTimers;
+*/
+
 static bool deferringTimers;
 
+/*
 @interface KWQObjectTimerTarget : NSObject
 {
     QObject *target;
@@ -51,6 +55,7 @@ static bool deferringTimers;
 - (void)timerFired;
 
 @end
+*/
 
 KWQSignal *QObject::findSignal(const char *signalName) const
 {

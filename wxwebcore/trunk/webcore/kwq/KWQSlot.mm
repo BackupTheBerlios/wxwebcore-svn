@@ -317,6 +317,7 @@ void KWQSlot::call(Job *job, const KURL &url) const
     call();
 }
 
+/*
 void KWQSlot::call(KIO::Job *job, NSData *allData) const
 {
     if (m_object.isNull()) {
@@ -346,6 +347,7 @@ void KWQSlot::call(KIO::Job *job, NSURLResponse *response) const
     
     call();
 }
+*/
 
 void KWQSlot::call(DocLoader *loader, CachedObject *cachedObject) const
 {

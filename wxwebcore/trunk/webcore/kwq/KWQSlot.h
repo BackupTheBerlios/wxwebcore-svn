@@ -28,14 +28,6 @@
 
 #include "KWQGuardedPtr.h"
 
-#if __OBJC__
-@class NSData;
-@class NSURLResponse;
-#else
-class NSData;
-class NSURLResponse;
-#endif
-
 class QString;
 class KURL;
 
@@ -67,9 +59,12 @@ public:
     void call(khtml::DocLoader *, khtml::CachedObject *) const;
     void call(KIO::Job *, const char *, int) const;
     void call(KIO::Job *, const KURL &) const;
+	
+	/*
     void call(KIO::Job *, NSData *) const;
     void call(KIO::Job *, NSURLResponse *) const;
-
+	*/
+	
     friend bool operator==(const KWQSlot &, const KWQSlot &);
 
 private:
