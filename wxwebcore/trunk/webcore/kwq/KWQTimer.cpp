@@ -26,7 +26,6 @@
 #import "KWQTimer.h"
 
 #import "KWQAssertions.h"
-#import "KWQFoundationExtras.h"
 
 class wxSingleShotTimer: public wxEvtHandler {
 	public:
