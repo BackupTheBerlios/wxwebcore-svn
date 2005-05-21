@@ -34,13 +34,14 @@
 
 #include "KWQMemArray.h"
 
-typedef struct _NSPoint NSPoint;
+#include "wx/setup.h"
+#include "wx/gdicmn.h"
 
 class QPoint {
 public:
     QPoint();
     QPoint(int, int);
-    explicit QPoint(const NSPoint &); // don't do this implicitly since it's lossy
+    explicit QPoint(const wxPoint &); // don't do this implicitly since it's lossy
 
     int x() const { return xCoord; }
     int y() const { return yCoord; }
@@ -48,7 +49,7 @@ public:
     friend QPoint operator+(const QPoint &, const QPoint &);
     friend QPoint operator-(const QPoint &, const QPoint &);
     
-    operator NSPoint() const;
+    operator wxPoint() const;
 
 private:
     int xCoord;
