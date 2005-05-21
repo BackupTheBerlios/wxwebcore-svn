@@ -32,13 +32,14 @@
 #include <iosfwd>
 #endif
 
-typedef struct _NSSize NSSize;
+#include "wx/setup.h"
+#include "wx/gdicmn.h"
 
 class QSize {
 public:
     QSize();
     QSize(int,int);
-    explicit QSize(const NSSize &);
+    explicit QSize(const wxSize &);
 
     bool isValid() const;
     int width() const { return w; }
@@ -47,7 +48,7 @@ public:
     void setHeight(int height) { h = height; }
     QSize expandedTo(const QSize &) const;
     
-    operator NSSize() const;
+    operator wxSize() const;
 
     friend QSize operator+(const QSize &, const QSize &);
     friend bool operator==(const QSize &, const QSize &);

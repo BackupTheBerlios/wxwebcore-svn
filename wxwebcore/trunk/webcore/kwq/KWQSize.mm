@@ -33,7 +33,7 @@ QSize::QSize(int width, int height) : w(width), h(height)
 {
 }
 
-QSize::QSize(const NSSize &s) : w((int)s.width), h((int)s.height)
+QSize::QSize(const wxSize &s) : w((int)s.GetWidth()), h((int)s.GetHeight())
 {
 }
 
@@ -47,9 +47,9 @@ QSize QSize::expandedTo(const QSize &o) const
     return QSize(w > o.w ? w : o.w, h > o.h ? h : o.h);
 }
 
-QSize::operator NSSize() const
+QSize::operator wxSize() const
 {
-    return NSMakeSize(w, h);
+    return wxSize(w, h);
 }
 
 QSize operator+(const QSize &a, const QSize &b)
