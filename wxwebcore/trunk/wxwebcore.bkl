@@ -11,6 +11,7 @@
     <set var="BUILDDIR">obj-$(FORMAT)</set>
 
     <template id="base" template="simple">
+        <pic>on</pic>
         <threading>multi</threading>
         <warnings>max</warnings>
         <dirname>.</dirname>
@@ -40,6 +41,8 @@
         <if cond="FORMAT=='gnu'">
             <!-- FIXME: we need proper configure checks -->
             <define>HAVE_FUNC_ISNAN</define>
+            <!-- check for undefined symbols for debugging reasons -->
+            <ldflags>-Wl,--no-undefined</ldflags>
         </if>
     </template>
 
@@ -108,13 +111,13 @@
     </set>
     <!-- Libraries: -->
 
-    <lib id="wxwebcore" template="base,wx-lib">
+    <dll id="wxwebcore" template="base,wx">
         <sources>
             $(JSCORE_PCRE_SRC)
             $(JSCORE_KJS_SRC)
             $(WEBCORE_KWQ_SRC)
         </sources>
-    </lib>
+    </dll>
 
 </makefile>
 
