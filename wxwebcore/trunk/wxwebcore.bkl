@@ -106,13 +106,14 @@
         webcore/kwq/KWQRect.cpp
         webcore/kwq/KWQRegExp.cpp
         webcore/kwq/KWQSize.cpp
-        webcore/kwq/KWQString.cpp
         webcore/kwq/KWQTextStream.cpp
         webcore/kwq/KWQTextUtilities.cpp
         webcore/kwq/KWQTimer.cpp
         webcore/kwq/KWQValueListImpl.cpp
         webcore/kwq/KWQVariant.cpp
         webcore/kwq/KWQVectorImpl.cpp
+        webcore/kwq/KWQChar.cpp
+        webcore/kwq/KWQString.cpp
     </set>
     <!-- Libraries: -->
 
