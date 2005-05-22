@@ -51,10 +51,14 @@
 
 #include <unicode/uchar.h>
 
+#ifdef __APPLE__
 // malloc_good_size is not prototyped anywhere!
 extern "C" {
   size_t malloc_good_size(size_t size);
 }
+#else
+#define malloc_good_size(x) (x)
+#endif
 
 #endif
 

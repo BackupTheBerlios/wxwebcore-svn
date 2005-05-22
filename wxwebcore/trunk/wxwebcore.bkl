@@ -10,6 +10,10 @@
 
     <set var="BUILDDIR">obj-$(FORMAT)</set>
 
+
+    <!-- IBM ICU: -->
+    <set var="ICU_LDFLAGS">`icu-config --ldflags`</set>
+
     <template id="base" template="simple">
         <pic>on</pic>
         <threading>multi</threading>
@@ -17,8 +21,8 @@
         <dirname>.</dirname>
 
         <include>jscore/kjs</include>
-        <include>jscore/bindings</include>
         <include>jscore/pcre</include>
+        <include>jscore/bindings</include>
 
 		<!--        
         <include>webcore/khtml</include>
@@ -43,6 +47,8 @@
             <define>HAVE_FUNC_ISNAN</define>
             <!-- check for undefined symbols for debugging reasons -->
             <ldflags>-Wl,--no-undefined</ldflags>
+
+            <ldflags>$(ICU_LDFLAGS)</ldflags>
         </if>
     </template>
 
@@ -91,7 +97,6 @@
         jscore/pcre/get.c
         jscore/pcre/maketables.c
         jscore/pcre/pcre.c
-        jscore/pcre/dftables.c
     </set>
    
     <set var="WEBCORE_KWQ_SRC">

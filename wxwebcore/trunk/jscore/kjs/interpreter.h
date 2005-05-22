@@ -395,7 +395,10 @@ namespace KJS {
      */
     virtual bool isSafeScript (const Interpreter *target) { return true; }
     
+#if 0 // not used by us, at least now (FIXME?)
     virtual void *createLanguageInstanceForValue (ExecState *exec, Bindings::Instance::BindingLanguage language, const Object &value, const Bindings::RootObject *origin, const Bindings::RootObject *current);
+#endif
+
 #endif
     
   private:

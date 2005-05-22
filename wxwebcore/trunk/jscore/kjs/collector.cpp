@@ -24,6 +24,10 @@
 #include "value.h"
 #include "internal.h"
 
+// Apple's changes in this file appear to be Cocoa specific, so don't
+// build them:
+#undef APPLE_CHANGES
+
 #if APPLE_CHANGES
 #include <CoreFoundation/CoreFoundation.h>
 #include <cxxabi.h>

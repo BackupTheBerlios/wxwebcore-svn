@@ -61,6 +61,12 @@
 
 const time_t invalidDate = -1;
 
+// Apple's dates code is better in that it doesn't use setlocale(), but it's
+// Mac-only, so enable it on macs
+#ifndef __APPLE__
+    #undef APPLE_CHANGES
+#endif
+
 #if APPLE_CHANGES
 
 // Originally, we wrote our own implementation that uses Core Foundation because of a performance problem in Mac OS X 10.2.
@@ -428,6 +434,7 @@ Value DateProtoFuncImp::call(ExecState *exec, Object &thisObj, const List &args)
 #if !APPLE_CHANGES
   const int bufsize=100;
   char timebuffer[bufsize];
+  // FIXME: using setlocale() is not MT-safe, it affects other threads!
   CString oldlocale = setlocale(LC_TIME,NULL);
   if (!oldlocale.c_str())
     oldlocale = setlocale(LC_ALL, NULL);
