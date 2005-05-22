@@ -30,6 +30,9 @@
 
 #include "KWQRefPtr.h"
 
+//TODO: Check - Is this the correct fix?
+typedef unsigned int uint;
+
 class KWQMapNodeImpl
 {
 protected:
