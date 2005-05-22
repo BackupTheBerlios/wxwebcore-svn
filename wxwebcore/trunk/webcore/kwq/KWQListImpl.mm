@@ -27,7 +27,6 @@
 
 #import <cstddef>
 #import <algorithm>
-#import <CoreFoundation/CFArray.h>
 #import "KWQAssertions.h"
 
 class KWQListNode
@@ -141,7 +140,7 @@ void KWQListImpl::sort(int (*compareFunc)(void *a, void *b, void *data), void *d
     }
 
     // insertion sort for most common sizes
-    const uint cutoff = 32;
+    const uint cutoff = 2000;
     if (nodeCount <= cutoff) {
         // Straight out of Sedgewick's Algorithms in C++.
 
@@ -181,7 +180,9 @@ void KWQListImpl::sort(int (*compareFunc)(void *a, void *b, void *data), void *d
     }
 
     // CFArray sort for larger lists
-    
+    // TODO: Determine what would be a more efficient solution here.
+	
+	/*
     CFMutableArrayRef array = CFArrayCreateMutable(NULL, nodeCount, NULL);
 
     for (KWQListNode *node = head; node != NULL; node = node->next) {
@@ -196,6 +197,7 @@ void KWQListImpl::sort(int (*compareFunc)(void *a, void *b, void *data), void *d
     }
 
     CFRelease(array);
+	*/
 }
 
 void *KWQListImpl::at(uint n)
