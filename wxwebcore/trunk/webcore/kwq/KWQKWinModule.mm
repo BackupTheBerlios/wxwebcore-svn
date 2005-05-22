@@ -25,11 +25,13 @@
 
 #import "KWQKWinModule.h"
 
+#include "wx/setup.h"
+#include "wx/display.h"
+
 QRect KWinModule::workArea() const
 {
-    // Returns the visibleFrame of the main screen, which is the screen that the key window is on.
-    // No need to block exceptions because these simple NSScreen calls never throw.
-    NSRect rect = [[NSScreen mainScreen] visibleFrame];
-    rect.origin.y = NSMaxY([[[NSScreen screens] objectAtIndex:0] frame]) - NSMaxY(rect);
-    return QRect(rect);
+    //TODO: Not sure if this is the appropriate fix, it's the closest thing
+	//I could find in wx.
+	wxDisplay thisDisplay(0);
+    return QRect(thisDisplay.GetGeometry());
 }
