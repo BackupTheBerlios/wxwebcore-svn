@@ -22,7 +22,6 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
-#include <CoreFoundation/CoreFoundation.h>
 
 #define HAVE_ICU_LIBRARY 1
 
@@ -33,6 +32,8 @@
 #if !HAVE_ICU_LIBRARY
 typedef UInt32 UChar32;
 #endif
+
+typedef UChar32 UniChar;
 
 #ifdef __cplusplus
 extern "C" {

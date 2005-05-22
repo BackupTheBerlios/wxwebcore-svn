@@ -29,6 +29,8 @@
 #include "KWQCString.h"
 #include "WebCoreUnicode.h"
 
+#include <ctype.h>
+
 // Make htmltokenizer.cpp happy
 #define QT_VERSION 300
 
@@ -498,7 +500,10 @@ public:
     QString &setNum(ulong);
     QString &setNum(double);
 
-    QString &sprintf(const char *, ...) __attribute__ ((format (printf, 2, 3)));
+    QString &sprintf(const char *, ...)
+#ifdef __GNUC__
+        __attribute__ ((format (printf, 2, 3)));
+#endif
 
     QString &append(const QString &);
     QString &append(QChar);
@@ -535,8 +540,6 @@ public:
     QString &operator+=(const QString &s) { return append(s); }
     QString &operator+=(QChar c) { return append(c); }
     QString &operator+=(char c) { return append(c); }
-
-    CFStringRef getCFString() const;
 
 	//TODO: This is called once, in KWQLoader. Rewrite that portion in wx! :-)
     //void setBufferFromCFString(CFStringRef);

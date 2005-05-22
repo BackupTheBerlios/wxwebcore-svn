@@ -26,8 +26,6 @@
 #ifndef KWQCHARSETS_H_
 #define KWQCHARSETS_H_
 
-#include <CoreFoundation/CoreFoundation.h>
-
 enum KWQEncodingFlags {
     NoEncodingFlags = 0,
     VisualOrdering = 1,

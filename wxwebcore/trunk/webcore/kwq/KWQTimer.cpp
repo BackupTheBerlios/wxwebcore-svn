@@ -37,7 +37,7 @@ class wxSingleShotTimer: public wxEvtHandler {
 };
 
 QTimer::QTimer()
-    : m_timer(nil), m_monitorFunction(0), m_timeoutSignal(this, SIGNAL(timeout()))
+    : m_timer(NULL), m_monitorFunction(0), m_timeoutSignal(this, SIGNAL(timeout()))
 {
 	m_timer = new wxTimer();
 }
@@ -59,7 +59,7 @@ void QTimer::start(int msec, bool singleShot)
 
 void QTimer::stop()
 {
-    if (m_timer == nil) {
+    if (m_timer == NULL) {
         return;
     }
     m_timer->Stop();
