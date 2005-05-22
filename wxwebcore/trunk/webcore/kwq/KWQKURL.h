@@ -30,21 +30,12 @@
 
 class QTextCodec;
 
-#ifdef __OBJC__
-@class NSData;
-@class NSURL;
-#else
-class NSData;
-class NSURL;
-#endif
-
 class KURL {
 public:
     KURL();
     KURL(const char *);
     KURL(const KURL &, const QString &, const QTextCodec * = 0);
     KURL(const QString &);
-    KURL(NSURL *);
     
     bool isEmpty() const { return urlString.isEmpty(); } 
     bool isMalformed() const { return !m_isValid; }
@@ -76,9 +67,6 @@ public:
     void setRef(const QString &);
 
     QString prettyURL() const;
-    
-    NSURL *getNSURL() const;
-    NSData *getNSData() const;
 
     bool isLocalFile() const;
 

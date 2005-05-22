@@ -48,9 +48,6 @@ struct KWQIntegerPair {
     int end;
 };
 
-// The simple Cocoa calls to NSString, NSURL and NSData can't throw so
-// no need to block NSExceptions here.
-
 typedef enum {
     // alpha 
     SchemeFirstChar = 1 << 0,
@@ -289,40 +286,6 @@ KURL::KURL(const QString &url)
         }
     } else {
 	parse(url.ascii(), &url);
-    }
-}
-
-KURL::KURL(NSURL *url)
-{
-    if (url) {
-        CFIndex bytesLength = CFURLGetBytes((CFURLRef)url, NULL, 0);
-        size_t bufferLength = bytesLength + 6; // 5 for "file:", 1 for NUL terminator
-        char staticBuffer[2048];
-        char *buffer;
-        if (bufferLength > sizeof(staticBuffer)) {
-            buffer = (char *)malloc(bufferLength);
-        } else {
-            buffer = staticBuffer;
-        }
-        char *bytes = &buffer[5];
-        CFURLGetBytes((CFURLRef)url, (UInt8 *)bytes, bytesLength);
-	bytes[bytesLength] = '\0';
-        if (bytes[0] == '/') {
-            buffer[0] = 'f';
-            buffer[1] = 'i';
-            buffer[2] = 'l';
-            buffer[3] = 'e';
-            buffer[4] = ':';
-            parse(buffer, NULL);
-        } else {
-            parse(bytes, NULL);
-        }
-        if (buffer != staticBuffer) {
-            free(buffer);
-        }
-    }
-    else {
-        parse("", NULL);
     }
 }
 
@@ -1477,33 +1440,6 @@ QString KURL::encode_string(const QString& notEncodedString)
     }
 
     return result;
-}
-
-NSURL *KURL::getNSURL() const
-{
-    const UInt8 *bytes = (const UInt8 *)(urlString.latin1());
-    NSURL *result = nil;
-    if (urlString.length() > 0) {
-        // NOTE: We use UTF-8 here since this encoding is used when computing strings when returning URL components
-        // (e.g calls to NSURL -path). However, this function is not tolerant of illegal UTF-8 sequences, which
-        // could either be a malformed string or bytes in a different encoding, like shift-jis, so we fall back
-        // onto using ISO Latin 1 in those cases.
-        result = KWQCFAutorelease(CFURLCreateAbsoluteURLWithBytes(NULL, bytes, urlString.length(), kCFStringEncodingUTF8, NULL, TRUE));
-        if (!result) {
-            result = KWQCFAutorelease(CFURLCreateAbsoluteURLWithBytes(NULL, bytes, urlString.length(), kCFStringEncodingISOLatin1, NULL, TRUE));
-        }
-    }
-    else {
-        result = [NSURL URLWithString:@""];
-    }
-    
-    return result;
-}
-
-NSData *KURL::getNSData() const
-{
-    const UInt8 *bytes = (const UInt8 *)(urlString.latin1());
-    return [NSData dataWithBytes:bytes length:urlString.length()];
 }
 
 #if HAVE_ICU_LIBRARY
