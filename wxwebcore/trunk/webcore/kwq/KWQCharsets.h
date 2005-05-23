@@ -34,6 +34,9 @@ enum KWQEncodingFlags {
     IsJapanese = 8
 };
 
+// FIXME!
+typedef int CFStringEncoding;
+
 CFStringEncoding KWQCFStringEncodingFromIANACharsetName(const char *, KWQEncodingFlags *flags = 0);
 const char *KWQCFStringEncodingToIANACharsetName(CFStringEncoding);
 
