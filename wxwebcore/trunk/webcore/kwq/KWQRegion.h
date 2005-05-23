@@ -30,8 +30,8 @@
 #include "KWQImage.h"
 #include "KWQRect.h"
 
-#include "wx/setup.h"
-#include "wx/region.h"
+#include <wx/defs.h>
+#include <wx/region.h>
 
 class QRegion {
 public:

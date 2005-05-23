@@ -25,8 +25,8 @@
 
 #import "KWQPaintDeviceMetrics.h"
 
-#include "wx/setup.h"
-#include "wx/display.h"
+#include <wx/defs.h>
+#include <wx/display.h>
 
 QPaintDeviceMetrics::QPaintDeviceMetrics(const QPaintDevice *)
 {

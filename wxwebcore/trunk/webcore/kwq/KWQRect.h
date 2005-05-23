@@ -29,8 +29,8 @@
 #include "KWQSize.h"
 #include "KWQPointArray.h"
 
-#include "wx/setup.h"
-#include "wx/gdicmn.h"
+#include <wx/defs.h>
+#include <wx/gdicmn.h>
 
 class QRect {
 public:

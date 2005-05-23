@@ -25,8 +25,8 @@
 
 #import "KWQKWinModule.h"
 
-#include "wx/setup.h"
-#include "wx/display.h"
+#include <wx/defs.h>
+#include <wx/display.h>
 
 QRect KWinModule::workArea() const
 {

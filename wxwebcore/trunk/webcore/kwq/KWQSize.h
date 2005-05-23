@@ -32,8 +32,8 @@
 #include <iosfwd>
 #endif
 
-#include "wx/setup.h"
-#include "wx/gdicmn.h"
+#include <wx/defs.h>
+#include <wx/gdicmn.h>
 
 class QSize {
 public:

@@ -29,8 +29,8 @@
 #include "KWQObject.h"
 #include "KWQSignal.h"
 
-#include "wx/setup.h"
-#include "wx/timer.h"
+#include <wx/defs.h>
+#include <wx/timer.h>
 
 class QTimer : public QObject {
 public:
