@@ -24,6 +24,10 @@
  */
 
 #import <stdio.h>
+#import <stdlib.h>
+
+#include <wx/debug.h>
+#include <wx/strconv.h>
 
 #import "dtoa.h"
 
@@ -31,6 +35,21 @@
 #import "KWQString.h"
 #import "KWQRegExp.h"
 #import "KWQTextCodec.h"
+
+
+// Qt/Apple code depends on QChar struct being of same size as it's UniChar
+// member. This should be OK everywhere, but check it anyway, just in case some
+// compiler adds some padding:
+wxCOMPILE_TIME_ASSERT( sizeof(QChar) == sizeof(UniChar),
+                       PaddingAddedToQCharAllThingsWillBreak );
+
+// For now, we use wx's methods to handle UniChar data (e.g. in fromUtf8).
+// This works only if UniChar is interchangeable with wchar_t and since UniChar
+// is defined as ICU's char type UInt32, it doesn't have to always be the case.
+// Check the assumption:
+wxCOMPILE_TIME_ASSERT( sizeof(UniChar) == sizeof(wchar_t),
+                       UniCharHasDifferentSizeThanWchar_t );
+
 
 #define CHECK_FOR_HANDLE_LEAKS 0
 
@@ -213,9 +232,6 @@ void _printQStringAllocationStatistics()
 #define DELETE_QCHAR( P ) free( P )
 
 #endif // QSTRING_DEBUG_ALLOCATIONS
-
-#import <mach/vm_map.h>
-#import <mach/mach_init.h>
 
 struct HandleNode;
 struct HandlePageNode;
@@ -746,7 +762,7 @@ QString QString::number(double n)
     return qs;
 }
 
-/*
+#if 0
 void QString::setBufferFromCFString(CFStringRef cfs)
 {
     if (!cfs) {
@@ -766,19 +782,21 @@ void QString::setBufferFromCFString(CFStringRef cfs)
         free(buffer);
     }
 }
-*/
+#endif
 
 QString QString::fromUtf8(const char *chs)
 {
-    return QTextCodec(kCFStringEncodingUTF8).toUnicode(chs, strlen(chs));
+    return fromUtf8(chs, strlen(chs));
 }
 
 QString QString::fromUtf8(const char *chs, int len)
 {
-    return QTextCodec(kCFStringEncodingUTF8).toUnicode(chs, len);
+    size_t outsize;
+    wxWCharBuffer buf(wxConvUTF8.cMB2WC(chs, (size_t)len, &outsize));
+    QString str((const QChar*)buf.data(), outsize);
 }
 
-/*
+#if 0
 QString QString::fromCFString(CFStringRef cfs)
 {
     QString qs;
@@ -810,7 +828,7 @@ NSString *QString::getNSString() const
     FATAL("invalid character cache");
     return nil;
 }
-*/
+#endif
 
 inline void QString::detachIfInternal()
 {
@@ -1148,17 +1166,16 @@ QCString QString::utf8(int &length) const
     if (len == 0) {
         return QCString();
     }
-    CFStringRef s = getCFString();
-    CFIndex utf8Size;
-    CFStringGetBytes(s, CFRangeMake(0, len), kCFStringEncodingUTF8, '?', false, 0, 0, &utf8Size);
-    length = utf8Size;
-    QCString qcs(utf8Size + 1);
-    CFStringGetCString(s, qcs.data(), utf8Size + 1, kCFStringEncodingUTF8);
-    return qcs;
+
+    size_t outsz;
+    wxCharBuffer buf(wxConvUTF8.cWC2MB((const wchar_t*)unicode(), len, &outsz));
+    length = outsz;
+    return QCString(buf.data(), outsz);
 }
 
 QCString QString::local8Bit() const
 {
+    // FIXME: this is Mac-specific, we probably need to use wxConvLocal!
     return utf8();
 }
 
