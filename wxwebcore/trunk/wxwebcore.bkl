@@ -116,6 +116,7 @@
         webcore/kwq/KWQString.cpp
         webcore/kwq/KWQCString.cpp
         webcore/kwq/KWQArrayImpl.cpp
+        webcore/kwq/KWQGlobal.cpp
     </set>
     <!-- Libraries: -->
 
