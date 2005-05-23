@@ -54,9 +54,13 @@ wxCOMPILE_TIME_ASSERT( sizeof(UniChar) == sizeof(wchar_t),
 #define DISABLE_MAC_MEMORY_CODE 1
 #define CHECK_FOR_HANDLE_LEAKS 0
 
+#ifdef __APPLE__
 // Why can't I find this in a header anywhere?  It's too bad we have
 // to wire knowledge of allocation sizes, but it makes a huge diffence.
 extern "C" int malloc_good_size(int size);
+#else
+#define malloc_good_size(x) (x)
+#endif
 
 #define ALLOC_QCHAR_GOOD_SIZE(X) (malloc_good_size(X*sizeof(QChar))/sizeof(QChar))
 #define ALLOC_CHAR_GOOD_SIZE(X) (malloc_good_size(X))

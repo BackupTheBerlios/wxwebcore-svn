@@ -32,7 +32,11 @@
 #import "KWQValueList.h"
 
 // FIXME: Should get this from a header.
+#ifdef __APPLE__
 extern "C" int malloc_good_size(int size);
+#else
+#define malloc_good_size(x) (x)
+#endif
 
 // You may have to turn this to 0 to compile without the headers for ICU installed.
 #define HAVE_ICU_LIBRARY 1
