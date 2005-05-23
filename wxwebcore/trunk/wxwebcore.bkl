@@ -114,6 +114,7 @@
         webcore/kwq/KWQVectorImpl.cpp
         webcore/kwq/KWQChar.cpp
         webcore/kwq/KWQString.cpp
+        webcore/kwq/KWQCString.cpp
     </set>
     <!-- Libraries: -->
 

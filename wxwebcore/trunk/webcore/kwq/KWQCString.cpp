@@ -27,6 +27,7 @@
 
 #import "KWQAssertions.h"
 #import <ctype.h>
+#include <ostream>
 
 using std::ostream;
 
