@@ -23,8 +23,8 @@
         <include>jscore/kjs</include>
         <include>jscore/pcre</include>
         <include>jscore/bindings</include>
-
-		<!--        
+        <include>webcore/ForwardingHeaders</include>
+        <include>webcore/kwq</include>
         <include>webcore/khtml</include>
         <include>webcore/khtml/css</include>
         <include>webcore/khtml/dom</include>
@@ -36,7 +36,6 @@
         <include>webcore/khtml/xbl</include>
         <include>webcore/khtml/xml</include>
         <include>webcore/khtml/xsl</include>
-        -->
 
         <define>APPLE_CHANGES=1</define>
         <!-- this GC version requires Mach's thread suspend/resume: -->
@@ -119,6 +118,12 @@
         webcore/kwq/KWQGlobal.cpp
         webcore/kwq/KWQRegion.cpp
     </set>
+
+    <set var="WEBCORE_KHTML_SRC">
+        webcore/khtml/xsl/xsl_stylesheetimpl.cpp
+        webcore/khtml/xsl/xslt_processorimpl.cpp
+    </set>
+    
     <!-- Libraries: -->
 
     <dll id="wxwebcore" template="base,wx">
@@ -126,6 +131,7 @@
             $(JSCORE_PCRE_SRC)
             $(JSCORE_KJS_SRC)
             $(WEBCORE_KWQ_SRC)
+            $(WEBCORE_KHTML_SRC)
         </sources>
     </dll>
 
