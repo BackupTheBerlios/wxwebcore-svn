@@ -798,6 +798,7 @@ QString QString::fromUtf8(const char *chs, int len)
     size_t outsize;
     wxWCharBuffer buf(wxConvUTF8.cMB2WC(chs, (size_t)len, &outsize));
     QString str((const QChar*)buf.data(), outsize);
+    return str;
 }
 
 #if 0
