@@ -51,6 +51,7 @@ wxCOMPILE_TIME_ASSERT( sizeof(UniChar) == sizeof(wchar_t),
                        UniCharHasDifferentSizeThanWchar_t );
 
 
+#define DISABLE_MAC_MEMORY_CODE 1
 #define CHECK_FOR_HANDLE_LEAKS 0
 
 // Why can't I find this in a header anywhere?  It's too bad we have
@@ -236,6 +237,7 @@ void _printQStringAllocationStatistics()
 struct HandleNode;
 struct HandlePageNode;
 
+#if !DISABLE_MAC_MEMORY_CODE
 static HandleNode *allocateNode(HandlePageNode *pageNode);
 static HandlePageNode *allocatePageNode();
 
@@ -247,12 +249,13 @@ static inline void initializeHandleNodes()
     if (freeNodeAllocationPages == 0)
         freeNodeAllocationPages = allocatePageNode();
 }
+#endif // !DISABLE_MAC_MEMORY_CODE
 
 static inline KWQStringData **allocateHandle()
 {
-#if CHECK_FOR_HANDLE_LEAKS
+#if CHECK_FOR_HANDLE_LEAKS || DISABLE_MAC_MEMORY_CODE
     return static_cast<KWQStringData **>(malloc(sizeof(KWQStringData *)));
-#endif
+#else
 
     initializeHandleNodes();
     
@@ -261,6 +264,7 @@ static inline KWQStringData **allocateHandle()
 #endif
 
     return reinterpret_cast<KWQStringData **>(allocateNode(freeNodeAllocationPages));
+#endif
 }
 
 static void freeHandle(KWQStringData **);
@@ -2952,6 +2956,7 @@ static void CHECK_PAGE_LISTS()
 
 #endif
 
+#if !DISABLE_MAC_MEMORY_CODE
 static HandleNode *initializeHandleNodeBlock(HandlePageNode *pageNode)
 {
     uint i;
@@ -3028,13 +3033,14 @@ static HandleNode *allocateNode(HandlePageNode *pageNode)
 
     return allocated;
 }
+#endif // !DISABLE_MAC_MEMORY_CODE
 
 void freeHandle(KWQStringData **_free)
 {
-#if CHECK_FOR_HANDLE_LEAKS
+#if CHECK_FOR_HANDLE_LEAKS || DISABLE_MAC_MEMORY_CODE
     free(_free);
     return;
-#endif
+#else
 
     CHECK_PAGE_LISTS();
 
@@ -3074,5 +3080,7 @@ void freeHandle(KWQStringData **_free)
 
 #ifdef QSTRING_DEBUG_ALLOCATIONS
     handleInstances--;
+#endif
+
 #endif
 }
