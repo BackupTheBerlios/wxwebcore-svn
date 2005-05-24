@@ -35,10 +35,6 @@ typedef UInt32 UChar32;
 
 typedef UChar32 UniChar;
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
     typedef enum
     {
         DirectionL = 0, 	// Left Letter 
@@ -68,13 +64,9 @@ extern "C" {
     } WebCoreUnicodeDirection;
 
 
-    extern int (*WebCoreUnicodeDigitValueFunction)(UChar32 c);
-    extern WebCoreUnicodeDirection (*WebCoreUnicodeDirectionFunction)(UChar32 c);
-    extern bool (*WebCoreUnicodeMirroredFunction)(UChar32 c);
-    extern UChar32 (*WebCoreUnicodeMirroredCharFunction)(UChar32 c);
-    extern UChar32 (*WebCoreUnicodeLowerFunction)(UChar32 c);
-    extern UChar32 (*WebCoreUnicodeUpperFunction)(UChar32 c);
-
-#ifdef __cplusplus
-}
-#endif
+    int WebCoreUnicodeDigitValueFunction(UChar32 c);
+    WebCoreUnicodeDirection WebCoreUnicodeDirectionFunction(UChar32 c);
+    bool WebCoreUnicodeMirroredFunction(UChar32 c);
+    UChar32 WebCoreUnicodeMirroredCharFunction(UChar32 c);
+    UChar32 WebCoreUnicodeLowerFunction(UChar32 c);
+    UChar32 WebCoreUnicodeUpperFunction(UChar32 c);

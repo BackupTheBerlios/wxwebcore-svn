@@ -79,12 +79,12 @@ bool QChar::isPunct() const
 
 UniChar QChar::lowerNonASCII(UniChar c)
 {
-    return WebCoreUnicodeLowerFunction(c); // FIXME: use u_tolower
+    return WebCoreUnicodeLowerFunction(c);
 }
 
 UniChar QChar::upperNonASCII(UniChar c)
 {
-    return WebCoreUnicodeUpperFunction(c); // FIXME: use u_toupper
+    return WebCoreUnicodeUpperFunction(c);
 }
 
 bool QChar::mirrored() const
@@ -97,8 +97,7 @@ QChar QChar::mirroredChar() const
     return QChar((UniChar)WebCoreUnicodeMirroredCharFunction(c));
 }
 
-int QChar::digitValueNonASCII(UniChar)
+int QChar::digitValueNonASCII(UniChar c)
 {
-    // FIXME: This isn't right. Need Unicode-savvy version of this that matches isDigitNonASCII.
-    return -1;
+    return WebCoreUnicodeDigitValueFunction(c);
 }
