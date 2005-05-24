@@ -23,6 +23,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
+#include <math.h>
+
 #import "KWQColor.h"
 
 #import "KWQNamespace.h"
@@ -215,57 +217,4 @@ QColor QColor::dark(int factor) const
     result.setHsv(h, s, v);
     
     return result;
-}
-
-NSColor *QColor::getNSColor() const
-{
-    unsigned c = color & 0xFFFFFFFF;
-    switch (c) {
-        case 0: {
-            // Need this to avoid returning nil because cachedRGBAValues will default to 0.
-            static NSColor *clearColor = [[NSColor clearColor] retain];
-            return clearColor;
-        }
-        case Qt::black: {
-            static NSColor *blackColor = [[NSColor blackColor] retain];
-            return blackColor;
-        }
-        case Qt::white: {
-            static NSColor *whiteColor = [[NSColor whiteColor] retain];
-            return whiteColor;
-        }
-        default: {
-            const int cacheSize = 32;
-            static unsigned cachedRGBAValues[cacheSize];
-            static NSColor *cachedColors[cacheSize];
-
-            for (int i = 0; i != cacheSize; ++i) {
-                if (cachedRGBAValues[i] == c) {
-                    return cachedColors[i];
-                }
-            }
-
-#if COLORMATCH_EVERYTHING
-            NSColor *result = [NSColor colorWithCalibratedRed:red() / 255.0
-                                                        green:green() / 255.0
-                                                         blue:blue() / 255.0
-                                                        alpha:qAlpha(color)/255.0];
-#else
-            NSColor *result = [NSColor colorWithDeviceRed:red() / 255.0
-                                                    green:green() / 255.0
-                                                     blue:blue() / 255.0
-                                                    alpha:qAlpha(color)/255.0];
-#endif
-
-            static int cursor;
-            cachedRGBAValues[cursor] = c;
-            [cachedColors[cursor] autorelease];
-            cachedColors[cursor] = [result retain];
-            if (++cursor == cacheSize) {
-                cursor = 0;
-            }
-
-            return result;
-        }
-    }
 }

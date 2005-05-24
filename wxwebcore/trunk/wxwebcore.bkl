@@ -118,6 +118,8 @@
         webcore/kwq/KWQGlobal.cpp
         webcore/kwq/KWQRegion.cpp
         webcore/kwq/WebCoreUnicode.cpp
+        webcore/kwq/KWQColor.cpp
+        webcore/kwq/KWQColorData.c
     </set>
 
     <set var="WEBCORE_KHTML_SRC">

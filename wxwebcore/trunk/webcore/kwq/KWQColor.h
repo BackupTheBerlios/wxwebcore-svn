@@ -27,12 +27,7 @@
 #define QCOLOR_H_
 
 #include "KWQString.h"
-
-#ifdef __OBJC__
-@class NSColor;
-#else
-class NSColor;
-#endif
+#include <wx/colour.h>
 
 typedef unsigned int QRgb;			// RGBA quadruplet
 
@@ -69,7 +64,10 @@ public:
     friend bool operator==(const QColor &a, const QColor &b);
     friend bool operator!=(const QColor &a, const QColor &b);
 
-    NSColor *getNSColor() const;
+    operator wxColour() const
+    {
+        return wxColour(red(), green(), blue());
+    }
 
 private:
     QRgb color;
