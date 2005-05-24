@@ -37,9 +37,6 @@ public:
     QString join(const QString &) const;
     
     QString pop_front();
-    
-	//TODO: called once, in KWQKHTMLPart - reimplement in wx!
-    //NSArray *getNSArray() const;
 };
 
 #endif
