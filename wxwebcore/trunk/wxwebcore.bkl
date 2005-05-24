@@ -120,6 +120,7 @@
         webcore/kwq/WebCoreUnicode.cpp
         webcore/kwq/KWQColor.cpp
         webcore/kwq/KWQColorData.c
+        webcore/kwq/KWQStyle.cpp
     </set>
 
     <set var="WEBCORE_KHTML_SRC">

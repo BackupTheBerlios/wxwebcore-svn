@@ -25,9 +25,8 @@
 
 #import "KWQStyle.h"
 
-#import "KWQWidget.h"
-
 QSize QStyle::sizeFromContents(ContentType, QWidget *, const QSize &s) const
 {
+    // FIXME: use wxWindow::GetBestSize?
     return QSize(s.width() + 28, 32);
 }
