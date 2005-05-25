@@ -128,7 +128,6 @@
         webcore/kwq/KWQKStandardDirs.cpp
         webcore/kwq/KWQLabel.cpp
         webcore/kwq/KWQPaintDeviceMetrics.cpp
-        webcore/kwq/KWQTextUtilites.cpp
         webcore/kwq/KWQLogging.c
         webcore/kwq/KWQKStringHandler.cpp
         webcore/kwq/KWQMapImpl.cpp
