@@ -30,25 +30,14 @@
 #import <unicode/ustring.h>
 #import <unicode/utypes.h>
 
-// This code was swiped from the CarbonCore UnicodeUtilities.  One change from that is to use the empty
-// string instead of the "old locale model" as the ultimate fallback.  This change is per the UnicodeUtilities
-// engineer.
-// NOTE: this abviously could be fairly expensive to do.  If it turns out to be a bottleneck, it might
-// help to instead put a call in the iteratory initializer to set the current text break locale.  Unfortunately,
-// we can not cache it across calls to our API since the result can change without our knowing (AFAIK
-// there are no notifiers for AppleTextBreakLocale and/or AppleLanguages changes).
-static char * currentTextBreakLocaleID(void)
+#import <wx/defs.h>
+#import <wx/intl.h>
+
+static wxString currentTextBreakLocaleID(void)
 {
-#define localeStringLength 32
-    static char     localeStringBuffer[localeStringLength];
-    char *          localeString = &localeStringBuffer[0];
-    
-	//TODO: Implement this using wx!
-	
-    // empty string means "root locale", which what we use if we can't use a pref
-    *localeString = 0;
-	
-    return localeString;
+	wxLocale myLocale;
+	myLocale.Init();
+    return myLocale.GetCanonicalName();
 }
 
 void KWQFindWordBoundary(const QChar *chars, int len, int position, int *start, int *end)
@@ -57,7 +46,7 @@ void KWQFindWordBoundary(const QChar *chars, int len, int position, int *start, 
     int  endPos = 0;
 
     UErrorCode status = U_ZERO_ERROR;
-    UBreakIterator *boundary = ubrk_open(UBRK_WORD, currentTextBreakLocaleID(), const_cast<UChar *>(reinterpret_cast<const UChar *>(chars)), len, &status);
+    UBreakIterator *boundary = ubrk_open(UBRK_WORD, (const char*)currentTextBreakLocaleID().c_str(), const_cast<UChar *>(reinterpret_cast<const UChar *>(chars)), len, &status);
     if ( boundary && U_SUCCESS(status) ) {
         startPos = ubrk_preceding(boundary, position);
         if (startPos == UBRK_DONE) {
@@ -79,7 +68,7 @@ int KWQFindNextWordFromIndex(const QChar *chars, int len, int position, bool for
     int pos = 0;
     
     UErrorCode status = U_ZERO_ERROR;
-    UBreakIterator *boundary = ubrk_open(UBRK_WORD, currentTextBreakLocaleID(), const_cast<UChar *>(reinterpret_cast<const UChar *>(chars)), len, &status);
+    UBreakIterator *boundary = ubrk_open(UBRK_WORD, (const char*)currentTextBreakLocaleID().c_str(), const_cast<UChar *>(reinterpret_cast<const UChar *>(chars)), len, &status);
     if ( boundary && U_SUCCESS(status) ) {
         if (forward) {
             pos = ubrk_following(boundary, position);
@@ -102,7 +91,7 @@ void KWQFindSentenceBoundary(const QChar *chars, int len, int position, int *sta
     int  endPos = 0;
 
     UErrorCode status = U_ZERO_ERROR;
-    UBreakIterator *boundary = ubrk_open(UBRK_SENTENCE, currentTextBreakLocaleID(), const_cast<UChar *>(reinterpret_cast<const UChar *>(chars)), len, &status);
+    UBreakIterator *boundary = ubrk_open(UBRK_SENTENCE, (const char*)currentTextBreakLocaleID().c_str(), const_cast<UChar *>(reinterpret_cast<const UChar *>(chars)), len, &status);
     if ( boundary && U_SUCCESS(status) ) {
         startPos = ubrk_preceding(boundary, position);
         if (startPos == UBRK_DONE) {
@@ -124,7 +113,7 @@ int KWQFindNextSentenceFromIndex(const QChar *chars, int len, int position, bool
     int pos = 0;
     
     UErrorCode status = U_ZERO_ERROR;
-    UBreakIterator *boundary = ubrk_open(UBRK_SENTENCE, currentTextBreakLocaleID(), const_cast<UChar *>(reinterpret_cast<const UChar *>(chars)), len, &status);
+    UBreakIterator *boundary = ubrk_open(UBRK_SENTENCE, (const char*)currentTextBreakLocaleID().c_str(), const_cast<UChar *>(reinterpret_cast<const UChar *>(chars)), len, &status);
     if ( boundary && U_SUCCESS(status) ) {
         if (forward) {
             pos = ubrk_following(boundary, position);
