@@ -122,6 +122,17 @@
         webcore/kwq/KWQColor.cpp
         webcore/kwq/KWQColorData.c
         webcore/kwq/KWQStyle.cpp
+        webcore/kwq/KWQKWinModule.cpp
+        webcore/kwq/KWQListImpl.cpp
+        webcore/kwq/KWQKPartsEvent.cpp
+        webcore/kwq/KWQKStandardDirs.cpp
+        webcore/kwq/KWQLabel.cpp
+        webcore/kwq/KWQPaintDeviceMetrics.cpp
+        webcore/kwq/KWQTextUtilites.cpp
+        webcore/kwq/KWQLogging.c
+        webcore/kwq/KWQKStringHandler.cpp
+        webcore/kwq/KWQMapImpl.cpp
+        webcore/kwq/KWQKJob.cpp
     </set>
 
     <set var="WEBCORE_KHTML_SRC">
