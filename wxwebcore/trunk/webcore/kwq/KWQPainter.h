@@ -37,7 +37,12 @@
 #include "KWQString.h"
 #include "KWQFontMetrics.h"
 
-#include <ApplicationServices/ApplicationServices.h>
+// FIXME: temporary compilation fix
+typedef int CGContextRef;
+typedef int CGColorSpaceRef;
+typedef int CGImageRef;
+
+
 
 class QFont;
 class QPixmap;
