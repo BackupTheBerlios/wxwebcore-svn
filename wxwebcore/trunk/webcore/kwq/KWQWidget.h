@@ -37,11 +37,8 @@
 #include "KWQEvent.h"
 #include "KWQStyle.h"
 
-#ifdef __OBJC__
-@class NSView;
-#else
-class NSView;
-#endif
+#include "wx/setup.h"
+#include "wx/window.h"
 
 class KWQWidgetPrivate;
 
@@ -63,7 +60,7 @@ public:
     };
 
     QWidget();
-    QWidget(NSView *view);
+    QWidget(wxWindow *view);
     virtual ~QWidget();
 
     virtual QSize sizeHint() const;
@@ -139,12 +136,15 @@ public:
 
     void setAcceptDrops(bool) { }
         
-    NSView *getView() const;
-    NSView *getOuterView() const;
-    void setView(NSView *aView);
+	wxWindow *getView();
+    void setView(wxWindow *aView);
     virtual void populate() {};
 
     void displayRect(int x, int y, int w, int h);
+	
+	//These functions are Cocoa additions and probably 
+	//will be handled elsewhere in the wxWidgets port.
+	/*
     void lockDrawingFocus();
     void unlockDrawingFocus();
     void enableFlushDrawing();
@@ -162,6 +162,7 @@ public:
     void removeFromSuperview();
 
     static void setDeferFirstResponderChanges(bool);
+	*/
 
 private:
     KWQWidgetPrivate *data;
