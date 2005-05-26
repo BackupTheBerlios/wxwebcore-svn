@@ -100,6 +100,8 @@
    
     <set var="WEBCORE_KWQ_SRC">
         webcore/kwq/KWQArrayImpl.cpp
+        webcore/kwq/KWQAssertions.c
+        webcore/kwq/KWQBuffer.cpp
         webcore/kwq/KWQChar.cpp
         webcore/kwq/KWQColor.cpp
         webcore/kwq/KWQColorData.c
@@ -132,7 +134,6 @@
         webcore/kwq/KWQValueListImpl.cpp
         webcore/kwq/KWQVariant.cpp
         webcore/kwq/KWQVectorImpl.cpp
-        webcore/kwq/KWQWidget.mm
         webcore/kwq/WebCoreUnicode.cpp
     </set>
 
