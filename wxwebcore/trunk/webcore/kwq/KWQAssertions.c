@@ -24,6 +24,8 @@
  */
 
 #import "KWQAssertions.h"
+#include <stdio.h>
+#include <stdarg.h>
 
 static int (* vfprintf_no_warning)(FILE *, const char *, va_list) = vfprintf;
 
