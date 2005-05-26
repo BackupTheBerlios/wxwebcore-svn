@@ -99,39 +99,41 @@
     </set>
    
     <set var="WEBCORE_KWQ_SRC">
+        webcore/kwq/KWQArrayImpl.cpp
+        webcore/kwq/KWQChar.cpp
+        webcore/kwq/KWQColor.cpp
+        webcore/kwq/KWQColorData.c
+        webcore/kwq/KWQCString.cpp
+        webcore/kwq/KWQGlobal.cpp
+        webcore/kwq/KWQKJob.cpp
+        webcore/kwq/KWQKPartsEvent.cpp
+        webcore/kwq/KWQKPartsPart.cpp
+        webcore/kwq/KWQKStandardDirs.cpp
+        webcore/kwq/KWQKStringHandler.cpp
+        webcore/kwq/KWQKWinModule.cpp
+        webcore/kwq/KWQLabel.cpp
+        webcore/kwq/KWQListImpl.cpp
+        webcore/kwq/KWQLogging.c
+        webcore/kwq/KWQMapImpl.cpp
+        webcore/kwq/KWQPaintDeviceMetrics.cpp
         webcore/kwq/KWQPen.cpp
         webcore/kwq/KWQPoint.cpp
         webcore/kwq/KWQPointArray.cpp
         webcore/kwq/KWQRect.cpp
         webcore/kwq/KWQRegExp.cpp
+        webcore/kwq/KWQRegion.cpp
         webcore/kwq/KWQSize.cpp
+        webcore/kwq/KWQString.cpp
+        webcore/kwq/KWQStringList.cpp
+        webcore/kwq/KWQStyle.cpp
         webcore/kwq/KWQTextStream.cpp
         webcore/kwq/KWQTextUtilities.cpp
         webcore/kwq/KWQTimer.cpp
         webcore/kwq/KWQValueListImpl.cpp
         webcore/kwq/KWQVariant.cpp
         webcore/kwq/KWQVectorImpl.cpp
-        webcore/kwq/KWQChar.cpp
-        webcore/kwq/KWQString.cpp
-        webcore/kwq/KWQCString.cpp
-        webcore/kwq/KWQStringList.cpp
-        webcore/kwq/KWQArrayImpl.cpp
-        webcore/kwq/KWQGlobal.cpp
-        webcore/kwq/KWQRegion.cpp
+        webcore/kwq/KWQWidget.mm
         webcore/kwq/WebCoreUnicode.cpp
-        webcore/kwq/KWQColor.cpp
-        webcore/kwq/KWQColorData.c
-        webcore/kwq/KWQStyle.cpp
-        webcore/kwq/KWQKWinModule.cpp
-        webcore/kwq/KWQListImpl.cpp
-        webcore/kwq/KWQKPartsEvent.cpp
-        webcore/kwq/KWQKStandardDirs.cpp
-        webcore/kwq/KWQLabel.cpp
-        webcore/kwq/KWQPaintDeviceMetrics.cpp
-        webcore/kwq/KWQLogging.c
-        webcore/kwq/KWQKStringHandler.cpp
-        webcore/kwq/KWQMapImpl.cpp
-        webcore/kwq/KWQKJob.cpp
     </set>
 
     <set var="WEBCORE_KHTML_SRC">
