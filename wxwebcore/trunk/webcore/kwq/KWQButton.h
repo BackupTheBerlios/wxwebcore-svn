@@ -30,6 +30,9 @@
 #include "KWQString.h"
 #include "KWQSignal.h"
 
+#include <wx/defs.h>
+#include <wx/button.h>
+
 class QButton : public QWidget {
 public:
     QButton();
@@ -49,10 +52,7 @@ public:
 
 private:
     KWQSignal m_clicked;
+	wxButton *m_button;
 };
-
-#ifdef __OBJC__
-NSControlSize KWQNSControlSizeForFont(const QFont &);
-#endif
 
 #endif
