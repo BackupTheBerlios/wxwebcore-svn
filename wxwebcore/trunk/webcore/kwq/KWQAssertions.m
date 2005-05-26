@@ -29,11 +29,7 @@ static int (* vfprintf_no_warning)(FILE *, const char *, va_list) = vfprintf;
 
 static void vprintf_stderr_objc(const char *format, va_list args)
 {
-    if (!strstr(format, "%@")) {
-        vfprintf_no_warning(stderr, format, args);
-    } else {
-        fputs([[[[NSString alloc] initWithFormat:[NSString stringWithCString:format] arguments:args] autorelease] UTF8String], stderr);
-    }
+	vfprintf_no_warning(stderr, format, args);
 }
 
 void KWQReportAssertionFailure(const char *file, int line, const char *function, const char *assertion)
@@ -83,17 +79,10 @@ void KWQReportError(const char *file, int line, const char *function, const char
 void KWQLog(const char *file, int line, const char *function, KWQLogChannel *channel, const char *format, ...)
 {
     if (channel->state == KWQLogChannelUninitialized) {
-        channel->state = KWQLogChannelOff;
-        NSString *logLevelString = [[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithCString:channel->defaultName]];
-        if (logLevelString) {
-            unsigned logLevel;
-            if (![[NSScanner scannerWithString:logLevelString] scanHexInt:&logLevel]) {
-                NSLog(@"unable to parse hex value for %s (%@), logging is off", channel->defaultName, logLevelString);
-            }
-            if ((logLevel & channel->mask) == channel->mask) {
-                channel->state = KWQLogChannelOn;
-            }
-        }
+        channel->state = KWQLogChannelOn;
+		//FIXME: It seems WebKit/WebCore gets a preference to check if logging is turned on for various types of logs
+		// for now, we'll just leave logging on until we have a similar preferences system. 
+        //NSString *logLevelString = [[NSUserDefaults standardUserDefaults] objectForKey:[NSString stringWithCString:channel->defaultName]];
     }
     
     if (channel->state != KWQLogChannelOn) {
