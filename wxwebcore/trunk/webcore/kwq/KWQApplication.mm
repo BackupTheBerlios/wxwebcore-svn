@@ -25,17 +25,14 @@
 
 #import "KWQApplication.h"
 
-// The NSScreen Cocoa calls in this file should never throw, so
-// there's no need to block exceptions.
-
 int QDesktopWidget::width()
 {
-    return (int)[[NSScreen mainScreen] frame].size.width;
+    return (int)screenGeometry().width();
 }
     
 int QDesktopWidget::height()
 {
-    return (int)[[NSScreen mainScreen] frame].size.height;
+    return (int)screenGeometry().height();
 }
 
 // FIXME: Some day we may want to handle the case where the widget is in a window that's on
@@ -53,9 +50,8 @@ QRect QDesktopWidget::screenGeometry(int screenNumber)
 {
     // Ignores the screen number, and always returns the geometry of the main screen,
     // which is the screen that the key window is on.
-    NSRect rect = [[NSScreen mainScreen] frame];
-    rect.origin.y = NSMaxY([[[NSScreen screens] objectAtIndex:0] frame]) - NSMaxY(rect);
-    return QRect(rect);
+	wxDisplay thisDisplay(0);
+    return QRect(thisDisplay.GetGeometry());
 }
 
 void QApplication::setOverrideCursor(const QCursor &c)
