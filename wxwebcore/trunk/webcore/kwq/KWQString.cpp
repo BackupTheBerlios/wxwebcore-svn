@@ -1016,6 +1016,24 @@ QString &QString::operator=(const QString &qs)
     return *this;
 }
 
+QString::QString(const wxString& str)
+{
+#if wxUSE_UNICODE
+    setUnicode((const QChar*)str.c_str(), str.length());
+#else
+    #error "ANSI wx build not supported"
+#endif
+}
+
+QString::operator wxString() const
+{
+#if wxUSE_UNICODE
+    return wxString((const wchar_t*)unicode(), length());
+#else
+    #error "ANSI wx build not supported"
+#endif
+}
+
 QString &QString::operator=(const QCString &qcs)
 {
     return setLatin1(qcs);

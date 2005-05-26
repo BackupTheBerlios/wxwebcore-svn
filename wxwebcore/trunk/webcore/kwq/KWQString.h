@@ -30,6 +30,7 @@
 #include "WebCoreUnicode.h"
 
 #include <ctype.h>
+#include <wx/string.h>
 
 // Make htmltokenizer.cpp happy
 #define QT_VERSION 300
@@ -392,6 +393,9 @@ public:
     QString &operator=(const QString &);
 
     ~QString();
+
+    QString(const wxString& str);
+    operator wxString() const;
 
     static QString fromLatin1(const char *);
     static QString fromLatin1(const char *, int len);
