@@ -52,41 +52,38 @@
 // The NSCursor cocoa calls here can't fail, so no need to block Cocoa exceptions
 
 QCursor::QCursor()
-    : cursor(NULL)
+    : m_cursor()
 {
 }
 
 QCursor::QCursor(const wxCursor &cur)
-    : cursor(cur)
+    : m_cursor(cur)
 {
 }
 
 QCursor::QCursor(const QPixmap &pixmap)
-    : cursor(NULL)
+    : m_cursor()
 {
     // Needed for custom cursors.
     ERROR("not yet implemented");
 }
 
 QCursor::QCursor(const QCursor &other)
-    : cursor(other.cursor)
+    : m_cursor(other)
 {
 }
 
 QCursor::~QCursor()
 {
-	cursor = NULL;
 }
       
 QCursor &QCursor::operator=(const QCursor &other)
 {
-	// wx ref-counts wxCursor
-	cursor = NULL;
-    cursor = other.cursor;
+    m_cursor = other;
     return *this;
 }
 
-wxCursor QCursor::handle() const
+QCursor::operator wxCursor() const
 {
-    return cursor;
+    return m_cursor;
 }

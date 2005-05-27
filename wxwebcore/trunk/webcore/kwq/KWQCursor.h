@@ -29,26 +29,23 @@
 #include "KWQPixmap.h"
 #include "KWQPointArray.h"
 
-#ifdef __OBJC__
-@class NSCursor;
-#else
-class NSCursor;
-#endif
+#include <wx/defs.h>
+#include <wx/cursor.h>
 
 class QCursor {
 public:
     QCursor();
     QCursor(const QPixmap &);
-    QCursor(NSCursor *);
+    QCursor(const wxCursor &);
     QCursor(const QCursor &);
     ~QCursor();
 
     QCursor &operator=(const QCursor &);
     
-    NSCursor *handle() const;
+    operator wxCursor() const;
 
  private:
-    NSCursor *cursor;
+    wxCursor m_cursor;
 };
 
 #endif
