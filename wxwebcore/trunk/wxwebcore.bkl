@@ -105,8 +105,13 @@
         webcore/kwq/KWQChar.cpp
         webcore/kwq/KWQColor.cpp
         webcore/kwq/KWQColorData.c
+        webcore/kwq/KWQCursor.cpp
         webcore/kwq/KWQCString.cpp
+        webcore/kwq/KWQFont.cpp
         webcore/kwq/KWQGlobal.cpp
+        webcore/kwq/KWQGuardedPtr.cpp
+        webcore/kwq/KWQKCursor.cpp
+        webcore/kwq/KWQKGlobalSettings.cpp
         webcore/kwq/KWQKJob.cpp
         webcore/kwq/KWQKPartsEvent.cpp
         webcore/kwq/KWQKPartsPart.cpp
