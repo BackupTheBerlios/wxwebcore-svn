@@ -23,16 +23,4 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import "KWQAssertions.h"
-
-#ifndef LOG_CHANNEL_PREFIX
-#define LOG_CHANNEL_PREFIX KWQLog
-#endif
-
-extern KWQLogChannel KWQLogNotYetImplemented;
-
-extern KWQLogChannel KWQLogFrames;
-extern KWQLogChannel KWQLogLoading;
-extern KWQLogChannel KWQLogPopupBlocking;
-extern KWQLogChannel KWQLogEvents;
-extern KWQLogChannel KWQLogEditing;
+#include "KWQAssertions.h"
