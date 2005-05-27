@@ -29,6 +29,8 @@
 #include <wx/defs.h>
 #include <wx/font.h>
 
+#include "KWQString.h"
+
 class QFont {
 public:
     enum Weight { Normal = 50, Bold = 63 };
@@ -59,7 +61,7 @@ public:
     bool italic() const;
 
     void setPixelSize(float s);
-    int pixelSize() const { return (int)_size; }
+    int pixelSize() const { return m_font.GetPointSize(); }
 
     bool isFixedPitch() const;
     
@@ -69,7 +71,7 @@ public:
     bool operator==(const QFont &x) const;
     bool operator!=(const QFont &x) const { return !(*this == x); }
     
-	wxFont operator wxFont() const; 
+	operator wxFont() const; 
 
 private:
     bool _isPrinterFont;

@@ -25,9 +25,6 @@
 
 #import "KWQFont.h"
 
-#import "KWQExceptions.h"
-#import "KWQString.h"
-
 QFont::QFont()
     : _isPrinterFont(false)
     , m_font()
@@ -53,7 +50,7 @@ QFont &QFont::operator=(const QFont &other)
 
 QString QFont::family() const
 {
-    return m_font.GetFaceName();
+    return QString(m_font.GetFaceName());
 }
 
 void QFont::setFamily(const QString &qfamilyName)
@@ -63,7 +60,7 @@ void QFont::setFamily(const QString &qfamilyName)
 	// they are determined by heuristics, and we don't have to 
 	// worry about that for now anyways.
 	
-    m_font.SetFaceName(qFamilyName);
+    m_font.SetFaceName(qfamilyName);
 }
 
 #if 0
@@ -83,9 +80,9 @@ void QFont::setPixelSize(float s)
 void QFont::setWeight(int weight)
 {
     if (weight == Bold) {
-        m_font.SetFontWeight(wxFONTWEIGHT_BOLD);
+        m_font.SetWeight(wxFONTWEIGHT_BOLD);
     } else if (weight == Normal) {
-        m_font.SetFontWeight(wxFONTWEIGHT_NORMAL);
+        m_font.SetWeight(wxFONTWEIGHT_NORMAL);
     }
 }
 
@@ -102,20 +99,20 @@ int QFont::weight() const
 void QFont::setItalic(bool flag)
 {
     if (flag) {
-        m_font.SetFontStyle(wxFONTSTYLE_ITALIC);
+        m_font.SetStyle(wxFONTSTYLE_ITALIC);
     } else {
-        m_font.SetFontStyle(wxFONTSTYLE_NORMAL);
+        m_font.SetStyle(wxFONTSTYLE_NORMAL);
     }
 }
 
 bool QFont::italic() const
 {
-    return (m_font.GetFontStyle() == wxFONTSTYLE_ITALIC);
+    return (m_font.GetStyle() == wxFONTSTYLE_ITALIC);
 }
 
 bool QFont::bold() const
 {
-    return (m_font.GetFontWeight() == wxFONTWEIGHT_BOLD);
+    return (m_font.GetWeight() == wxFONTWEIGHT_BOLD);
 }
 
 bool QFont::isFixedPitch() const
