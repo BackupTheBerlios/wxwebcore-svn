@@ -61,7 +61,7 @@ QCursor::QCursor(const wxCursor &cur)
 {
 }
 
-QCursor::QCursor(const QPixmap &pixmap)
+QCursor::QCursor(const QPixmap& /*pixmap*/)
     : m_cursor()
 {
     // Needed for custom cursors.
