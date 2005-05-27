@@ -25,25 +25,28 @@
 
 #import "KWQKCursor.h"
 
-void KCursor::setAutoHideCursor(QWidget *w, bool enable) {}
+void KCursor::setAutoHideCursor(QWidget* /*w*/, bool /*enable*/) {}
 
-QCursor KCursor::arrowCursor() { return QCursor(); }
-QCursor KCursor::crossCursor() { return QCursor(wxCROSS_CURSOR); }
-QCursor KCursor::handCursor() { return QCursor(); }
-QCursor KCursor::sizeAllCursor() { return QCursor(); }
-QCursor KCursor::sizeHorCursor() { return QCursor(); }
-QCursor KCursor::sizeVerCursor() { return QCursor(); }
-QCursor KCursor::sizeBDiagCursor() { return QCursor(); }
-QCursor KCursor::sizeFDiagCursor() { return QCursor(); }
-QCursor KCursor::ibeamCursor() { return QCursor(); }
-QCursor KCursor::waitCursor() { return QCursor(wxHOURGLASS_CURSOR); }
-QCursor KCursor::whatsThisCursor() { return QCursor(); }
+QCursor KCursor::arrowCursor() { return wxCursor(wxCURSOR_ARROW); }
+QCursor KCursor::crossCursor() { return wxCursor(wxCURSOR_CROSS); }
+QCursor KCursor::handCursor() { return wxCursor(wxCURSOR_HAND); }
+QCursor KCursor::sizeAllCursor() { return wxCursor(wxCURSOR_SIZING); }
+QCursor KCursor::sizeHorCursor() { return wxCursor(wxCURSOR_SIZENS); }
+QCursor KCursor::sizeVerCursor() { return wxCursor(wxCURSOR_SIZEWE); }
+QCursor KCursor::sizeBDiagCursor() { return wxCursor(wxCURSOR_SIZENESW); }
+QCursor KCursor::sizeFDiagCursor() { return wxCursor(wxCURSOR_SIZENWSE); }
+QCursor KCursor::ibeamCursor() { return wxCursor(wxCURSOR_IBEAM); }
+QCursor KCursor::waitCursor() { return wxCursor(wxCURSOR_WAIT); }
+QCursor KCursor::whatsThisCursor() { return wxCursor(wxCURSOR_QUESTION_ARROW); }
 
-QCursor KCursor::eastResizeCursor() { return QCursor(); }
-QCursor KCursor::northResizeCursor() { return QCursor(); }
-QCursor KCursor::northEastResizeCursor() { return QCursor(); }
-QCursor KCursor::northWestResizeCursor() { return QCursor(); }
-QCursor KCursor::southResizeCursor() { return QCursor(); }
-QCursor KCursor::southEastResizeCursor() { return QCursor(); }
-QCursor KCursor::southWestResizeCursor() { return QCursor(); }
-QCursor KCursor::westResizeCursor() { return QCursor(); }
+// NB: wx doesn't have single-direction cursors built-in, so we use
+//     bidirectional cursors
+//     FIXME: we can fix this at least under GTK+
+QCursor KCursor::eastResizeCursor() { return sizeHorCursor(); }
+QCursor KCursor::northResizeCursor() { return sizeVerCursor(); }
+QCursor KCursor::northEastResizeCursor() { return sizeBDiagCursor(); }
+QCursor KCursor::northWestResizeCursor() { return sizeFDiagCursor(); }
+QCursor KCursor::southResizeCursor() { return sizeVerCursor(); }
+QCursor KCursor::southEastResizeCursor() { return sizeFDiagCursor(); }
+QCursor KCursor::southWestResizeCursor() { return sizeBDiagCursor(); }
+QCursor KCursor::westResizeCursor() { return sizeHorCursor(); }
