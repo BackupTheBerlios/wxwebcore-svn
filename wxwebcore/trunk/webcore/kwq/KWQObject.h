@@ -35,6 +35,9 @@
 #include "KWQStringList.h"
 #include "KWQPtrList.h"
 
+#import <wx/defs.h>
+#import <wx/timer.h>
+
 #define slots : public
 #define SLOT(x) "SLOT:" #x
 #define signals protected
@@ -67,11 +70,7 @@ class QVariant;
 class KWQGuardedPtrBase;
 class KWQSignal;
 
-#ifdef __OBJC__
-@class NSTimer;
-#else
-class NSTimer;
-#endif
+class wxTimer;
 
 class QObject : public Qt {
 public:
@@ -110,7 +109,6 @@ public:
     static void setDefersTimers(bool defers);
 
 private:
-    void _addTimer(NSTimer *timer, int _timerId);
 
     // no copying or assignment
     QObject(const QObject &);
