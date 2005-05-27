@@ -27,85 +27,65 @@
 
 #import "KWQExceptions.h"
 #import "KWQString.h"
-#import "KWQFoundationExtras.h"
-#import "WebCoreTextRendererFactory.h"
 
 QFont::QFont()
-    : _trait(0)
-    , _size(12.0)
-    , _isPrinterFont(false)
-    , _NSFont(0)
+    : _isPrinterFont(false)
+    , m_font()
 {
 }
 
 QFont::~QFont()
 {
-    KWQRelease(_NSFont);
 }
 
 QFont::QFont(const QFont &other)
-    : _family(other._family)
-    , _trait(other._trait)
-    , _size(other._size)
-    , _isPrinterFont(other._isPrinterFont)
-    , _NSFont(KWQRetain(other._NSFont))
+    : _isPrinterFont(other._isPrinterFont)
+    , m_font(other)
 {
 }
 
 QFont &QFont::operator=(const QFont &other)
 {
-    _family = other._family;
-    _trait = other._trait;
-    _size = other._size;
     _isPrinterFont = other._isPrinterFont;
-    KWQRetain(other._NSFont);
-    KWQRelease(_NSFont);
-    _NSFont = other._NSFont;
+    m_font = other;
     return *this;
 }
 
 QString QFont::family() const
 {
-    return _family.family().string();
+    return m_font.GetFaceName();
 }
 
 void QFont::setFamily(const QString &qfamilyName)
 {
-    _family.setFamily(qfamilyName);
-    KWQRelease(_NSFont);
-    _NSFont = 0;
+	// NOTE: QFont's family is more like wx's face name than
+	// a special font family. Qt may have those too, but if so,
+	// they are determined by heuristics, and we don't have to 
+	// worry about that for now anyways.
+	
+    m_font.SetFaceName(qFamilyName);
 }
 
+#if 0
 void QFont::setFirstFamily(const KWQFontFamily& family) 
 {
     _family = family;
     KWQRelease(_NSFont);
     _NSFont = 0;
 }
+#endif
 
 void QFont::setPixelSize(float s)
 {
-    if (_size != s) {
-        KWQRelease(_NSFont); 
-        _NSFont = 0;
-    }
-    _size = s;
+    m_font.SetPointSize((int)s);
 }
 
 void QFont::setWeight(int weight)
 {
     if (weight == Bold) {
-        if (!(_trait & NSBoldFontMask)){
-            KWQRelease(_NSFont);
-            _NSFont = 0;
-        }
-        _trait |= NSBoldFontMask;
+        m_font.SetFontWeight(wxFONTWEIGHT_BOLD);
     } else if (weight == Normal) {
-        if ((_trait & NSBoldFontMask)){
-            KWQRelease(_NSFont);
-            _NSFont = 0;
-        }
-        _trait &= ~NSBoldFontMask;
+        m_font.SetFontWeight(wxFONTWEIGHT_NORMAL);
     }
 }
 
@@ -122,57 +102,35 @@ int QFont::weight() const
 void QFont::setItalic(bool flag)
 {
     if (flag) {
-        if (!(_trait & NSItalicFontMask)){
-            KWQRelease(_NSFont);
-            _NSFont = 0;
-        }
-        _trait |= NSItalicFontMask;
+        m_font.SetFontStyle(wxFONTSTYLE_ITALIC);
     } else {
-        if ((_trait & NSItalicFontMask)){
-            KWQRelease(_NSFont);
-            _NSFont = 0;
-        }
-        _trait &= ~NSItalicFontMask;
+        m_font.SetFontStyle(wxFONTSTYLE_NORMAL);
     }
 }
 
 bool QFont::italic() const
 {
-    return _trait & NSItalicFontMask;
+    return (m_font.GetFontStyle() == wxFONTSTYLE_ITALIC);
 }
 
 bool QFont::bold() const
 {
-    return _trait & NSBoldFontMask;
+    return (m_font.GetFontWeight() == wxFONTWEIGHT_BOLD);
 }
 
 bool QFont::isFixedPitch() const
 {
-    KWQ_BLOCK_EXCEPTIONS;
-    return [[WebCoreTextRendererFactory sharedFactory] isFontFixedPitch: getNSFont()];
-    KWQ_UNBLOCK_EXCEPTIONS;
-    return false;
+    m_font.IsFixedWidth();
 }
 
 
 bool QFont::operator==(const QFont &compareFont) const
 {
-    return _family == compareFont._family
-        && _trait == compareFont._trait
-        && _size == compareFont._size
+    return m_font == compareFont
         && _isPrinterFont == compareFont._isPrinterFont;
 }
 
-NSFont *QFont::getNSFont() const
+QFont::operator wxFont() const
 {
-    if (!_NSFont) {
-        CREATE_FAMILY_ARRAY(*this, families);
-	KWQ_BLOCK_EXCEPTIONS;
-        _NSFont = KWQRetain([[WebCoreTextRendererFactory sharedFactory] 
-            fontWithFamilies:families
-                      traits:getNSTraits() 
-                        size:getNSSize()]);
-	KWQ_UNBLOCK_EXCEPTIONS;
-    }
-    return _NSFont;
+    return m_font;
 }

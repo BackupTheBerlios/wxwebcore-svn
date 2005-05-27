@@ -26,13 +26,8 @@
 #ifndef QFONT_H_
 #define QFONT_H_
 
-#include "KWQFontFamily.h"
-
-#ifdef __OBJC__
-@class NSFont;
-#else
-class NSFont;
-#endif
+#include <wx/defs.h>
+#include <wx/font.h>
 
 class QFont {
 public:
@@ -47,10 +42,15 @@ public:
     void setFamily(const QString &);
     QString family() const;
 
+#if 0
+	// NOTE: The setter is only called from khtml/rendering/font.cpp
+	// and as far as I can tell the getters here aren't ever called.
+	// Looks like just a Cocoa helper class. 
     const KWQFontFamily *firstFamily() const { return &_family; }
     KWQFontFamily *firstFamily() { return &_family; }
     void setFirstFamily(const KWQFontFamily &family);
-    
+#endif
+
     void setWeight(int);
     int weight() const;
     bool bold() const;
@@ -69,18 +69,11 @@ public:
     bool operator==(const QFont &x) const;
     bool operator!=(const QFont &x) const { return !(*this == x); }
     
-    NSString *getNSFamily() const { return _family.getNSFamily(); }
-    int getNSTraits() const { return _trait; }
-    float getNSSize() const { return _size; }
-    
-    NSFont *getNSFont() const;
+	wxFont operator wxFont() const; 
 
 private:
-    KWQFontFamily _family;
-    int _trait;
-    float _size;
     bool _isPrinterFont;
-    mutable NSFont *_NSFont;
+	wxFont m_font;
 };
 
 #endif
