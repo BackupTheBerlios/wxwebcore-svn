@@ -35,256 +35,30 @@
 
 #import "render_form.h"
 
-@interface NSCell (KWQButtonKnowsAppKitSecrets)
-- (NSMutableDictionary *)_textAttributes;
-@end
-
-@interface KWQButton : NSButton <KWQWidgetHolder>
-{
-    QButton *button;
-    BOOL needToSendConsumedMouseUp;
-    BOOL inNextValidKeyView;
-}
-
-- (id)initWithQButton:(QButton *)b;
-- (void)detachQButton;
-- (void)sendConsumedMouseUpIfNeeded;
-
-@end
-
-@interface KWQButtonCell : NSButtonCell
-{
-    NSWritingDirection baseWritingDirection;
-}
-
-- (void)setBaseWritingDirection:(NSWritingDirection)direction;
-- (NSWritingDirection)baseWritingDirection;
-
-@end
-
-@implementation KWQButton
-
-+ (Class)cellClass
-{
-    return [KWQButtonCell class];
-}
-
-- (id)initWithQButton:(QButton *)b
-{
-    self = [self init];
-
-    button = b;
-
-    [self setTarget:self];
-    [self setAction:@selector(action:)];
-    
-    return self;
-}
-
-- (void)detachQButton
-{
-    button = 0;
-    [self setTarget:nil];
-}
-
-- (void)action:(id)sender
-{
-    button->clicked();
-}
-
-- (void)sendConsumedMouseUpIfNeeded
-{
-    if (needToSendConsumedMouseUp) {
-	needToSendConsumedMouseUp = NO;
-	if (button) {
-            button->sendConsumedMouseUp();
-        }
-    } 
-}
-
--(void)mouseDown:(NSEvent *)event
-{
-    needToSendConsumedMouseUp = YES;
-
-    QWidget::beforeMouseDown(self);
-    [super mouseDown:event];
-    QWidget::afterMouseDown(self);
-
-    [self sendConsumedMouseUpIfNeeded];
-}
-
-- (QWidget *)widget
-{
-    return button;
-}
-
-- (BOOL)becomeFirstResponder
-{
-    BOOL become = [super becomeFirstResponder];
-    if (become && button) {
-        if (!KWQKHTMLPart::currentEventIsMouseDownInWidget(button)) {
-            [self _KWQ_scrollFrameToVisible];
-        }
-        if (button) {
-            QFocusEvent event(QEvent::FocusIn);
-            const_cast<QObject *>(button->eventFilterObject())->eventFilter(button, &event);
-        }
-    }
-    return become;
-}
-
-- (BOOL)resignFirstResponder
-{
-    BOOL resign = [super resignFirstResponder];
-    if (resign && button) {
-        QFocusEvent event(QEvent::FocusOut);
-        const_cast<QObject *>(button->eventFilterObject())->eventFilter(button, &event);
-    }
-    return resign;
-}
-
--(NSView *)nextKeyView
-{
-    NSView *view = nil;
-    if (button && inNextValidKeyView) {
-        // resign so we send a blur before setting focus on
-        // the next widget, otherwise the blur for this
-        // widget will remove focus from the widget after
-        // we tab to it
-        [self resignFirstResponder];
-        if (button) {
-            view = KWQKHTMLPart::nextKeyViewForWidget(button, KWQSelectingNext);
-        } else {
-            view = [super nextKeyView];
-        }
-    } else { 
-        view = [super nextKeyView];
-    }
-    return view;
-}
-
--(NSView *)previousKeyView
-{
-    NSView *view = nil;
-    if (button && inNextValidKeyView) {
-        // resign so we send a blur before setting focus on
-        // the next widget, otherwise the blur for this
-        // widget will remove focus from the widget after
-        // we tab to it
-        [self resignFirstResponder];
-        if (button) {
-            view = KWQKHTMLPart::nextKeyViewForWidget(button, KWQSelectingPrevious);
-        } else {
-            view = [super previousKeyView];
-        }
-    }  else { 
-        view = [super previousKeyView];
-    }
-    return view;
-}
-
-- (BOOL)canBecomeKeyView
-{
-    // Simplified method from NSView; overridden to replace NSView's way of checking
-    // for full keyboard access with ours.
-    if (button && !KWQKHTMLPart::partForWidget(button)->tabsToAllControls()) {
-        return NO;
-    }
-    return ([self window] != nil) && ![self isHiddenOrHasHiddenAncestor] && [self acceptsFirstResponder];
-}
-
--(NSView *)nextValidKeyView
-{
-    inNextValidKeyView = YES;
-    NSView *view = [super nextValidKeyView];
-    inNextValidKeyView = NO;
-    return view;
-}
-
--(NSView *)previousValidKeyView
-{
-    inNextValidKeyView = YES;
-    NSView *view = [super previousValidKeyView];
-    inNextValidKeyView = NO;
-    return view;
-}
-
-@end
-
-@implementation KWQButtonCell
-
-- (NSWritingDirection)baseWritingDirection
-{
-    return baseWritingDirection;
-}
-
-- (void)setBaseWritingDirection:(NSWritingDirection)direction
-{
-    baseWritingDirection = direction;
-}
-
-- (NSMutableDictionary *)_textAttributes
-{
-    NSMutableDictionary *attributes = [super _textAttributes];
-    NSParagraphStyle *style = [attributes objectForKey:NSParagraphStyleAttributeName];
-    ASSERT(style != nil);
-    if ([style baseWritingDirection] != baseWritingDirection) {
-        NSMutableParagraphStyle *mutableStyle = [style mutableCopy];
-        [mutableStyle setBaseWritingDirection:baseWritingDirection];
-        [attributes setObject:mutableStyle forKey:NSParagraphStyleAttributeName];
-        [mutableStyle release];
-    }
-    return attributes;
-}
-
-@end
-
 QButton::QButton()
     : m_clicked(this, SIGNAL(clicked()))
 {
-    KWQ_BLOCK_EXCEPTIONS;
-
-    KWQButton *button = [[KWQButton alloc] initWithQButton:this];
-    setView(button);
-    [button release];
-    
-    [button setTitle:@""];
-    [[button cell] setControlSize:NSSmallControlSize];
-    [button setFont:[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:NSSmallControlSize]]];
-
-    KWQ_UNBLOCK_EXCEPTIONS;
+	m_button = new wxButton(NULL, -1);
 }
 
 QButton::~QButton()
 {
-    KWQ_BLOCK_EXCEPTIONS;
-
-    KWQButton *button = (KWQButton *)getView();
-    [button detachQButton];
-
-    KWQ_UNBLOCK_EXCEPTIONS;
+    if (m_button)
+		m_button->Destroy();
+	
 }
 
 void QButton::setText(const QString &s)
 {
-    KWQ_BLOCK_EXCEPTIONS;
-
-    NSButton *button = (NSButton *)getView();
-    [button setTitle:s.getNSString()];
-
-    KWQ_UNBLOCK_EXCEPTIONS;
+    if (m_button)
+		m_button->SetLabel(s));
 }
 
 QString QButton::text() const
 {
     QString result;
-
-    KWQ_BLOCK_EXCEPTIONS;
-
-    NSButton *button = (NSButton *)getView();
-    result = QString::fromNSString([button title]);
-    
-    KWQ_UNBLOCK_EXCEPTIONS;
+	if (m_button)
+		result = QString(m_button->GetLabel());
 
     return result;
 }
@@ -297,80 +71,40 @@ void QButton::clicked()
     //   3) clicked
     // Proper behavior of check boxes, at least, depends on this order.
     
-    KWQ_BLOCK_EXCEPTIONS;
-
-    KWQButton *button = (KWQButton *)getView();
-    [button sendConsumedMouseUpIfNeeded];
-
     // Don't call clicked if the button was destroyed inside of sendConsumedMouseUpIfNeeded.
-    if ([button target]) {
+    if (m_button) {
         m_clicked.call();
     }
 
-    KWQ_UNBLOCK_EXCEPTIONS;
 }
 
 void QButton::click(bool sendMouseEvents)
 {
-    KWQ_BLOCK_EXCEPTIONS;
-
-    KWQButton *button = (KWQButton *)getView();
-    [button performClick:nil];
-
-    KWQ_UNBLOCK_EXCEPTIONS;
+	// TODO: Is there a friendly, wx way to do this or do we have to actually
+	// send native event signals...
 }
 
 void QButton::setFont(const QFont &f)
 {
-    KWQ_BLOCK_EXCEPTIONS;
-
-    QWidget::setFont(f);
-
-    const NSControlSize size = KWQNSControlSizeForFont(f);    
-    NSControl * const button = static_cast<NSControl *>(getView());
-    [[button cell] setControlSize:size];
-    [button setFont:[NSFont systemFontOfSize:[NSFont systemFontSizeForControlSize:size]]];
-
-    KWQ_UNBLOCK_EXCEPTIONS;
-}
-
-NSControlSize KWQNSControlSizeForFont(const QFont &f)
-{
-    const int fontSize = f.pixelSize();
-    if (fontSize >= 16) {
-        return NSRegularControlSize;
-    }
-    if (fontSize >= 11) {
-        return NSSmallControlSize;
-    }
-    return NSMiniControlSize;
+	m_button->SetFont(f);
 }
 
 QWidget::FocusPolicy QButton::focusPolicy() const
 {
-    KWQ_BLOCK_EXCEPTIONS;
 
+	// FIXME: This won't compile until we take care of WebCoreBridge
+	// and KWQKHTMLPart
+	/*
     WebCoreBridge *bridge = KWQKHTMLPart::bridgeForWidget(this);
-    if (!bridge || ![bridge part] || ![bridge part]->tabsToAllControls()) {
+    if (!bridge || !bridge->getPart() || !bridge->getPart()->tabsToAllControls()) {
         return NoFocus;
     }
-    
-    KWQ_UNBLOCK_EXCEPTIONS;
+	*/
 
     return QWidget::focusPolicy();
 }
 
 void QButton::setWritingDirection(QPainter::TextDirection direction)
 {
-    KWQ_BLOCK_EXCEPTIONS;
-
-    KWQButton *button = getView();
-    KWQButtonCell *cell = [button cell];
-    NSWritingDirection d = direction == QPainter::RTL ? NSWritingDirectionRightToLeft : NSWritingDirectionLeftToRight;
-    if ([cell baseWritingDirection] != d) {
-        [cell setBaseWritingDirection:d];
-        [button setNeedsDisplay:YES];
-    }
-
-    KWQ_UNBLOCK_EXCEPTIONS;
+	//TODO: How should we handle this? 
 }
