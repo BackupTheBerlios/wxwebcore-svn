@@ -23,13 +23,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <Cocoa/Cocoa.h>
+#include <wx/defs.h>
+#include <wx/url.h>
+#include <wx/datetime.h>
+#include <wx/font.h>
+#include <wx/dynarray.h>
 
-#import <JavaScriptCore/npruntime.h>
-#import <JavaVM/jni.h>
-#import <WebCore/WebCoreKeyboardAccess.h>
+#import "npruntime.h"
 
-#ifdef __cplusplus
+// FIXME: it'd be nice if we don't have to ifdef this...
+#if __APPLE__
+#include <JavaVM/jni.h>
+#else
+#include <jni.h>
+#endif
+
+#import "WebCoreKeyboardAccess.h"
 
 class KWQKHTMLPart;
 class KHTMLView;
@@ -42,46 +51,55 @@ namespace khtml {
 
 typedef khtml::RenderPart KHTMLRenderPart;
 
-#else
+class DOMCSSStyleDeclaration;
+class DOMDocument;
+class DOMDocumentFragment;
+class DOMElement;
+class DOMHTMLElement;
+class DOMNode;
+class DOMRange;
+class WebCoreSettings;
+class WebScriptObject;
 
-@class KWQKHTMLPart;
-@class KHTMLView;
-@class KHTMLRenderPart;
-@class RenderArena;
+// just a placeholder name for now, until we determine the best match for NSArray
+class wxArray; 
 
-#endif
+//just for the moment so we can compile files including this header
+//we may need/want to implement wx versions of these
+class NSDictionary;
+class NSAttributedString; //basically a string which stores formatting info
+class NSRange;
+typedef unsigned int NSDraggingOperation;
+// possible values are here: 
+// http://developer.apple.com/documentation/Cocoa/Reference/ApplicationKit/ObjC_classic/TypesAndConstants/AppKitTypes.html#//apple_ref/doc/uid/20000019-BAJJFEEE
 
-@class DOMCSSStyleDeclaration;
-@class DOMDocument;
-@class DOMDocumentFragment;
-@class DOMElement;
-@class DOMHTMLElement;
-@class DOMNode;
-@class DOMRange;
-@class WebCoreSettings;
-@class WebScriptObject;
+typedef enum _NSSelectionAffinity {
+   NSSelectionAffinityUpstream = 0,
+   NSSelectionAffinityDownstream = 1
+} NSSelectionAffinity;
 
-@protocol WebCoreDOMTreeCopier;
-@protocol WebCoreRenderTreeCopier;
-@protocol WebCoreResourceHandle;
-@protocol WebCoreResourceLoader;
-@protocol WebCoreFileButton;
-@protocol WebCoreFileButtonDelegate;
+typedef enum _NSCellState {
+   NSMixedState = -1,
+   NSOffState = 0,
+   NSOnState = 1
+} NSCellStateValue;
 
-extern NSString *WebCoreElementDOMNodeKey;
-extern NSString *WebCoreElementFrameKey;
-extern NSString *WebCoreElementImageAltStringKey;
-extern NSString *WebCoreElementImageKey;
-extern NSString *WebCoreElementImageRectKey;
-extern NSString *WebCoreElementImageURLKey;
-extern NSString *WebCoreElementIsSelectedKey;
-extern NSString *WebCoreElementLinkURLKey;
-extern NSString *WebCoreElementLinkTargetFrameKey;
-extern NSString *WebCoreElementLinkLabelKey;
-extern NSString *WebCoreElementLinkTitleKey;
-extern NSString *WebCoreElementTitleKey;
+//end NS defines
 
-extern NSString *WebCorePageCacheStateKey;
+extern wxString *WebCoreElementDOMNodeKey;
+extern wxString *WebCoreElementFrameKey;
+extern wxString *WebCoreElementImageAltStringKey;
+extern wxString *WebCoreElementImageKey;
+extern wxString *WebCoreElementImageRectKey;
+extern wxString *WebCoreElementImageURLKey;
+extern wxString *WebCoreElementIsSelectedKey;
+extern wxString *WebCoreElementLinkURLKey;
+extern wxString *WebCoreElementLinkTargetFrameKey;
+extern wxString *WebCoreElementLinkLabelKey;
+extern wxString *WebCoreElementLinkTitleKey;
+extern wxString *WebCoreElementTitleKey;
+
+extern wxString *WebCorePageCacheStateKey;
 
 typedef enum {
     WebCoreDeviceScreen,
@@ -173,332 +191,350 @@ typedef enum {
 
 // The WebCoreBridge interface contains methods for use by the non-WebCore side of the bridge.
 
-@interface WebCoreBridge : NSObject
+// KO: what this means for us is that this is the part that's implemented in WebCoreBridge.mm
+// and it is basically a Cocoa and now wx wrapper around KHTMLPart.
+
+class WebCoreBridge : wxObject
 {
+public:
+	WebCoreBridge();
+	~WebCoreBridge();
+	
+	static WebCoreBridge* bridgeForDOMDocument(DOMDocument* document);
+	void initializeSettings(WebCoreSettings* settings);
+	void setRenderPart(KHTMLRenderPart* renderPart);
+	KHTMLRenderPart* getRenderPart() const {return _renderPart; }
+	void setName(const wxString& name);
+	wxString& getName() const;
+	
+	KWQKHTMLPart* getPart();
+	void setParent(WebCoreBridge *parent);
+	
+	void provisionalLoadStarted();
+	void openURL(wxURL* URL, bool reload, const wxString& contentType, const wxString& refresh, const wxDateTime& lastModified, NSDictionary* pageCache);
+	void setEncoding(const wxFontEncoding& encoding, bool userChosen);
+	void addData(void* data);
+	void closeURL();
+	
+	void didNotOpenURL(wxURL* URL, NSDictionary* pageCache);
+	bool canLoadURL(wxURL* URL, const wxString& referrer, bool hideReferrer);
+	
+	void saveDocumentState();
+	void restoreDocumentState();
+	
+	bool canCachePage();
+	bool saveDocumentToPageCache();
+	
+	void end();
+	void stop();
+	
+	wxURL* GetURL();
+	wxURL* GetBaseURL();
+	
+	void installInFrame(wxWindow* window);
+	void removeFromFrame();
+	
+	void scrollToAnchor(const wxString& anchor);
+	void scrollToAnchorWithURL(wxURL* URL);
+	
+	bool scrollOverflowInDirection(WebScrollDirection direction, WebScrollGranularity granularity);
+	bool scrollOverflowWithScrollWheelEvent(wxEvent* event);
+	
+	void createKHTMLViewWithWindow(wxWindow* window, int marginWidth, int marginHeight);
+	bool isFrameSet();
+	
+	void reapplyStylesForDeviceType(WebCoreDeviceType deviceType);
+	void forceLayoutAdjustingViewSize(bool adjustSizeFlag);
+	void forceLayoutWithMinimumPageWidth(float minPageWidth, float maxPageWidth, bool adjustSizeFlag);
+	void sendResizeEvent();
+	void sendScrollEvent();
+	bool needsLayout();
+	void setNeedsLayout();
+	
+	void drawRect(const wxRect& rect);
+	void adjustPageHeightNew(float newBottom, float oldTop, float oldBottom, float bottomLimit);
+	wxArray& computePageRectsWithPrintWidthScaleFactor(float printWidthScaleFactor, float printHeight);
+	
+	void setActivationEventNumber(int num);
+	
+	// event handlers
+	void mouseDown(wxMouseEvent* event);
+	void mouseUp(wxMouseEvent* event);
+	void mouseMoved(wxMouseEvent* event);
+	void mouseDragged(wxMouseEvent* event);
+	
+	bool sendContextMenuEvent(wxEvent* event); // return YES if event is eaten by WebCore
+	
+	wxWindow* nextKeyView();
+	wxWindow* previousKeyView();
+	
+	wxWindow* nextKeyViewInsideWebFrameViews();
+	wxWindow* previousKeyViewInsideWebFrameViews();
+	
+	// these two are tricky, they are looking for protocols rather than implementations...
+	void* copyDOMTree(void* copier);
+	void* copyRenderTree(void* copier);
+	
+	wxString& renderTreeAsExternalRepresentation() const;
+	
+	NSDictionary* elementAtPoint(const wxPoint& point);
+	wxURL* URLWithAttributeString(const wxString& string);
+	
+	DOMElement* elementWithName(const wxString& name, DOMElement* form);
+	DOMElement* elementForView(wxWindow* view);
+	
+	bool elementDoesAutoComplete(DOMElement* element);
+	bool elementIsPassword(DOMElement* element);
+	
+	DOMElement* formForElement(DOMElement* element);
+	DOMElement* currentForm();
+	wxArray& controlsInForm(DOMElement* form) const;
+	wxString& searchForLabels(const wxArrayString& labels, DOMElement* beforeElement) const;
+	wxString& matchLabels(const wxArrayString& labels, DOMElement* againstElement) const;
+	
+	bool searchFor(const wxString& string, bool direction, bool caseSensitive, bool wrap);
+	void jumpToSelection();
+	
+	wxString& advanceToNextMisspelling() const;
+	wxString& advanceToNextMisspellingStartingJustBeforeSelection() const;
+	void unmarkAllMisspellings();
+	
+	void setTextSizeMultiplier(float multiplier);
+	
+	wxString& GetTextEncoding() const;
+	
+	wxString& stringByEvaluatingJavaScriptFromString(const wxString& string) const;
+	wxString& stringByEvaluatingJavaScriptFromString(const wxString& string, bool forceUserGesture);
+	
+	DOMDocument* GetDOMDocument();
+	DOMHTMLElement* GetFrameElement();
+	
+	bool isSelectionEditable();
+	WebSelectionState GetSelectionState();
+	
+	NSAttributedString* selectedAttributedString();
+	wxString& selectedString() const;
+	
+	void setSelectionFromNone();
+	void setDisplaysWithFocusAttributes(bool flag);
+	
+	void setWindowHasFocus(bool flag);
+	
+	wxString& stringForRange(DOMRange* range) const;
+	
+	wxString& markupStringFromNode(DOMNode* node, wxArray* nodes);
+	wxString& markupStringFromRange(DOMRange* range, wxArray* nodes);
+	
+	void selectAll();
+	void deselectAll();
+	void deselectText();
+	
+	wxRect& selectionRect() const;
+	wxRect& visibleSelectionRect() const;
+	
+	void centerSelectionInVisibleArea();
+	
+	wxImage* selectionImage();
+	wxRect& caretRectAtNode(DOMNode* node, int offset, NSSelectionAffinity affinity) const;
+	wxRect& firstRectForDOMRange(DOMRange* range) const;
+	
+	void setSelectedDOMRange(DOMRange* range, NSSelectionAffinity selectionAffinity, bool closeTyping);
+	DOMRange* selectedDOMRange();
+	NSSelectionAffinity selectionAffinity();
+	
+	// Emacs-style-editing "mark"
+	void setMarkDOMRange(DOMRange* range);
+	DOMRange* markDOMRange();
+	
+	// international text input "marked text"
+	void setMarkedTextDOMRange(DOMRange* range, const wxArray& attributes, const wxArray& ranges);
+	DOMRange* markedTextDOMRange();
+	void replaceMarkedTextWithText(const wxString& text);
+	
+	NSAttributedString* attributedStringFrom(DOMNode* startNode, int startOffset, DOMNode* endNode, int endOffset);
+	
+	wxFont& fontForSelection(bool hasMultipleFonts) const;
+	NSDictionary* fontAttributesForSelectionStart();
+	NSWritingDirection baseWritingDirectionForSelectionStart();
+	
+	// do we use 
+	wxString& stringWithData(void* data, const wxFontEncoding& textEncoding) const;
+	wxString& stringWithData(void* data, const wxString& textEncodingName) const;
+	
+	bool interceptKeyEvent(wxKeyEvent* event, wxWindow* view);
+	
+	void setShouldCreateRenderers(bool f);
+	bool shouldCreateRenderers();
+	
+	int numPendingOrLoadingRequests();
+	bool doneProcessingData();
+	
+	void setDrawsBackground(bool drawsBackground);
+	
+	wxColour& bodyBackgroundColor() const;
+	wxColour& selectionColor() const;
+	
+	void adjustViewSize();
+	
+	void* accessibilityTree();
+	
+	void undoEditing(void* arg);
+	void redoEditing(void* arg);
+	
+	DOMRange* rangeByExpandingSelectionWithGranularity(WebSelectionGranularity granularity);
+	DOMRange* rangeOfCharactersAroundCaret();
+	DOMRange* rangeByAlteringCurrentSelection(WebSelectionAlteration alteration, WebSelectionDirection direction, WebSelectionGranularity granularity);
+	void alterCurrentSelection(WebSelectionAlteration alteration, WebSelectionDirection direction, WebSelectionGranularity granularity);
+	DOMRange* rangeByAlteringCurrentSelection(WebSelectionAlteration alteration, float verticalDistance);
+	WebSelectionGranularity selectionGranularity();
+	
+	DOMRange* smartDeleteRangeForProposedRange(DOMRange* proposedCharRange);
+	void smartInsertForString(const wxString& pasteString, DOMRange* charRangeToReplace, wxString* beforeString, wxString* afterString); 
+	bool canDeleteRange(DOMRange* range);
+	void selectNSRange(const NSRange& range);
+	NSRange selectedNSSRange() const;
+	NSRange markedTextNSRange() const;
+	DOMRange* convertToObjCDOMRange(NSRange range);
+	
+	DOMDocumentFragment* documentFragmentWithMarkupString(const wxString& markupString, const wxString& baseURLString);
+	DOMDocumentFragment* documentFragmentWithText(const wxString& text);
+	
+	void replaceSelectionWithFragment(DOMDocumentFragment* fragment, bool selectReplacement, bool smartReplace, bool matchStyle);
+	void replaceSelectionWithNode(DOMNode* node, bool selectReplacement, bool smartReplace);
+	void replaceSelectionWithMarkupString(const wxString& markupString, const wxString& baseURLString, bool selectReplacement, bool smartReplace);
+	void replaceSelectionWithText(const wxString& text, bool selectReplacement, bool smartReplace);
+	
+	void insertLineBreak();
+	void insertParagraphSeparator();
+	void insertParagraphSeparatorInQuotedContext();
+	void insertText(const wxString& text, bool selectInsertedText);
+	
+	void setSelectionToDragCaret();
+	void moveSelectionToDragCaret(DOMDocumentFragment* selectionFragment, bool smartMove);
+	void moveDragCaretToPoint(const wxPoint& point);
+	void removeDragCaret();
+	DOMRange* dragCaretDOMRange();
+	DOMRange* editableDOMRangeForPoint(const wxPoint& point);
+	
+	void deleteSelectionWithSmartDelete(bool smartDelete);
+	void deleteKeyPressedWithSmartDelete(bool smartDelete);
+	void forwardDeleteKeyPressedWithSmartDelete(bool smartDelete);
+	
+	DOMCSSStyleDeclaration* typingStyle();
+	void setTypingStyle(DOMCSSStyleDeclaration* style, WebUndoAction undoAction);
+	void applyStyle(DOMCSSStyleDeclaration* style, WebUndoAction undoAction);
+	void applyParagraphStyle(DOMCSSStyleDeclaration* style, WebUndoAction undoAction);
+	bool selectionStartHasStyle(DOMCSSStyleDeclaration* style);
+	NSCellStateValue selectionHasStyle(DOMCSSStyleDeclaration* style);
+	void applyEditingStyleToBodyElement();
+	void removeEditingStyleFromBodyElement();
+	void applyEditingStyleToElement(DOMElement* element);
+	void removeEditingStyleFromElement(DOMElement* element);
+	
+	void ensureSelectionVisible();
+	
+	// these are part of the ObjC JS bindings
+	WebScriptObject* windowScriptObject();
+	NPObject* windowScriptNPObject();
+	
+	bool eventMayStartDrag(wxEvent* event);
+	
+	// the three functions below take an object that conforms to the "NSDraggingInfo"
+	// interface. 
+	NSDragOperation dragOperationForDraggingInfo(void* info);
+	void dragExitedWithDraggingInfo(void* info);
+	bool concludeDragForDraggingInfo(void* info);
+	
+	void dragSourceMovedTo(const wxPoint& windowLoc);
+	void dragSourceEndedAt(const wxPoint& windowLoc, NSDragOperation operation);
+	
+	bool mayDHTMLCut();
+	bool mayDHTMLCopy();
+	bool mayDHTMLPaste();
+	bool tryDHTMLCut();
+	bool tryDHTMLCopy();
+	bool tryDHTMLPaste();
+	
+	void clear();
+	
+private:
     KWQKHTMLPart *_part;
     KHTMLRenderPart *_renderPart;
     RenderArena *_renderPartArena;
-    BOOL _shouldCreateRenderers;
+    bool _shouldCreateRenderers;
 }
-
-+ (WebCoreBridge *)bridgeForDOMDocument:(DOMDocument *)document;
-
-- (void)initializeSettings:(WebCoreSettings *)settings;
-
-- (void)setRenderPart:(KHTMLRenderPart *)renderPart;
-- (KHTMLRenderPart *)renderPart;
-
-- (void)setName:(NSString *)name;
-- (NSString *)name;
-
-- (KWQKHTMLPart *)part;
-
-- (void)setParent:(WebCoreBridge *)parent;
-
-- (void)provisionalLoadStarted;
-
-- (void)openURL:(NSURL *)URL reload:(BOOL)reload
-    contentType:(NSString *)contentType refresh:(NSString *)refresh lastModified:(NSDate *)lastModified
-    pageCache:(NSDictionary *)pageCache;
-- (void)setEncoding:(NSString *)encoding userChosen:(BOOL)userChosen;
-- (void)addData:(NSData *)data;
-- (void)closeURL;
-
-- (void)didNotOpenURL:(NSURL *)URL pageCache:(NSDictionary *)pageCache;
-
-- (BOOL)canLoadURL:(NSURL *)URL fromReferrer:(NSString *)referrer hideReferrer:(BOOL *)hideReferrer;
-
-- (void)saveDocumentState;
-- (void)restoreDocumentState;
-
-- (BOOL)canCachePage;
-- (BOOL)saveDocumentToPageCache;
-
-- (void)end;
-- (void)stop;
-
-- (NSURL *)URL;
-- (NSURL *)baseURL;
-- (NSString *)referrer;
-- (NSString *)domain;
-- (WebCoreBridge *)opener;
-
-- (void)installInFrame:(NSView *)view;
-- (void)removeFromFrame;
-
-- (void)scrollToAnchor:(NSString *)anchor;
-- (void)scrollToAnchorWithURL:(NSURL *)URL;
-
-- (BOOL)scrollOverflowInDirection:(WebScrollDirection)direction granularity:(WebScrollGranularity)granularity;
-- (BOOL)scrollOverflowWithScrollWheelEvent:(NSEvent *)event;
-
-- (void)createKHTMLViewWithNSView:(NSView *)view marginWidth:(int)mw marginHeight:(int)mh;
-
-- (BOOL)isFrameSet;
-
-- (void)reapplyStylesForDeviceType:(WebCoreDeviceType)deviceType;
-- (void)forceLayoutAdjustingViewSize:(BOOL)adjustSizeFlag;
-- (void)forceLayoutWithMinimumPageWidth:(float)minPageWidth maximumPageWidth:(float)maxPageWidth adjustingViewSize:(BOOL)adjustSizeFlag;
-- (void)sendResizeEvent;
-- (void)sendScrollEvent;
-- (BOOL)needsLayout;
-- (void)setNeedsLayout;
-- (void)drawRect:(NSRect)rect;
-- (void)adjustPageHeightNew:(float *)newBottom top:(float)oldTop bottom:(float)oldBottom limit:(float)bottomLimit;
-- (NSArray*)computePageRectsWithPrintWidthScaleFactor:(float)printWidthScaleFactor printHeight:(float)printHeight;
-
-- (void)setActivationEventNumber:(int)num;
-- (void)mouseDown:(NSEvent *)event;
-- (void)mouseUp:(NSEvent *)event;
-- (void)mouseMoved:(NSEvent *)event;
-- (void)mouseDragged:(NSEvent *)event;
-
-- (BOOL)sendContextMenuEvent:(NSEvent *)event; // return YES if event is eaten by WebCore
-
-- (NSView *)nextKeyView;
-- (NSView *)previousKeyView;
-
-- (NSView *)nextKeyViewInsideWebFrameViews;
-- (NSView *)previousKeyViewInsideWebFrameViews;
-
-- (NSObject *)copyDOMTree:(id <WebCoreDOMTreeCopier>)copier;
-- (NSObject *)copyRenderTree:(id <WebCoreRenderTreeCopier>)copier;
-- (NSString *)renderTreeAsExternalRepresentation;
-
-- (NSDictionary *)elementAtPoint:(NSPoint)point;
-- (NSURL *)URLWithAttributeString:(NSString *)string;
-
-- (DOMElement *)elementWithName:(NSString *)name inForm:(DOMElement *)form;
-- (DOMElement *)elementForView:(NSView *)view;
-- (BOOL)elementDoesAutoComplete:(DOMElement *)element;
-- (BOOL)elementIsPassword:(DOMElement *)element;
-- (DOMElement *)formForElement:(DOMElement *)element;
-- (DOMElement *)currentForm;
-- (NSArray *)controlsInForm:(DOMElement *)form;
-- (NSString *)searchForLabels:(NSArray *)labels beforeElement:(DOMElement *)element;
-- (NSString *)matchLabels:(NSArray *)labels againstElement:(DOMElement *)element;
-
-- (BOOL)searchFor:(NSString *)string direction:(BOOL)forward caseSensitive:(BOOL)caseFlag wrap:(BOOL)wrapFlag;
-- (void)jumpToSelection;
-
-- (NSString *)advanceToNextMisspelling;
-- (NSString *)advanceToNextMisspellingStartingJustBeforeSelection;
-- (void)unmarkAllMisspellings;
-
-- (void)setTextSizeMultiplier:(float)multiplier;
-
-- (CFStringEncoding)textEncoding;
-
-- (NSString *)stringByEvaluatingJavaScriptFromString:(NSString *)string;
-- (NSString *)stringByEvaluatingJavaScriptFromString:(NSString *)string forceUserGesture:(BOOL)forceUserGesture;
-
-- (DOMDocument *)DOMDocument;
-- (DOMHTMLElement *)frameElement;
-
-- (BOOL)isSelectionEditable;
-- (WebSelectionState)selectionState;
-
-- (NSAttributedString *)selectedAttributedString;
-- (NSString *)selectedString;
-
-- (void)setSelectionFromNone;
-- (void)setDisplaysWithFocusAttributes:(BOOL)flag;
-
-- (void)setWindowHasFocus:(BOOL)flag;
-
-- (NSString *)stringForRange:(DOMRange *)range;
-
-- (NSString *)markupStringFromNode:(DOMNode *)node nodes:(NSArray **)nodes;
-- (NSString *)markupStringFromRange:(DOMRange *)range nodes:(NSArray **)nodes;
-
-- (void)selectAll;
-- (void)deselectAll;
-- (void)deselectText;
-
-- (NSRect)selectionRect;
-- (NSRect)visibleSelectionRect;
-- (void)centerSelectionInVisibleArea;
-- (NSImage *)selectionImage;
-- (NSRect)caretRectAtNode:(DOMNode *)node offset:(int)offset affinity:(NSSelectionAffinity)affinity;
-- (NSRect)firstRectForDOMRange:(DOMRange *)range;
-
-- (void)setSelectedDOMRange:(DOMRange *)range affinity:(NSSelectionAffinity)selectionAffinity closeTyping:(BOOL)closeTyping;
-- (DOMRange *)selectedDOMRange;
-- (NSSelectionAffinity)selectionAffinity;
-
-// Emacs-style-editing "mark"
-- (void)setMarkDOMRange:(DOMRange *)range;
-- (DOMRange *)markDOMRange;
-
-// international text input "marked text"
-- (void)setMarkedTextDOMRange:(DOMRange *)range customAttributes:(NSArray *)attributes ranges:(NSArray *)ranges;
-- (DOMRange *)markedTextDOMRange;
-- (void)replaceMarkedTextWithText:(NSString *)text;
-
-- (NSAttributedString *)attributedStringFrom:(DOMNode *)startNode startOffset:(int)startOffset to:(DOMNode *)endNode endOffset:(int)endOffset;
-
-- (NSFont *)fontForSelection:(BOOL *)hasMultipleFonts;
-- (NSDictionary *)fontAttributesForSelectionStart;
-- (NSWritingDirection)baseWritingDirectionForSelectionStart;
-
-+ (NSString *)stringWithData:(NSData *)data textEncoding:(CFStringEncoding)textEncoding;
-+ (NSString *)stringWithData:(NSData *)data textEncodingName:(NSString *)textEncodingName;
-
-- (BOOL)interceptKeyEvent:(NSEvent *)event toView:(NSView *)view;
-
-- (void)setShouldCreateRenderers:(BOOL)f;
-- (BOOL)shouldCreateRenderers;
-
-- (int)numPendingOrLoadingRequests;
-- (BOOL)doneProcessingData;
-
-- (void)setDrawsBackground:(BOOL)drawsBackround;
-
-- (NSColor *)bodyBackgroundColor;
-- (NSColor *)selectionColor;
-
-- (void)adjustViewSize;
-
-- (id)accessibilityTree;
-
-- (void)undoEditing:(id)arg;
-- (void)redoEditing:(id)arg;
-
-- (DOMRange *)rangeByExpandingSelectionWithGranularity:(WebSelectionGranularity)granularity;
-- (DOMRange *)rangeOfCharactersAroundCaret;
-- (DOMRange *)rangeByAlteringCurrentSelection:(WebSelectionAlteration)alteration direction:(WebSelectionDirection)direction granularity:(WebSelectionGranularity)granularity;
-- (void)alterCurrentSelection:(WebSelectionAlteration)alteration direction:(WebSelectionDirection)direction granularity:(WebSelectionGranularity)granularity;
-- (DOMRange *)rangeByAlteringCurrentSelection:(WebSelectionAlteration)alteration verticalDistance:(float)distance;
-- (void)alterCurrentSelection:(WebSelectionAlteration)alteration verticalDistance:(float)distance;
-- (WebSelectionGranularity)selectionGranularity;
-- (DOMRange *)smartDeleteRangeForProposedRange:(DOMRange *)proposedCharRange;
-- (void)smartInsertForString:(NSString *)pasteString replacingRange:(DOMRange *)charRangeToReplace beforeString:(NSString **)beforeString afterString:(NSString **)afterString;
-- (BOOL)canDeleteRange:(DOMRange *)range;
-- (void)selectNSRange:(NSRange)range;
-- (NSRange)selectedNSRange;
-- (NSRange)markedTextNSRange;
-- (DOMRange *)convertToObjCDOMRange:(NSRange)range;
-
-- (DOMDocumentFragment *)documentFragmentWithMarkupString:(NSString *)markupString baseURLString:(NSString *)baseURLString;
-- (DOMDocumentFragment *)documentFragmentWithText:(NSString *)text;
-
-- (void)replaceSelectionWithFragment:(DOMDocumentFragment *)fragment selectReplacement:(BOOL)selectReplacement smartReplace:(BOOL)smartReplace matchStyle:(BOOL)matchStyle;
-- (void)replaceSelectionWithNode:(DOMNode *)node selectReplacement:(BOOL)selectReplacement smartReplace:(BOOL)smartReplace;
-- (void)replaceSelectionWithMarkupString:(NSString *)markupString baseURLString:(NSString *)baseURLString selectReplacement:(BOOL)selectReplacement smartReplace:(BOOL)smartReplace;
-- (void)replaceSelectionWithText:(NSString *)text selectReplacement:(BOOL)selectReplacement smartReplace:(BOOL)smartReplace;
-
-- (void)insertLineBreak;
-- (void)insertParagraphSeparator;
-- (void)insertParagraphSeparatorInQuotedContent;
-- (void)insertText:(NSString *)text selectInsertedText:(BOOL)selectInsertedText;
-
-- (void)setSelectionToDragCaret;
-- (void)moveSelectionToDragCaret:(DOMDocumentFragment *)selectionFragment smartMove:(BOOL)smartMove;
-- (void)moveDragCaretToPoint:(NSPoint)point;
-- (void)removeDragCaret;
-- (DOMRange *)dragCaretDOMRange;
-- (DOMRange *)editableDOMRangeForPoint:(NSPoint)point;
-
-- (void)deleteSelectionWithSmartDelete:(BOOL)smartDelete;
-- (void)deleteKeyPressedWithSmartDelete:(BOOL)smartDelete;
-- (void)forwardDeleteKeyPressedWithSmartDelete:(BOOL)smartDelete;
-
-- (DOMCSSStyleDeclaration *)typingStyle;
-- (void)setTypingStyle:(DOMCSSStyleDeclaration *)style withUndoAction:(WebUndoAction)undoAction;
-- (void)applyStyle:(DOMCSSStyleDeclaration *)style withUndoAction:(WebUndoAction)undoAction;
-- (void)applyParagraphStyle:(DOMCSSStyleDeclaration *)style withUndoAction:(WebUndoAction)undoAction;
-- (BOOL)selectionStartHasStyle:(DOMCSSStyleDeclaration *)style;
-- (NSCellStateValue)selectionHasStyle:(DOMCSSStyleDeclaration *)style;
-- (void)applyEditingStyleToBodyElement;
-- (void)removeEditingStyleFromBodyElement;
-- (void)applyEditingStyleToElement:(DOMElement *)element;
-- (void)removeEditingStyleFromElement:(DOMElement *)element;
-
-- (void)ensureSelectionVisible;
-
-- (WebScriptObject *)windowScriptObject;
-- (NPObject *)windowScriptNPObject;
-
-- (BOOL)eventMayStartDrag:(NSEvent *)event;
-- (NSDragOperation)dragOperationForDraggingInfo:(id <NSDraggingInfo>)info;
-- (void)dragExitedWithDraggingInfo:(id <NSDraggingInfo>)info;
-- (BOOL)concludeDragForDraggingInfo:(id <NSDraggingInfo>)info;
-- (void)dragSourceMovedTo:(NSPoint)windowLoc;
-- (void)dragSourceEndedAt:(NSPoint)windowLoc operation:(NSDragOperation)operation;
-
-- (BOOL)mayDHTMLCut;
-- (BOOL)mayDHTMLCopy;
-- (BOOL)mayDHTMLPaste;
-- (BOOL)tryDHTMLCut;
-- (BOOL)tryDHTMLCopy;
-- (BOOL)tryDHTMLPaste;
-
-- (NSMutableDictionary *)dashboardRegions;
-
-- (void)clear;
-
-@end
 
 // The WebCoreBridge protocol contains methods for use by the WebCore side of the bridge.
 
-// In NSArray objects for post data, NSData objects represent literal data, and NSString objects represent encoded files.
+// In NSArray objects for post data, NSData objects represent literal data, and wxString objects represent encoded files.
 // The encoding is the standard form encoding for uploading files.
 
-@protocol WebCoreBridge
+// KO: A protocol in ObjC is closest to an base class/interface in C++/Java. It specifies a series of methods that any class 
+// derived from it *must* implement. So our wxWebCoreCtrl, or whatever, will derive from this.
+// However, that's up to us. I don't think anything in WebCore uses this. Safari does, but so long as we keep our 
+// WebCoreBridge above in sync, we can decide how to wrap it into wx ourselves.
 
-- (NSArray *)childFrames; // WebCoreBridge objects
-- (WebCoreBridge *)mainFrame;
-- (WebCoreBridge *)findFrameNamed:(NSString *)name;
-/* Creates a name for an frame unnamed in the HTML.  It should produce repeatable results for loads of the same frameset. */
-- (NSString *)generateFrameName;
-- (void)frameDetached;
-- (NSView *)documentView;
+// KO: This is actually a complete TLW interface, as it manipulates status bar, toolbars, etc.
+// I think we can actually change this as we need to, I don't see anywhere within WebCore that this interface is implemented
 
-- (void)loadURL:(NSURL *)URL referrer:(NSString *)referrer reload:(BOOL)reload userGesture:(BOOL)forUser target:(NSString *)target triggeringEvent:(NSEvent *)event form:(DOMElement *)form formValues:(NSDictionary *)values;
-- (void)postWithURL:(NSURL *)URL referrer:(NSString *)referrer target:(NSString *)target data:(NSArray *)data contentType:(NSString *)contentType triggeringEvent:(NSEvent *)event form:(DOMElement *)form formValues:(NSDictionary *)values;
+class WebCoreBridgeInterface : public wxObject {
 
-- (WebCoreBridge *)createWindowWithURL:(NSURL *)URL frameName:(NSString *)name;
-- (void)showWindow;
+public:
+	WebCoreBridgeInterface();
+	~WebCoreBridgeInterface();
 
-- (NSString *)userAgentForURL:(NSURL *)URL;
+	virtual wxList& childFrames(); // WebCoreBridge objects
+	virtual WebCoreBridge* mainFrame();
+	virtual WebCoreBridge* findFrameNamed(const wxString& name);
+	/* Creates a name for an frame unnamed in the HTML.  It should produce repeatable results for loads of the same frameset. */
+	virtual wxString& generateFrameName() const;
+	virtual void frameDetached();
+	virtual wxWindow* documentView();
 
-- (void)setTitle:(NSString *)title;
-- (void)setStatusText:(NSString *)status;
+	virtual void loadURL(wxURL* URL, const wxString& referrer, bool reload, bool userGesture, const wxString& target, wxEvent* triggerEvent, DOMElement* form, NSDictionary* formValues);
+	virtual void postWithURL(wxURL* URL, const wxString& referrer, const wxString& target, const wxList& data, const wxString& contentType, wxEvent* triggerEvent, DOMElement* form, NSDictionary* formValues);
 
-- (void)setIconURL:(NSURL *)URL;
-- (void)setIconURL:(NSURL *)URL withType:(NSString *)string;
+	virtual WebCoreBridge* createWindowWithURL(wxURL* URL, const wxString& name);
+	virtual void showWindow();
 
-- (WebCoreBridge *)createChildFrameNamed:(NSString *)frameName withURL:(NSURL *)URL
-    referrer:(NSString *)referrer
-    renderPart:(KHTMLRenderPart *)renderPart
-    allowsScrolling:(BOOL)allowsScrolling marginWidth:(int)width marginHeight:(int)height;
+	virtual wxString& userAgentForURL(wxURL* URL) const;
 
-- (BOOL)areToolbarsVisible;
-- (void)setToolbarsVisible:(BOOL)visible;
-- (BOOL)isStatusBarVisible;
-- (void)setStatusBarVisible:(BOOL)visible;
-- (BOOL)areScrollbarsVisible;
-- (void)setScrollbarsVisible:(BOOL)visible;
-- (NSWindow *)window;
-- (void)setWindowFrame:(NSRect)frame;
-- (NSRect)windowFrame;
-- (void)setWindowContentRect:(NSRect)frame;
-- (NSRect)windowContentRect;
+	virtual void setTitle(const wxString& title);
+	virtual void setStatusText(const wxString& status);
 
-- (void)setWindowIsResizable:(BOOL)resizable;
-- (BOOL)windowIsResizable;
+	virtual void setIconURL(wxURL* URL);
+	virtual void setIconURL(wxURL* URL, const wxString& withType);
 
-- (NSResponder *)firstResponder;
-- (void)makeFirstResponder:(NSResponder *)responder;
+	virtual WebCoreBridge* createChildFrameNamed(const wxString& frameName, wxURL* withURL);
+    virtual void referrer(const wxString& referrer);
+    virtual void renderPart(KHTMLRenderPart *renderPart);
+    virtual void allowsScrolling(bool allowsScrolling, int marginWidth, int marginHeight);
 
-- (BOOL)wasFirstResponderAtMouseDownTime:(NSResponder *)responder;
+	virtual bool areToolbarsVisible();
+	virtual void setToolbarsVisible(bool visible);
+	virtual bool isStatusBarVisible();
+	virtual void setStatusBarVisible(bool visible);
+	virtual bool areScrollbarsVisible();
+	virtual void setScrollbarsVisible(bool visible);
+	
+	virtual wxFrame* window();
+	virtual void setWindowFrame(const wxRect& frame);
+	virtual wxRect& windowFrame() const;
+	virtual void setWindowContentRect(const wxRect& frame);
+	virtual wxRect& windowContentRect() const;
 
-- (void)closeWindowSoon;
+	virtual void setWindowIsResizable(bool resizable);
+	virtual bool windowIsResizable();
 
-- (void)runJavaScriptAlertPanelWithMessage:(NSString *)message;
-- (BOOL)runJavaScriptConfirmPanelWithMessage:(NSString *)message;
-- (BOOL)runJavaScriptTextInputPanelWithPrompt:(NSString *)prompt defaultText:(NSString *)defaultText returningText:(NSString **)result;
-- (void)addMessageToConsole:(NSDictionary *)message;
+	virtual void closeWindowSoon();
+
+	virtual void runJavaScriptAlertPanelWithMessage(const wxString& message);
+	virtual bool runJavaScriptConfirmPanelWithMessage(const wxString& message);
+	virtual bool runJavaScriptTextInputPanelWithPrompt(const wxString& prompt, const wxString& defaultText, wxString* result);
+	virtual void addMessageToConsole(NSDictionary* message);
+
+//heck, we're probably not going to use some of this anyways, so I'll be lazy. :-)
+#if 0
 
 - (id <WebCoreResourceHandle>)startLoadingResource:(id <WebCoreResourceLoader>)loader withURL:(NSURL *)URL customHeaders:(NSDictionary *)customHeaders;
 - (id <WebCoreResourceHandle>)startLoadingResource:(id <WebCoreResourceLoader>)loader withURL:(NSURL *)URL customHeaders:(NSDictionary *)customHeaders postData:(NSArray *)data;
@@ -528,15 +564,15 @@ typedef enum {
 
 - (void)tokenizerProcessedData;
 
-// OK to be an NSString rather than an NSURL.
+// OK to be an wxString rather than an NSURL.
 // This URL is only used for coloring visited links.
-- (NSString *)requestedURLString;
-- (NSString *)incomingReferrer;
+- (wxString *)requestedURLString;
+- (wxString *)incomingReferrer;
 
 - (NSView *)viewForPluginWithURL:(NSURL *)URL
                   attributeNames:(NSArray *)attributeNames
                  attributeValues:(NSArray *)attributeValues
-                        MIMEType:(NSString *)MIMEType;
+                        MIMEType:(wxString *)MIMEType;
 - (NSView *)viewForJavaAppletWithFrame:(NSRect)frame
                         attributeNames:(NSArray *)attributeNames
                        attributeValues:(NSArray *)attributeValues
@@ -546,11 +582,11 @@ typedef enum {
 
 - (int)getObjectCacheSize;
 
-- (BOOL)frameRequiredForMIMEType:(NSString*)MIMEType URL:(NSURL *)URL;
+- (BOOL)frameRequiredForMIMEType:(wxString*)MIMEType URL:(NSURL *)URL;
 
 - (void)loadEmptyDocumentSynchronously;
 
-- (NSString *)MIMETypeForPath:(NSString *)path;
+- (wxString *)MIMETypeForPath:(wxString *)path;
 
 - (void)allowDHTMLDrag:(BOOL *)flagDHTML UADrag:(BOOL *)flagUA;
 - (BOOL)startDraggingImage:(NSImage *)dragImage at:(NSPoint)dragLoc operation:(NSDragOperation)op event:(NSEvent *)event sourceIsDHTML:(BOOL)flag DHTMLWroteData:(BOOL)dhtmlWroteData;
@@ -569,8 +605,8 @@ typedef enum {
 
 - (BOOL)control:(NSControl *)control textShouldBeginEditing:(NSText *)fieldEditor;
 - (BOOL)control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor;
-- (BOOL)control:(NSControl *)control didFailToFormatString:(NSString *)string errorDescription:(NSString *)error;
-- (void)control:(NSControl *)control didFailToValidatePartialString:(NSString *)string errorDescription:(NSString *)error;
+- (BOOL)control:(NSControl *)control didFailToFormatString:(wxString *)string errorDescription:(wxString *)error;
+- (void)control:(NSControl *)control didFailToValidatePartialString:(wxString *)string errorDescription:(wxString *)error;
 - (BOOL)control:(NSControl *)control isValidObject:(id)obj;
 - (BOOL)control:(NSControl *)control textView:(NSTextView *)textView doCommandBySelector:(SEL)commandSelector;
 - (BOOL)control:(NSControl *)control textView:(NSTextView *)textView shouldHandleEvent:(NSEvent *)event;
@@ -581,7 +617,7 @@ typedef enum {
 
 - (WebCoreKeyboardUIMode)keyboardUIMode;
 
-- (void)didSetName:(NSString *)name;
+- (void)didSetName:(wxString *)name;
 
 - (NSFileWrapper *)fileWrapperForURL:(NSURL *)URL;
 
@@ -593,7 +629,7 @@ typedef enum {
 - (jobject)pollForAppletInView:(NSView *)view;
 
 - (NSUndoManager *)undoManager;
-- (NSString *)nameForUndoAction:(WebUndoAction)undoAction;
+- (wxString *)nameForUndoAction:(WebUndoAction)undoAction;
 - (void)issueCutCommand;
 - (void)issueCopyCommand;
 - (void)issuePasteCommand;
@@ -606,7 +642,7 @@ typedef enum {
 - (BOOL)shouldEndEditing:(DOMRange *)range;
 - (BOOL)canPaste;
 
-- (NSString *)overrideMediaType;
+- (wxString *)overrideMediaType;
 
 - (void)windowObjectCleared;
 
@@ -618,28 +654,30 @@ typedef enum {
 - (void)dashboardRegionsChanged:(NSMutableDictionary *)regions;
 
 - (BOOL)isCharacterSmartReplaceExempt:(unichar)c isPreviousCharacter:(BOOL)isPreviousCharacter;
+#endif
+}
 
-@end
 
 // This interface definition allows those who hold a WebCoreBridge * to call all the methods
 // in the WebCoreBridge protocol without requiring the base implementation to supply the methods.
 // This idiom is appropriate because WebCoreBridge is an abstract class.
 
+#if 0
 @interface WebCoreBridge (SubclassResponsibility) <WebCoreBridge>
 @end
 
 @protocol WebCoreDOMTreeCopier <NSObject>
-- (NSObject *)nodeWithName:(NSString *)name value:(NSString *)value source:(NSString *)source children:(NSArray *)children;
+- (NSObject *)nodeWithName:(wxString *)name value:(wxString *)value source:(wxString *)source children:(NSArray *)children;
 @end
 
 @protocol WebCoreRenderTreeCopier <NSObject>
-- (NSObject *)nodeWithName:(NSString *)name position:(NSPoint)p rect:(NSRect)rect view:(NSView *)view children:(NSArray *)children;
+- (NSObject *)nodeWithName:(wxString *)name position:(NSPoint)p rect:(NSRect)rect view:(NSView *)view children:(NSArray *)children;
 @end
 
 @protocol WebCoreFileButton <NSObject>
-- (void)setFilename:(NSString *)filename;
+- (void)setFilename:(wxString *)filename;
 - (void)performClick;
-- (NSString *)filename;
+- (wxString *)filename;
 - (float)baseline;
 - (void)setVisualFrame:(NSRect)rect;
 - (NSRect)visualFrame;
@@ -647,7 +685,8 @@ typedef enum {
 @end
 
 @protocol WebCoreFileButtonDelegate <NSObject>
-- (void)filenameChanged:(NSString *)filename;
+- (void)filenameChanged:(wxString *)filename;
 - (void)focusChanged:(BOOL)nowHasFocus;
 - (void)clicked;
 @end
+#endif

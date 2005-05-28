@@ -33,12 +33,15 @@
 
 #import "WebCoreKeyboardAccess.h"
 
-#import <CoreFoundation/CoreFoundation.h>
+// turn on/off things that rely on bindings
+#define USE_BINDINGS 0
 
-#import <JavaScriptCore/jni_jsobject.h>
-#import <JavaScriptCore/npruntime.h>
-#import <JavaScriptCore/NP_jsobject.h>
-#import <JavaScriptCore/runtime.h>
+#if USE_BINDINGS
+#import "jni_jsobject.h"
+#import "npruntime.h"
+#import "NP_jsobject.h"
+#import "runtime.h"
+#endif 
 
 #import "KWQDict.h"
 #import "KWQClipboard.h"
@@ -65,30 +68,6 @@ namespace KJS {
     class ScheduledAction;
 }
 
-#ifdef __OBJC__
-
-// Avoid clashes with KJS::DOMElement in KHTML code.
-@class DOMElement;
-typedef DOMElement ObjCDOMElement;
-
-@class KWQPageState;
-@class NSArray;
-@class NSAttributedString;
-@class NSColor;
-@class NSDictionary;
-@class NSEvent;
-@class NSFileWrapper;
-@class NSFont;
-@class NSImage;
-@class NSMutableDictionary;
-@class NSResponder;
-@class NSString;
-@class NSView;
-@class WebCoreBridge;
-@class WebScriptObject;
-
-#else
-
 // Avoid clashes with KJS::DOMElement in KHTML code.
 class ObjCDOMElement;
 
@@ -106,11 +85,13 @@ class NSResponder;
 class NSString;
 class NSView;
 class WebCoreBridge;
+
+// classes from bindings
 class WebScriptObject;
+class NPObject;
 
 typedef int NSWritingDirection;
-
-#endif
+typedef int NSDragOperation;
 
 enum KWQSelectionDirection {
     KWQSelectingNext,
@@ -179,12 +160,12 @@ public:
 
     void updatePolicyBaseURL();
 
-    NSView *nextKeyView(DOM::NodeImpl *startingPoint, KWQSelectionDirection);
-    NSView *nextKeyViewInFrameHierarchy(DOM::NodeImpl *startingPoint, KWQSelectionDirection);
-    static NSView *nextKeyViewForWidget(QWidget *startingPoint, KWQSelectionDirection);
+    wxWindow *nextKeyView(DOM::NodeImpl *startingPoint, KWQSelectionDirection);
+    wxWindow *nextKeyViewInFrameHierarchy(DOM::NodeImpl *startingPoint, KWQSelectionDirection);
+    static wxWindow *nextKeyViewForWidget(QWidget *startingPoint, KWQSelectionDirection);
     static bool currentEventIsKeyboardOptionTab();
-    static bool handleKeyboardOptionTabInView(NSView *view);
-    
+    static bool handleKeyboardOptionTabInView(wxWindow *view);
+	
     virtual bool tabsToLinks() const;
     virtual bool tabsToAllControls() const;
     
@@ -231,12 +212,12 @@ public:
     int selectionEndOffset() const;
 
     QRect selectionRect() const;
-    NSRect visibleSelectionRect() const;
+    wxRect visibleSelectionRect() const;
     void centerSelectionInVisibleArea() const;
-    NSImage *selectionImage() const;
-    NSImage *snapshotDragImage(DOM::Node node, NSRect *imageRect, NSRect *elementRect) const;
+    wxImage *selectionImage() const;
+    wxImage *snapshotDragImage(DOM::Node node, wxRect *imageRect, wxRect *elementRect) const;
 
-    NSFont *fontForSelection(bool *hasMultipleFonts) const;
+    wxFont *fontForSelection(bool *hasMultipleFonts) const;
     NSDictionary *fontAttributesForSelectionStart() const;
     
     NSWritingDirection baseWritingDirectionForSelectionStart() const;
@@ -249,14 +230,17 @@ public:
 
     void addMetaData(const QString &key, const QString &value);
 
+// compilation fixes, also not sure how to handle these in wx
+#if 0
     void mouseDown(NSEvent *);
     void mouseDragged(NSEvent *);
     void mouseUp(NSEvent *);
     void mouseMoved(NSEvent *);
     bool keyEvent(NSEvent *);
     bool wheelEvent(NSEvent *);
-
+	
     void sendFakeEventsAfterWidgetTracking(NSEvent *initiatingEvent);
+#endif
 
     bool lastEventIsMouseUp() const;
     void setActivationEventNumber(int num) { _activationEventNumber = num; }
@@ -272,7 +256,7 @@ public:
     bool tryCopy();
     bool tryPaste();
     
-    bool sendContextMenuEvent(NSEvent *);
+    bool sendContextMenuEvent(wxEvent *);
 
     // Call this method before handling a new user action, like on a mouse down or key down.
     // Currently, all this does is clear the "don't submit form twice" data member.
@@ -291,11 +275,11 @@ public:
     void recordFormValue(const QString &name, const QString &value, DOM::HTMLFormElementImpl *element);
     DOM::HTMLFormElementImpl *currentForm() const;
 
-    NSString *searchForLabelsAboveCell(QRegExp *regExp, DOM::HTMLTableCellElementImpl *cell);
-    NSString *searchForLabelsBeforeElement(NSArray *labels, DOM::ElementImpl *element);
-    NSString *matchLabelsAgainstElement(NSArray *labels, DOM::ElementImpl *element);
+    wxString& searchForLabelsAboveCell(QRegExp *regExp, DOM::HTMLTableCellElementImpl *cell) const;
+    wxString& searchForLabelsBeforeElement(wxArrayString *labels, DOM::ElementImpl *element) const;
+    wxString& matchLabelsAgainstElement(wxArrayString *labels, DOM::ElementImpl *element) const;
 
-    bool findString(NSString *str, bool forward, bool caseFlag, bool wrapFlag);
+    bool findString(const wxString& str, bool forward, bool caseFlag, bool wrapFlag);
 
     void setSettings(KHTMLSettings *);
 
@@ -316,7 +300,7 @@ public:
     // Convenience, to avoid repeating the code to dig down to get this.
     QChar backslashAsCurrencySymbol() const;
 
-    NSColor *bodyBackgroundColor() const;
+    wxColour& bodyBackgroundColor() const;
     
     WebCoreKeyboardUIMode keyboardUIMode() const;
 
@@ -325,11 +309,13 @@ public:
     void didTellBridgeAboutLoad(const QString &urlString);
     bool haveToldBridgeAboutLoad(const QString &urlString);
 
+#if USE_BINDINGS
     KJS::Bindings::Instance *getEmbedInstanceForView(NSView *aView);
     KJS::Bindings::Instance *getObjectInstanceForView(NSView *aView);
     KJS::Bindings::Instance *getAppletInstanceForView(NSView *aView);
     void addPluginRootObject(const KJS::Bindings::RootObject *root);
     void cleanupPluginRootObjects();
+#endif
     
     void registerCommandForUndo(const khtml::EditCommandPtr &);
     void registerCommandForRedo(const khtml::EditCommandPtr &);
@@ -346,11 +332,13 @@ public:
     virtual bool shouldBeginEditing(const DOM::Range &) const;
     virtual bool shouldEndEditing(const DOM::Range &) const;
 
+#if USE_BINDINGS
     KJS::Bindings::RootObject *executionContextForDOM();
     KJS::Bindings::RootObject *bindingRootObject();
-    
+
     WebScriptObject *windowScriptObject();
     NPObject *KWQKHTMLPart::windowScriptNPObject();
+#endif
     
     void partClearedInBegin();
     
@@ -379,9 +367,13 @@ public:
 
     void didFirstLayout();
     
+	// BTW, Dashboard is a Tiger feature
+	// not sure if we can/should support it via wxMac
+#if 0
     NSMutableDictionary *dashboardRegionsDictionary();
     void dashboardRegionsChanged();
-    
+#endif
+	
     virtual bool isCharacterSmartReplaceExempt(const QChar &, bool);
     
     DOM::NodeImpl *mousePressNode();
@@ -398,20 +390,20 @@ private:
     
     void setPolicyBaseURL(const DOM::DOMString &);
     
-    NSView *mouseDownViewIfStillGood();
+    wxWindow *mouseDownViewIfStillGood();
 
     QString generateFrameName();
 
-    NSView *nextKeyViewInFrame(DOM::NodeImpl *startingPoint, KWQSelectionDirection);
+    wxWindow *nextKeyViewInFrame(DOM::NodeImpl *startingPoint, KWQSelectionDirection);
     static DOM::NodeImpl *nodeForWidget(const QWidget *);
     static KWQKHTMLPart *partForNode(DOM::NodeImpl *);
-    static NSView *documentViewForNode(DOM::NodeImpl *);
+    static wxWindow *documentViewForNode(DOM::NodeImpl *);
     
     bool dragHysteresisExceeded(float dragLocationX, float dragLocationY) const;
     bool dispatchCPPEvent(int eventId, KWQClipboard::AccessPolicy policy);
     bool dispatchDragSrcEvent(int eventId, const QPoint &loc) const;
 
-    NSImage *imageFromRect(NSRect rect) const;
+    wxImage *imageFromRect(const wxRect& rect) const;
 
     void freeClipboard();
 
@@ -427,7 +419,7 @@ private:
     KWQSignal _completed;
     KWQSignal _completedWithBool;
     
-    NSView *_mouseDownView;
+    //wxWidget *_mouseDownView;
     bool _mouseDownWasInSubframe;
     bool _sendingEventToSubview;
     bool _mouseDownMayStartDrag;
@@ -439,12 +431,12 @@ private:
     float _mouseDownTimestamp;
     int _activationEventNumber;
     
-    static NSEvent *_currentEvent;
+    //static NSEvent *_currentEvent;
 
     KURL _submittedFormURL;
 
-    NSMutableDictionary *_formValuesAboutToBeSubmitted;
-    ObjCDOMElement *_formAboutToBeSubmitted;
+    //NSMutableDictionary *_formValuesAboutToBeSubmitted;
+    //ObjCDOMElement *_formAboutToBeSubmitted;
 
     static QPtrList<KWQKHTMLPart> &mutableInstances();
 
@@ -457,12 +449,15 @@ private:
 
     friend class KHTMLPart;
 
+#if USE_BINDINGS
     KJS::Bindings::RootObject *_bindingRoot;  // The root object used for objects
                                             // bound outside the context of a plugin.
     QPtrList<KJS::Bindings::RootObject> rootObjects;
+
     WebScriptObject *_windowScriptObject;
     NPObject *_windowScriptNPObject;
-    
+#endif 
+
     DOM::Node _dragSrc;     // element that may be a drag source, for the current mouse gesture
     bool _dragSrcIsLink;
     bool _dragSrcIsImage;
