@@ -39,6 +39,8 @@
 #include "nodes.h"
 #include "context.h"
 
+#include <unistd.h>
+
 using namespace KJS;
 
 // ------------------------------ Context --------------------------------------
