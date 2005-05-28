@@ -23,7 +23,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <Cocoa/Cocoa.h>
+// NOTE: This class is an internal class (not an interface) and thus
+// it is subject to change. This should not be considered the final
+// API.
+
+#include <wx/defs.h>
 
 #ifndef ROUND_TO_INT
 #define ROUND_TO_INT(x) (unsigned int)((x)+.5)
@@ -31,12 +35,12 @@
 
 struct WebCoreTextStyle
 {
-    NSColor *textColor;
-    NSColor *backgroundColor;
+    wxColour *textColor;
+    wxColour *backgroundColor;
     int letterSpacing;
     int wordSpacing;
     int padding;
-    NSString **families;
+    wxString **families;
     unsigned smallCaps : 1;
     unsigned rtl : 1;
     unsigned visuallyOrdered : 1;
@@ -55,7 +59,7 @@ struct WebCoreTextRun
 
 struct WebCoreTextGeometry
 {
-    NSPoint point;
+    wxPoint point;
     float selectionY;
     float selectionHeight;
     bool useFontMetricsForSelectionYAndHeight : 1;
@@ -77,30 +81,27 @@ extern void WebCoreInitializeEmptyTextGeometry(WebCoreTextGeometry *geometry);
 }
 #endif
 
-@protocol WebCoreTextRenderer <NSObject>
+class WebCoreTextRenderer: wxObject {
+public:
 
-// WebCoreTextRenderer must guarantee that no calls to any of these
-// methods will raise any ObjC exceptions. It's too expensive to do
-// blocking for all of them at the WebCore level, and some
-// implementations may be able to guarantee no exceptions without the
-// use of NS_DURING.
-
-// vertical metrics
-- (int)ascent;
-- (int)descent;
-- (int)lineSpacing;
-- (float)xHeight;
+	WebCoreTextRenderer(); 
+	~WebCoreTextRenderer();
+	
+	int getAscent();
+	int getDescent();
+	int getLineSpacing();
+	float getXHeight();
 
 // horizontal metrics
-- (float)floatWidthForRun:(const WebCoreTextRun *)run style:(const WebCoreTextStyle *)style widths:(float *)buffer;
+	float floatWidthForRun(const WebCoreTextRun *run, const WebCoreTextStyle *style, float *buffer);
 
 // drawing
-- (void)drawRun:(const WebCoreTextRun *)run style:(const WebCoreTextStyle *)style geometry:(const WebCoreTextGeometry *)geometry;
-- (void)drawHighlightForRun:(const WebCoreTextRun *)run style:(const WebCoreTextStyle *)style geometry:(const WebCoreTextGeometry *)geometry;
-- (void)drawLineForCharacters:(NSPoint)point yOffset:(float)yOffset width: (int)width color:(NSColor *)color thickness:(float)thickness;
-- (void)drawLineForMisspelling:(NSPoint)point withWidth:(int)width;
-- (int)misspellingLineThickness;
+	void drawRun(const WebCoreTextRun *run, const WebCoreTextStyle *style, const WebCoreTextGeometry *geometry);
+	void drawHighlightForRun(const WebCoreTextRun *run, const WebCoreTextStyle *style, const WebCoreTextGeometry *geometry);
+	void drawLineForCharacters(wxPoint point, float yOffset, int width, wxColour *color, float thickness);
+	void drawLineForMisspelling(wxPoint point, (int)width);
+	int getMisspellingLineThickness();
 
 // selection point check
-- (int)pointToOffset:(const WebCoreTextRun *)run style:(const WebCoreTextStyle *)style position:(int)x reversed:(BOOL)reversed includePartialGlyphs:(BOOL)includePartialGlyphs;
-@end
+	int pointToOffset(const WebCoreTextRun *run, const WebCoreTextStyle *style, int x, bool reversed, bool includePartialGlyphs);
+}

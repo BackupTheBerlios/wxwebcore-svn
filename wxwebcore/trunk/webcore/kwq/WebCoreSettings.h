@@ -1,3 +1,5 @@
+
+
 /*
  * Copyright (C) 2003 Apple Computer, Inc.  All rights reserved.
  *
@@ -22,93 +24,95 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
+ 
+ #include <wx/defs.h>
 
-#import <Foundation/Foundation.h>
-
-#ifdef __cplusplus
 class KHTMLSettings;
-#else
-@class KHTMLSettings;
-#endif
 
-@interface WebCoreSettings : NSObject
+class WebCoreSettings: wxObject
 {
-    NSString *standardFontFamily;
-    NSString *fixedFontFamily;
-    NSString *serifFontFamily;
-    NSString *sansSerifFontFamily;
-    NSString *cursiveFontFamily;
-    NSString *fantasyFontFamily;
-    float minimumFontSize;
-    float minimumLogicalFontSize;
-    float defaultFontSize;
-    float defaultFixedFontSize;
-    BOOL JavaEnabled;
-    BOOL pluginsEnabled;
-    BOOL JavaScriptEnabled;
-    BOOL JavaScriptCanOpenWindowsAutomatically;
-    BOOL willLoadImagesAutomatically;
-    BOOL shouldPrintBackgrounds;
-    NSString *userStyleSheetLocation;
-    NSString *defaultTextEncoding;
+public:
+
+	WebCoreSettings();
+	~WebCoreSettings();
+	
+    wxString GetStandardFontFamily() const { return m_stdFontFamily; }
+	void SetStandardFontFamily(const wxString& s);
+	
+	wxString GetFixedFontFamily() const { return m_fixedFontFamily; }
+	void SetFixedFontFamily(const wxString& s);
+
+	wxString GetSerifFontFamily() const { return m_serifFontFamily; }
+	void SetSerifFontFamily(const wxString& s);
+	
+	wxString GetSansSerifFontFamily() const { return m_sansSerifFontFamily; }
+	void SetSansSerifFontFamily(const wxString& s);
+	
+	wxString GetCursiveFontFamily() const { return m_cursiveFontFamily; }
+	void SetCursiveFontFamily(const wxString& s);
+	
+	wxString GetFantasyFontFamily() const { return m_fantasyFontFamily; }
+	void SetFantasyFontFamily(const wxString& s);
+	
+	float GetMinimumFontSize() { return m_minimumFontSize; }
+	void SetMinimumFontSize(const float size);
+	
+	float GetMinimumLogicalFontSize() { return m_minimumLogicalFontSize; }
+	void SetMinimumLogicalFontSize(const float size);
+	
+	float GetDefaultFontSize() { return m_defaultFontSize; }
+	void SetDefaultFontSize(const float size);
+	
+	float GetDefaultFixedFontSize() { return m_defaultFixedFontSize; }
+	void SetDefaultFixedFontSize(const float size);
+	
+	wxString GetUserStyleSheetLocation() const { return m_userStyleSheetLocation; }
+	void SetUserStyleSheetLocation(const wxString& location);
+	
+	wxString GetDefaultTextEncoding() const { return m_defaultTextEncoding; }
+	void SetDefaultTextEncoding(const wxString& location);
+	
+	bool GetJavaEnabled() const { return m_javaEnabled; }
+	void SetJavaEnabled(bool enabled);
+	
+	bool GetPluginsEnabled() const { return m_pluginsEnabled; }
+	void SetPluginsEnabled(bool enabled);
+	
+	bool GetJavaScriptEnabled() const { return m_javaScriptEnabled; }
+	void SetJavaScriptEnabled(bool enabled);
+	
+	bool GetJavaScriptCanOpenWindowsAutomatically() const { return m_javaScriptCanOpenWindowsAutomatically; }
+	void SetJavaScriptCanOpenWindowsAutomatically(bool enabled);
+	
+	bool GetLoadWindowsAutomatically() const { return m_willLoadImagesAutomatically; }
+	void SetLoadWindowsAutomatically(bool enabled);
+	
+	bool GetShouldPrintBackgrounds() const { return m_shouldPrintBackgrounds; }
+	void SetShouldPrintBackgrounds(bool enabled);
+	
+	KHTMLSettings* GetKHTMLSettings() const { return m_settings; }
+	
+private:
+	wxString m_stdFontFamily;
+	wxString m_fixedFontFamily;
+	wxString m_serifFontFamily;
+	wxString m_sansSerifFontFamily;
+	wxString m_cursiveFontFamily;
+	wxString m_fantasyFontFamily;
+	
+    float m_minimumFontSize;
+    float m_minimumLogicalFontSize;
+    float m_defaultFontSize;
+    float m_defaultFixedFontSize;
+    bool m_javaEnabled;
+    bool m_pluginsEnabled;
+    bool m_javaScriptEnabled;
+    bool m_javaScriptCanOpenWindowsAutomatically;
+    bool m_willLoadImagesAutomatically;
+    bool m_shouldPrintBackgrounds;
+
+    wxString m_userStyleSheetLocation;
+    wxString m_defaultTextEncoding;
     
-    KHTMLSettings *settings;
+    KHTMLSettings* m_settings;
 }
-
-- (void)setStandardFontFamily:(NSString *)family;
-- (NSString *)standardFontFamily;
-
-- (void)setFixedFontFamily:(NSString *)family;
-- (NSString *)fixedFontFamily;
-
-- (void)setSerifFontFamily:(NSString *)family;
-- (NSString *)serifFontFamily;
-
-- (void)setSansSerifFontFamily:(NSString *)family;
-- (NSString *)sansSerifFontFamily;
-
-- (void)setCursiveFontFamily:(NSString *)family;
-- (NSString *)cursiveFontFamily;
-
-- (void)setFantasyFontFamily:(NSString *)family;
-- (NSString *)fantasyFontFamily;
-
-- (void)setMinimumFontSize:(float)size;
-- (float)minimumFontSize;
-
-- (void)setMinimumLogicalFontSize:(float)size;
-- (float)minimumLogicalFontSize;
-
-- (void)setDefaultFontSize:(float)size;
-- (float)defaultFontSize;
-
-- (void)setDefaultFixedFontSize:(float)size;
-- (float)defaultFixedFontSize;
-
-- (void)setJavaEnabled:(BOOL)enabled;
-- (BOOL)JavaEnabled;
-
-- (void)setPluginsEnabled:(BOOL)enabled;
-- (BOOL)pluginsEnabled;
-
-- (void)setJavaScriptEnabled:(BOOL)enabled;
-- (BOOL)JavaScriptEnabled;
-
-- (void)setJavaScriptCanOpenWindowsAutomatically:(BOOL)enabled;
-- (BOOL)JavaScriptCanOpenWindowsAutomatically;
-
-- (void)setWillLoadImagesAutomatically:(BOOL)load;
-- (BOOL)willLoadImagesAutomatically;
-
-- (void)setUserStyleSheetLocation:(NSString *)location;
-- (NSString *)userStyleSheetLocation;
-
-- (void)setShouldPrintBackgrounds:(BOOL)enabled;
-- (BOOL)shouldPrintBackgrounds;
-
-- (void)setDefaultTextEncoding:(NSString *)encoding;
-- (NSString *)defaultTextEncoding;
-
-- (KHTMLSettings *)settings;
-
-@end

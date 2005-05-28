@@ -23,23 +23,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <Cocoa/Cocoa.h>
+// NOTE: This class is an internal class (not an interface) and thus
+// it is subject to change. This should not be considered the final
+// API.
 
-@protocol WebCoreImageRenderer <NSObject, NSCopying>
+#include <wx/defs.h>
+#include <wx/bitmap.h>
+#include <wx/dc.h>
 
-- (BOOL)incrementalLoadWithBytes:(const void *)bytes length:(unsigned)length complete:(BOOL)isComplete callback:(id)c;
+class WebCoreImageRenderer: wxObject{
 
-- (NSSize)size;
-- (void)resize:(NSSize)s;
-- (void)drawImageInRect:(NSRect)ir fromRect:(NSRect)fr;
-- (void)drawImageInRect:(NSRect)ir fromRect:(NSRect)fr compositeOperator:(NSCompositingOperation)compsiteOperator context:(CGContextRef)context;
-- (void)stopAnimation;
-- (void)tileInRect:(NSRect)r fromPoint:(NSPoint)p context:(CGContextRef)context;
-- (BOOL)isNull;
-- (id <WebCoreImageRenderer>)retainOrCopyIfNeeded;
-- (void)increaseUseCount;
-- (void)decreaseUseCount;
-- (void)flushRasterCache;
-- (CGImageRef)imageRef;
-- (void)resetAnimation;
-@end
+public:
+
+	WebCoreImageRenderer();
+	~WebCoreImageRenderer();
+
+	bool incrementalLoadWithBytes(const void* bytes, unsigned length, bool isComplete, void* callback);
+	wxSize getSize();
+	void resize(wxSize &s);
+	void drawImageInRect(wxRect &ir, wxRect &fromRect);
+	void drawImageInRect(wxRect &ir, wxRect &fromRect, int compsiteOperator, wxDC* context);
+	// NOTE: in wx impl, compositeOperator is probably closest to a logical function
+	// see here for values Cocoa supports: 
+	// http://developer.apple.com/documentation/Cocoa/Reference/ApplicationKit/ObjC_classic/Classes/NSImage.html
+	// and here for the ones they expose via JavaScript (the ones we need to worry about!)
+	// http://developer.apple.com/documentation/AppleApplications/Reference/SafariJSRef/Classes/Canvas.html#//apple_ref/doc/uid/30001240-54491-BAJEHAHB
+	// in any case, whatever the implementation, we'll likely use an enum to determine which to use
+	// hence an int param.
+	
+	void stopAnimation();
+	void tileInRect(wxRect &r, wxPoint &p, wxDC *context);
+	bool isNull();
+	void flushRasterCache();
+	wxBitmap* getImage();
+	void resetAnimation();
+}

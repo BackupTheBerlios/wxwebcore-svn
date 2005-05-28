@@ -25,306 +25,160 @@
 
 #import "WebCoreSettings.h"
 
-#import "KWQFoundationExtras.h"
 #import "KWQKHTMLPart.h"
 #import "KWQKHTMLSettings.h"
 #import "WebCoreBridge.h"
 
-@implementation WebCoreSettings
+#include <math.h>
 
-- (void)dealloc
-{
-    [standardFontFamily release];
-    [fixedFontFamily release];
-    [serifFontFamily release];
-    [sansSerifFontFamily release];
-    [cursiveFontFamily release];
-    [fantasyFontFamily release];
-    [defaultTextEncoding release];
-
-    delete settings;
-    
-    [super dealloc];
+WebCoreSettings::WebCoreSettings(){
+	m_settings = new KHTMLSettings();
 }
 
-- (void)finalize
-{
-    delete settings;
-    [super finalize];
+WebCoreSettings::~WebCoreSettings(){
+    delete m_settings;
 }
 
-- init
+void WebCoreSettings::SetStandardFontFamily(const wxString& s)
 {
-    settings = new KHTMLSettings();
-    return [super init];
+    if (m_stdFontFamily == s)
+		return;
+	
+	m_stdFontFamily = s;
+    settings->setStdFontName(s);
 }
 
-- (void)_updateAllViews
+void WebCoreSettings::SetFixedFontFamily(const wxString& s)
 {
-    for (QPtrListIterator<KWQKHTMLPart> it(KWQKHTMLPart::instances()); it.current(); ++it) {
-        KWQKHTMLPart *part = it.current();
-        if (part->settings() == settings) {
-            [part->bridge() setNeedsReapplyStyles];
-        }
-    }
+    if (m_fixedFontFamily == s)
+		return;
+		
+	m_fixedFontFamily = s;
+    settings->setFixedFontName(s);
 }
 
-- (void)setStandardFontFamily:(NSString *)s
+void WebCoreSettings::SetSerifFontFamily(const wxString& s)
 {
-    if ([standardFontFamily isEqualToString:s]) {
+    if (m_serifFontFamily == s)
+		return;
+		
+    m_serifFontFamily = s;
+    settings->setSerifFontName(s);
+}
+
+void WebCoreSettings::SetSansSerifFontFamily:(const wxString& s)
+{
+    if (m_sansSerifFontFamily == s)
+		reutrn;
+		
+	m_sansSerifFontFamily = s;
+    settings->setSansSerifFontName(s);
+}
+
+void WebCoreSettings::SetCursiveFontFamily(const wxString& s)
+{
+    if (m_cursiveFontFamily == s)
+		return; 
+		
+	m_cursiveFontFamily = s;
+    settings->setCursiveFontName(s);
+}
+
+void WebCoreSettings::SetFantasyFontFamily(const wxString& s)
+{
+    if (m_fantasyFontFamily == s)
+		return;
+		
+	m_fantasyFontFamily = s;
+    settings->setFantasyFontName(s);
+}
+
+void WebCoreSettings::SetMinimumFontSize(float size)
+{
+    if (m_minimumFontSize == size) {
         return;
     }
-    [standardFontFamily release];
-    standardFontFamily = [s copy];
-    settings->setStdFontName(QString::fromNSString(s));
-    [self _updateAllViews];
-}
-
-- (NSString *)standardFontFamily
-{
-    return standardFontFamily;
-}
-
-- (void)setFixedFontFamily:(NSString *)s
-{
-    if ([fixedFontFamily isEqualToString:s]) {
-        return;
-    }
-    [fixedFontFamily release];
-    fixedFontFamily = [s copy];
-    settings->setFixedFontName(QString::fromNSString(s));
-    [self _updateAllViews];
-}
-
-- (NSString *)fixedFontFamily
-{
-    return fixedFontFamily;
-}
-
-- (void)setSerifFontFamily:(NSString *)s
-{
-    if ([serifFontFamily isEqualToString:s]) {
-        return;
-    }
-    [serifFontFamily release];
-    serifFontFamily = [s copy];
-    settings->setSerifFontName(QString::fromNSString(s));
-    [self _updateAllViews];
-}
-
-- (NSString *)serifFontFamily
-{
-    return serifFontFamily;
-}
-
-- (void)setSansSerifFontFamily:(NSString *)s
-{
-    if ([sansSerifFontFamily isEqualToString:s]) {
-        return;
-    }
-    [sansSerifFontFamily release];
-    sansSerifFontFamily = [s copy];
-    settings->setSansSerifFontName(QString::fromNSString(s));
-    [self _updateAllViews];
-}
-
-- (NSString *)sansSerifFontFamily
-{
-    return sansSerifFontFamily;
-}
-
-- (void)setCursiveFontFamily:(NSString *)s
-{
-    if ([cursiveFontFamily isEqualToString:s]) {
-        return;
-    }
-    [cursiveFontFamily release];
-    cursiveFontFamily = [s copy];
-    settings->setCursiveFontName(QString::fromNSString(s));
-    [self _updateAllViews];
-}
-
-- (NSString *)cursiveFontFamily
-{
-    return cursiveFontFamily;
-}
-
-- (void)setFantasyFontFamily:(NSString *)s
-{
-    if ([fantasyFontFamily isEqualToString:s]) {
-        return;
-    }
-    [fantasyFontFamily release];
-    fantasyFontFamily = [s copy];
-    settings->setFantasyFontName(QString::fromNSString(s));
-    [self _updateAllViews];
-}
-
-- (NSString *)fantasyFontFamily
-{
-    return fantasyFontFamily;
-}
-
-- (void)setMinimumFontSize:(float)size
-{
-    if (minimumFontSize == size) {
-        return;
-    }
-    minimumFontSize = size;
+    m_minimumFontSize = size;
     settings->setMinFontSize((int)rint(size));
-    [self _updateAllViews];
 }
 
-- (float)minimumFontSize
+void WebCoreSettings::SetMinimumLogicalFontSize(float size)
 {
-    return minimumFontSize;
-}
-
-- (void)setMinimumLogicalFontSize:(float)size
-{
-    if (minimumLogicalFontSize == size) {
+    if (m_minimumLogicalFontSize == size) {
         return;
     }
-    minimumLogicalFontSize = size;
+    m_minimumLogicalFontSize = size;
     settings->setMinLogicalFontSize((int)rint(size));
-    [self _updateAllViews];
 }
 
-- (float)minimumLogicalFontSize
+void WebCoreSettings::SetDefaultFontSize(float size)
 {
-    return minimumLogicalFontSize;
-}
-
-- (void)setDefaultFontSize:(float)size
-{
-    if (defaultFontSize == size) {
+    if (m_defaultFontSize == size) {
         return;
     }
-    defaultFontSize = size;
+	m_defaultFontSize = size;
     settings->setMediumFontSize((int)rint(size));
-    [self _updateAllViews];
 }
 
-- (float)defaultFontSize
+void WebCoreSettings::SetDefaultFixedFontSize:(float)size
 {
-    return defaultFontSize;
-}
-
-- (void)setDefaultFixedFontSize:(float)size
-{
-    if (defaultFixedFontSize == size) {
+    if (m_defaultFixedFontSize == size) {
         return;
     }
-    defaultFixedFontSize = size;
+    m_defaultFixedFontSize = size;
     settings->setMediumFixedFontSize((int)rint(size));
-    [self _updateAllViews];
 }
 
-- (float)defaultFixedFontSize
+void WebCoreSettings::SetJavaEnabled(bool enabled)
 {
-    return defaultFixedFontSize;
-}
-
-- (void)setJavaEnabled:(BOOL)enabled
-{
-    JavaEnabled = enabled;
+    m_javaEnabled = enabled;
     settings->setIsJavaEnabled(enabled);
 }
 
-- (BOOL)JavaEnabled
+void WebCoreSettings::SetPluginsEnabled(bool enabled)
 {
-    return JavaEnabled;
-}
-
-- (void)setPluginsEnabled:(BOOL)enabled
-{
-    pluginsEnabled = enabled;
+    m_pluginsEnabled = enabled;
     settings->setArePluginsEnabled(enabled);
 }
 
-- (BOOL)pluginsEnabled
+void WebCoreSettings::SetJavaScriptEnabled(bool enabled)
 {
-    return pluginsEnabled;
-}
-
-- (void)setJavaScriptEnabled:(BOOL)enabled
-{
-    JavaScriptEnabled = enabled;
+    m_javaScriptEnabled = enabled;
     settings->setIsJavaScriptEnabled(enabled);
 }
 
-- (BOOL)JavaScriptEnabled
+void WebCoreSettings::SetJavaScriptCanOpenWindowsAutomatically(bool enabled)
 {
-    return JavaScriptEnabled;
-}
-
-- (void)setJavaScriptCanOpenWindowsAutomatically:(BOOL)enabled
-{
-    JavaScriptCanOpenWindowsAutomatically = enabled;
+    m_javaScriptCanOpenWindowsAutomatically = enabled;
     settings->setJavaScriptCanOpenWindowsAutomatically(enabled);
 }
 
-- (BOOL)JavaScriptCanOpenWindowsAutomatically
+void WebCoreSettings::SetWillLoadImagesAutomatically(bool load)
 {
-    return JavaScriptCanOpenWindowsAutomatically;
-}
-
-- (void)setWillLoadImagesAutomatically:(BOOL)load
-{
-    willLoadImagesAutomatically = load;
+    m_willLoadImagesAutomatically = load;
     settings->setAutoLoadImages(load);
 }
 
-- (BOOL)willLoadImagesAutomatically
+void WebCoreSettings::SetUserStyleSheetLocation(const wxString& s)
 {
-    return willLoadImagesAutomatically;
-}
-
-- (void)setUserStyleSheetLocation:(NSString *)s
-{
-    if ([userStyleSheetLocation isEqualToString:s]) {
+    if (m_userStyleSheetLocation == s) {
         return;
     }
-    [userStyleSheetLocation release];
-    userStyleSheetLocation = [s copy];
-    settings->setUserStyleSheet(QString::fromNSString(s));
-    [self _updateAllViews];
+	m_userStyleSheetLocation == s;
+    settings->setUserStyleSheet(s);
 }
 
-- (NSString *)userStyleSheetLocation
+void WebCoreSettings::SetShouldPrintBackgrounds(bool enabled)
 {
-    return userStyleSheetLocation;
-}
-
-- (void)setShouldPrintBackgrounds:(BOOL)enabled
-{
-    shouldPrintBackgrounds = enabled;
+    m_shouldPrintBackgrounds = enabled;
     settings->setShouldPrintBackgrounds(enabled);
 }
 
-- (BOOL)shouldPrintBackgrounds
+void WebCoreSettings::SetDefaultTextEncoding(const wxString& s)
 {
-    return shouldPrintBackgrounds;
-}
-
-- (void)setDefaultTextEncoding:(NSString *)s
-{
-    if ([defaultTextEncoding isEqualToString:s]) {
+    if (m_defaultTextEncoding == s) {
         return;
     }
-    [defaultTextEncoding release];
-    defaultTextEncoding = [s copy];
-    settings->setEncoding(QString::fromNSString(s));
+	m_defaultTextEncoding = s;
+    settings->setEncoding(s);
 }
-
-- (NSString *)defaultTextEncoding
-{
-    return defaultTextEncoding;
-}
-
-- (KHTMLSettings *)settings
-{
-    return settings;
-}
-
-@end
