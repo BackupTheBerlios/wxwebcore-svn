@@ -1,0 +1,17 @@
+
+ Developers:
+-------------
+
+Kevin Ollivier <kevin-masako@theolliviers.com>
+Vaclav Slavik <vslavik@fastmail.fm>
+
+
+ Reused code:
+--------------
+
+Most of the code comes from KHTML [1] and WebCore (Apple's port of KHTML) [2].
+This code has Apple's or KDE's copyright information in files headers.
+
+Following parts of gtk-webcore were used as well:
+  webcore/kwq/KWQPtrDictImpl.h
+  webcore/kwq/KWQPtrDictImpl.cpp
