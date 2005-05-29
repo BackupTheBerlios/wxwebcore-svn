@@ -23,15 +23,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#define HAVE_ICU_LIBRARY 1
-
-#if HAVE_ICU_LIBRARY
 #include <unicode/utf.h>
-#endif
-
-#if !HAVE_ICU_LIBRARY
-typedef UInt32 UChar32;
-#endif
 
 typedef UChar32 UniChar;
 
