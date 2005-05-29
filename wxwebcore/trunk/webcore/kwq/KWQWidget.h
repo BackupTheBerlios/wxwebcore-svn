@@ -37,8 +37,8 @@
 #include "KWQEvent.h"
 #include "KWQStyle.h"
 
-#include "wx/setup.h"
-#include "wx/window.h"
+#include <wx/defs.h>
+#include <wx/window.h>
 
 class KWQWidgetPrivate;
 
@@ -144,7 +144,7 @@ public:
 	
 	//These functions are Cocoa additions and probably 
 	//will be handled elsewhere in the wxWidgets port.
-	/*
+#if 0
     void lockDrawingFocus();
     void unlockDrawingFocus();
     void enableFlushDrawing();
@@ -162,7 +162,7 @@ public:
     void removeFromSuperview();
 
     static void setDeferFirstResponderChanges(bool);
-	*/
+#endif 
 
 private:
     KWQWidgetPrivate *data;
