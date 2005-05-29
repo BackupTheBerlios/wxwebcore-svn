@@ -56,9 +56,6 @@
 
 #include <time.h>
 
-#include <CoreFoundation/CoreFoundation.h>
-#include <CoreServices/CoreServices.h>
-
 #define KHTML_NO_XBL 1
 
 #if MAC_OS_X_VERSION_MAX_ALLOWED <= MAC_OS_X_VERSION_10_3
@@ -72,7 +69,5 @@
 #define KHTML_XSLT 1
 
 #ifdef __OBJC__
-
-#import <Cocoa/Cocoa.h>
 
 #endif
