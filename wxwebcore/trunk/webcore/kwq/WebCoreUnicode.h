@@ -24,35 +24,31 @@
  */
 
 #include <unicode/utf.h>
+#include <unicode/uchar.h>
 
 typedef UChar32 UniChar;
 
     typedef enum
     {
-        DirectionL = 0, 	// Left Letter 
-        DirectionR,	// Right Letter
-        DirectionEN,	// European Number
-        DirectionES,	// European Separator
-        DirectionET,	// European Terminator (post/prefix e.g. $ and %)
-        DirectionAN,	// Arabic Number
-        DirectionCS,	// Common Separator 
-        DirectionB, 	// Paragraph Separator (aka as PS)
-        DirectionS, 	// Segment Separator (TAB)
-        DirectionWS, 	// White space
-        DirectionON,	// Other Neutral
-
-	// types for explicit controls
-        DirectionLRE, 
-        DirectionLRO, 
-
-        DirectionAL, 	// Arabic Letter (Right-to-left)
-
-        DirectionRLE, 
-        DirectionRLO, 
-        DirectionPDF, 
-
-        DirectionNSM, 	// Non-spacing Mark
-        DirectionBN	// Boundary neutral (type of RLE etc after explicit levels)
+        DirectionL   = U_LEFT_TO_RIGHT,
+        DirectionR   = U_RIGHT_TO_LEFT,
+        DirectionEN  = U_EUROPEAN_NUMBER,
+        DirectionES  = U_EUROPEAN_NUMBER_SEPARATOR,
+        DirectionET  = U_EUROPEAN_NUMBER_TERMINATOR,
+        DirectionAN  = U_ARABIC_NUMBER,
+        DirectionCS  = U_COMMON_NUMBER_SEPARATOR,
+        DirectionB   = U_BLOCK_SEPARATOR,
+        DirectionS   = U_SEGMENT_SEPARATOR,
+        DirectionWS  = U_WHITE_SPACE_NEUTRAL,
+        DirectionON  = U_OTHER_NEUTRAL,
+        DirectionLRE = U_LEFT_TO_RIGHT_EMBEDDING,
+        DirectionLRO = U_LEFT_TO_RIGHT_OVERRIDE,
+        DirectionAL  = U_RIGHT_TO_LEFT_ARABIC,
+        DirectionRLE = U_RIGHT_TO_LEFT_EMBEDDING,
+        DirectionRLO = U_RIGHT_TO_LEFT_OVERRIDE,
+        DirectionPDF = U_POP_DIRECTIONAL_FORMAT,
+        DirectionNSM = U_DIR_NON_SPACING_MARK,
+        DirectionBN  = U_BOUNDARY_NEUTRAL
     } WebCoreUnicodeDirection;
 
 

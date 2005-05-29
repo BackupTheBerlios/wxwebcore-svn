@@ -22,7 +22,6 @@
  */
 
 #include "WebCoreUnicode.h"
-#include <unicode/uchar.h>
 #include <wx/debug.h>
 
 int WebCoreUnicodeDigitValueFunction(UChar32 c)
@@ -33,52 +32,8 @@ int WebCoreUnicodeDigitValueFunction(UChar32 c)
 WebCoreUnicodeDirection WebCoreUnicodeDirectionFunction(UChar32 c)
 {
     // NB: UCharDirection and WebCoreUnicodeDirection values are identical,
-    //     but doing a case is less error-prone
-    switch ( u_charDirection(c) )
-    {
-        case U_LEFT_TO_RIGHT:
-            return DirectionL;
-        case U_RIGHT_TO_LEFT:
-            return DirectionR;
-        case U_EUROPEAN_NUMBER:
-            return DirectionEN;
-        case U_EUROPEAN_NUMBER_SEPARATOR:
-            return DirectionES;
-        case U_EUROPEAN_NUMBER_TERMINATOR:
-            return DirectionET;
-        case U_ARABIC_NUMBER:
-            return DirectionAN;
-        case U_COMMON_NUMBER_SEPARATOR:
-            return DirectionCS;
-        case U_BLOCK_SEPARATOR:
-            return DirectionB;
-        case U_SEGMENT_SEPARATOR:
-            return DirectionS;
-        case U_WHITE_SPACE_NEUTRAL:
-            return DirectionWS;
-        case U_OTHER_NEUTRAL:
-            return DirectionON;
-        case U_LEFT_TO_RIGHT_EMBEDDING:
-            return DirectionLRE;
-        case U_LEFT_TO_RIGHT_OVERRIDE:
-            return DirectionLRO;
-        case U_RIGHT_TO_LEFT_ARABIC:
-            return DirectionAL;
-        case U_RIGHT_TO_LEFT_EMBEDDING:
-            return DirectionRLE;
-        case U_RIGHT_TO_LEFT_OVERRIDE:
-            return DirectionRLO;
-        case U_POP_DIRECTIONAL_FORMAT:
-            return DirectionPDF;
-        case U_DIR_NON_SPACING_MARK:
-            return DirectionNSM;
-        case U_BOUNDARY_NEUTRAL:
-            return DirectionBN;
-        case U_CHAR_DIRECTION_COUNT:
-            wxFAIL_MSG(_T("invalid character direction"));
-    };
-
-    return DirectionL /*arbitrary*/;
+    //     by definition in WebCoreUnicode.h
+    return WebCoreUnicodeDirection(u_charDirection(c));
 }
 
 bool WebCoreUnicodeMirroredFunction(UChar32 c)
