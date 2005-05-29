@@ -60,6 +60,10 @@ public:
     QCString &operator+=(const char *s) { return append(s); }
     QCString &operator+=(char c) { return append(c); }
 
+    bool operator==(const QCString &x) const
+        { return QByteArray::operator==(x); }
+    bool operator!=(const QCString &x) const { return !(*this == x); }
+
 #ifdef _KWQ_IOSTREAM_
     friend std::ostream &operator<<(std::ostream &, const QCString &);
 #endif
