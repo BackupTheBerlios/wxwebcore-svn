@@ -23,12 +23,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <Foundation/Foundation.h>
+#include <wx/defs.h>
+#include <wx/arrstr.h>
+#include <wx/url.h>
 
-@interface WebCoreKeyGenerator : NSObject
+class WebCoreKeyGenerator : public wxObject{
 
-+ (WebCoreKeyGenerator *)sharedGenerator;
-- (NSArray *)strengthMenuItemTitles;
-- (NSString *)signedPublicKeyAndChallengeStringWithStrengthIndex:(unsigned)index challenge:(NSString *)challenge pageURL:(NSURL *)pageURL;
+public:
+	WebCoreKeyGenerator();
+	~WebCoreKeyGenerator();
 
-@end
+	static WebCoreKeyGenerator * sharedGenerator();
+	wxArrayString* strengthMenuItemTitles();
+	wxString& signedPublicKeyAndChallengeStringWithStrengthIndex(unsigned index, const wxString& challenge, wxURL* pageURL);
+}

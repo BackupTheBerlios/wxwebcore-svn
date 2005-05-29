@@ -22,26 +22,42 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
+ 
+// NOTE: This class is an internal class (not an interface) and thus
+// it is subject to change. This should not be considered the final
+// API.
 
-#import <Foundation/Foundation.h>
+#include <wx/defs.h>
+#include <wx/url.h>
 
-@protocol WebCoreResourceLoader <NSObject>
+// KO: these are interfaces. see ObjC @protocol reference or WebCoreBridge.h for more info on why
+// I did things this way
 
-- (void)receivedResponse:(NSURLResponse *)response;
-- (void)redirectedToURL:(NSURL *)url;
+class WebCoreResourceLoader: public wxObject {
 
-- (void)addData:(NSData *)data;
+public:
+
+	WebCoreResourceLoader();
+	~WebCoreResourceLoader();
+	virtual void receivedResponse(void* response); //just for now, so things compile
+	virtual void redirectedToURL(wxURL* url);
+
+	virtual void addData(void* data);
 
 // Either finishWithData:, reportError, or cancel must be called before the
 // loader is released, but never more than one.
-- (void)finishWithData:(NSData *)data;
-- (void)reportError;
-- (void)cancel;
+	virtual void finishWithData(void* data);
+	virtual void reportError();
+	virtual void cancel();
+}
 
-@end
+class WebCoreResourceHandle: public wxObject {
 
-@protocol WebCoreResourceHandle <NSObject>
+public:
 
-- (void)cancel;
-
-@end
+	WebCoreResourceHandle();
+	~WebCoreResourceHandle();
+	
+	// yup, this was the only function this class had...
+	virtual void cancel();
+}
