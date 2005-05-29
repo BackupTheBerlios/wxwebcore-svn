@@ -27,7 +27,9 @@
 #define QDATETIME_H_
 
 #include "KWQDef.h"
-#include <CoreFoundation/CFDate.h>
+
+#include <wx/defs.h>
+#include <wx/datetime.h>
 
 #ifdef _KWQ_IOSTREAM_
 #include <iosfwd>
@@ -35,17 +37,17 @@
 
 class QTime {
 public:
-    QTime() : timeInSeconds(0) { }
-    explicit QTime(CFAbsoluteTime t) : timeInSeconds(t) { }
+    QTime() : timeInSeconds() { }
+    explicit QTime(const wxDateTime& t) : timeInSeconds(t) { }
     QTime(int hours, int minutes);
 
     int msec() const;
-    void start() { timeInSeconds = CFAbsoluteTimeGetCurrent(); }
+    void start() { timeInSeconds.SetToCurrent(); }
     int elapsed() const;
     int restart();
     
 private:
-    CFAbsoluteTime timeInSeconds; 
+    wxDateTime timeInSeconds; 
     
     friend class QDateTime;
 #ifdef _KWQ_IOSTREAM_
@@ -71,17 +73,17 @@ private:
 
 class QDateTime {
 public:
-    QDateTime() : dateInSeconds(0) { }
-    explicit QDateTime(CFAbsoluteTime d) : dateInSeconds(d) { }
+    QDateTime() : dateInSeconds() { }
+    explicit QDateTime(const wxDateTime& d) : dateInSeconds() { }
     QDateTime(const QDate &, const QTime &);
     
     QTime time() { return QTime(dateInSeconds); }
     int secsTo(const QDateTime &) const;
     
-    static QDateTime currentDateTime() { return QDateTime(CFAbsoluteTimeGetCurrent()); }
+    static QDateTime currentDateTime() { return QDateTime(wxDateTime::Now()); }
 
 private:
-    CFAbsoluteTime dateInSeconds;
+    wxDateTime dateInSeconds;
 
 #ifdef _KWQ_IOSTREAM_
     friend std::ostream &operator<<( std::ostream &, const QDateTime & );

@@ -1,4 +1,27 @@
 /*
+ * Copyright (c) 2005 Kevin Ollivier
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ *
+ */
+
+/*
  * Copyright (C) 2003 Apple Computer, Inc.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -23,39 +46,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
-#import <Foundation/Foundation.h>
 #import "KWQDateTime.h"
-#import <time.h>
-#import "WebCoreGraphicsBridge.h"
-
-static CFTimeZoneRef systemTimeZone()
-{
-    static CFTimeZoneRef zone = CFTimeZoneCopySystem();
-    return zone;
-}
 
 QTime::QTime(int hours, int minutes)
 {
-    CFGregorianDate date;
-    date.year = 2001;
-    date.month = 1;
-    date.day = 1;
-    date.hour = hours;
-    date.minute = minutes;
-    date.second = 0;
-    timeInSeconds = CFGregorianDateGetAbsoluteTime(date, systemTimeZone());
+	timeInSeconds = wxDateTime();
+    timeInSeconds.Set(1, wxDateTime::Jan, 2001, hours, minutes, 0, 0);
 }
 
 int QTime::msec() const
 {
-    CFAbsoluteTime seconds = CFAbsoluteTimeGetGregorianDate(timeInSeconds, systemTimeZone()).second;
-    return (int)(seconds * 1000) % 1000;
+    if (timeInSeconds)
+		return timeInSeconds.GetMillisecond();
 }
 
 int QTime::elapsed() const
 {
-    CFTimeInterval elapsed = CFAbsoluteTimeGetCurrent() - timeInSeconds;
-    return (int)(elapsed * 1000);
+	wxDateTime current = wxDateTime::Now();
+	current.Subtract(timeInSeconds);
+	// value is milliseconds!
+	return (current.GetTicks() * 1000);
 }
 
 int QTime::restart()
@@ -73,16 +83,19 @@ QDate::QDate(int y, int m, int d)
 
 QDateTime::QDateTime(const QDate &d, const QTime &t)
 {
-    CFGregorianDate dateWithTime = CFAbsoluteTimeGetGregorianDate(t.timeInSeconds, systemTimeZone());
-    dateWithTime.year = d.year;
-    dateWithTime.month = d.month;
-    dateWithTime.day = d.day;
-    dateInSeconds = CFGregorianDateGetAbsoluteTime(dateWithTime, systemTimeZone());
+	
+    dateInSeconds = wxDateTime();
+	dateInSeconds.SetYear(d.year);
+	dateInSeconds.SetMonth(d.month-1);
+	dateInSeconds.SetDay(d.day);
+	dateInSeconds.SetHours(t.timeInSeconds.GetHours());
+	dateInSeconds.SetMinutes(t.timeInSeconds.GetMinutes());
+	dateInSeconds.SetSeconds(t.timeInSeconds.GetSeconds());
 }
 
 int QDateTime::secsTo(const QDateTime &b) const
 {
-    return (int)(b.dateInSeconds - dateInSeconds);
+    return (int)(b.dateInSeconds.GetTicks() - dateInSeconds.GetTicks());
 }
 
 bool KWQUIEventTime::uiEventPending() const
@@ -112,37 +125,35 @@ std::ostream &operator<<(std::ostream &o, const QDate &date)
 
 std::ostream &operator<<(std::ostream &o, const QTime &time)
 {
-    CFGregorianDate g = CFAbsoluteTimeGetGregorianDate(time.timeInSeconds, systemTimeZone());
     return o <<
         "QTime: [hh:mm:ss:ms = " <<
-        (int)g.hour <<
+        (int)time.timeInSeconds.GetHour() <<
         ':' <<
-        (int)g.minute <<
+        (int)time.timeInSeconds.GetMinute() <<
         ':' <<
-        (int)g.second <<
+        (int)time.timeInSeconds.GetSecond() <<
         ':' <<
-        time.msec() <<
+        time.timeInSeconds.GetMillisecond() <<
         ']';
 }
 
 std::ostream &operator<<(std::ostream &o, const QDateTime &dateTime)
 {
-    CFGregorianDate g = CFAbsoluteTimeGetGregorianDate(dateTime.dateInSeconds, systemTimeZone());
     return o <<
         "QDateTime: [yy/mm/dd hh:mm:ss:ms = " <<
-        (int)g.year <<
+        (int)dateTime.dateInSeconds.GetYear() <<
         '/' <<
-        (int)g.month <<
+        (int)dateTime.dateInSeconds.GetMonth() <<
         '/' <<
-        (int)g.day <<
+        (int)dateTime.dateInSeconds.GetDay() <<
         ' ' << 
-        (int)g.hour <<
+        (int)dateTime.dateInSeconds.GetHour() <<
         ':' <<
-        (int)g.minute <<
+        (int)dateTime.dateInSeconds.GetMinute() <<
         ':' <<
-        (int)g.second <<
+        (int)dateTime.dateInSeconds.GetSecond() <<
         ':' <<
-        ((int)(g.second * 1000) % 1000) <<
+        ((int)dateTime.dateInSeconds.GetMillisecond() <<
         ']';
 }
 
