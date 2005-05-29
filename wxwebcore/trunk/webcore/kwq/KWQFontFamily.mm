@@ -32,7 +32,6 @@ using DOM::DOMStringImpl;
 KWQFontFamily::KWQFontFamily()
     : _next(0)
     , _refCnt(0)
-    , _NSFamily(0)
 {
 }
 
@@ -40,7 +39,6 @@ KWQFontFamily::KWQFontFamily(const KWQFontFamily& other)
     : _family(other._family)
     , _next(other._next)
     , _refCnt(0)
-    , _NSFamily(other._NSFamily)
 {
     if (_next)
         _next->ref();
@@ -54,10 +52,10 @@ KWQFontFamily& KWQFontFamily::operator=(const KWQFontFamily& other)
         _next->deref();
     _family = other._family;
     _next = other._next;
-    _NSFamily = other._NSFamily;
     return *this;
 }
 
+#if 0
 const void *retainDOMStringImpl(CFAllocatorRef allocator, const void *value)
 {
     ((DOMStringImpl*)value)->ref();
@@ -91,11 +89,13 @@ NSString *KWQFontFamily::getNSFamily() const
     }
     return _NSFamily;
 }
+#endif
+
+
 
 void KWQFontFamily::setFamily(const AtomicString &family)
 {
     _family = family;
-    _NSFamily = nil;
 }
 
 bool KWQFontFamily::operator==(const KWQFontFamily &compareFontFamily) const
@@ -106,4 +106,8 @@ bool KWQFontFamily::operator==(const KWQFontFamily &compareFontFamily) const
         return false;
     
     return _family == compareFontFamily._family;
+}
+
+wxString KWQFontFamily::operator wxString() const {
+	return _family.string();
 }
