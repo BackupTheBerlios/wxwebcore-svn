@@ -25,8 +25,6 @@
 
 #import "KWQPushButton.h"
 
-#import "KWQExceptions.h"
-
 enum {
     topMargin,
     bottomMargin,
@@ -35,41 +33,31 @@ enum {
     baselineFudgeFactor
 };
 
-QPushButton::QPushButton(QWidget *)
+QPushButton::QPushButton(QWidget *parent)
 {
-    NSButton *button = (NSButton *)getView();
-    KWQ_BLOCK_EXCEPTIONS;
-    [button setBezelStyle:NSRoundedBezelStyle];
-    KWQ_UNBLOCK_EXCEPTIONS;
+    m_button = new wxButton(parent->getView(), -1);
 }
 
-QPushButton::QPushButton(const QString &text, QWidget *)
+QPushButton::QPushButton(const QString &text, QWidget *parent)
 {
-    NSButton *button = (NSButton *)getView();
-
-    KWQ_BLOCK_EXCEPTIONS;
-    [button setBezelStyle:NSRoundedBezelStyle];
-    KWQ_UNBLOCK_EXCEPTIONS;
-
+    m_button = new wxButton(parent->getView(), -1);
     setText(text);
 }
 
 QSize QPushButton::sizeHint() const 
 {
-    NSButton *button = (NSButton *)getView();
-
-    QSize size;
-
-    KWQ_BLOCK_EXCEPTIONS;
-    size = QSize((int)[[button cell] cellSize].width - (dimensions()[leftMargin] + dimensions()[rightMargin]),
-        (int)[[button cell] cellSize].height - (dimensions()[topMargin] + dimensions()[bottomMargin]));
-    KWQ_UNBLOCK_EXCEPTIONS;
-
+	QSize size(-1, -1);
+    if (m_button)
+		size = m_button->GetBestSize();
     return size;
 }
 
 QRect QPushButton::frameGeometry() const
 {
+
+	// TODO: We'll have to figure out if we need special calcs like this ourselves
+	// or if we can just go with the regular wx class methods. I think we'll have to
+	// see the render to find out...
     QRect r = QWidget::frameGeometry();
     return QRect(r.x() + dimensions()[leftMargin], r.y() + dimensions()[topMargin],
         r.width() - (dimensions()[leftMargin] + dimensions()[rightMargin]),
@@ -86,16 +74,6 @@ void QPushButton::setFrameGeometry(const QRect &r)
 int QPushButton::baselinePosition(int height) const
 {
     // Button text is centered vertically, with a fudge factor to account for the shadow.
-    NSButton *button = (NSButton *)getView();
-
-    KWQ_BLOCK_EXCEPTIONS;
-    NSFont *font = [button font];
-    float ascender = [font ascender];
-    float descender = [font descender];
-    return (int)ceil(-dimensions()[topMargin]
-        + ((height + dimensions()[topMargin] + dimensions()[bottomMargin]) - (ascender - descender)) / 2.0
-        + ascender - dimensions()[baselineFudgeFactor]);
-    KWQ_UNBLOCK_EXCEPTIONS;
 
     return (int)ceil(-dimensions()[topMargin]
         + ((height + dimensions()[topMargin] + dimensions()[bottomMargin])) / 2.0
@@ -111,11 +89,6 @@ const int *QPushButton::dimensions() const
         { 4, 6, 5, 5, 2 },
         { 0, 1, 1, 1, 1 }
     };
-    NSControl * const button = static_cast<NSControl *>(getView());
 
-    KWQ_BLOCK_EXCEPTIONS;
-    return w[[[button cell] controlSize]];
-    KWQ_UNBLOCK_EXCEPTIONS;
-
-    return w[NSSmallControlSize];
+    return w[0];
 }
