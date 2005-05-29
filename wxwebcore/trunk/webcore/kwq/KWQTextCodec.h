@@ -31,6 +31,7 @@
 #include "KWQCString.h"
 
 class QTextDecoder;
+class QTextConverter;
 
 class QTextCodec {
 public:
@@ -38,35 +39,46 @@ public:
     static QTextCodec *codecForNameEightBitOnly(const char *);
     static QTextCodec *codecForLocale();
 
-    explicit QTextCodec(CFStringEncoding e, KWQEncodingFlags f = NoEncodingFlags) : _encoding(e), _flags(f) { }
+    const char *name() const { return m_name; }
+    bool usesVisualOrdering() const { return m_flags & VisualOrdering; }
+    bool isJapanese() const { return m_flags & IsJapanese; }
 
-    const char *name() const;
-    bool usesVisualOrdering() const { return _flags & VisualOrdering; }
-    bool isJapanese() const { return _flags & IsJapanese; }
-    
-    QChar backslashAsCurrencySymbol() const;
+    QChar backslashAsCurrencySymbol() const
+        { return m_backslashAsCurrencySymbol; }
 
     QTextDecoder *makeDecoder() const;
 
     QCString fromUnicode(const QString &) const;
 
-    QString toUnicode(const char *, int) const;
-    QString toUnicode(const QByteArray &, int) const;
-    
-    friend bool operator==(const QTextCodec &, const QTextCodec &);
-    unsigned hash() const;
-    
-private:
-    CFStringEncoding _encoding;
-    KWQEncodingFlags _flags;
-};
+    QString toUnicode(const char *data, int len) const;
+    QString toUnicode(const QByteArray& arr, int len) const
+        { return toUnicode(arr.data(), len); }
 
-inline bool operator!=(const QTextCodec &a, const QTextCodec &b) { return !(a == b); }
+    bool operator==(const QTextCodec& x) const { return m_name == x.m_name; }
+    bool operator!=(const QTextCodec& x) const { return !(*this == x); }
+
+    virtual ~QTextCodec();
+
+private:
+    QTextCodec(QTextConverter *conv, const char *charset);
+
+    QCString m_name;
+    QTextConverter *m_conv;
+    QChar m_backslashAsCurrencySymbol;
+    KWQEncodingFlags m_flags;
+};
 
 class QTextDecoder {
 public:
     virtual ~QTextDecoder();
-    virtual QString toUnicode(const char *, int, bool flush = false) = 0;
+    virtual QString toUnicode(const char *, int, bool flush = false);
+
+private:
+    QTextDecoder(QTextConverter *conv) : m_conv(conv) {}
+
+    QTextConverter *m_conv;
+
+    friend class QTextCodec;
 };
 
 #endif

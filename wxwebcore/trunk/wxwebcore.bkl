@@ -104,6 +104,7 @@
         webcore/kwq/KWQArrayImpl.cpp
         webcore/kwq/KWQBuffer.cpp
         webcore/kwq/KWQChar.cpp
+        webcore/kwq/KWQCharsets.cpp
         webcore/kwq/KWQColor.cpp
         webcore/kwq/KWQColorData.c
         webcore/kwq/KWQCursor.cpp
@@ -136,6 +137,7 @@
         webcore/kwq/KWQString.cpp
         webcore/kwq/KWQStringList.cpp
         webcore/kwq/KWQStyle.cpp
+        webcore/kwq/KWQTextCodec.cpp
         webcore/kwq/KWQTextStream.cpp
         webcore/kwq/KWQTextUtilities.cpp
         webcore/kwq/KWQTimer.cpp
