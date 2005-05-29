@@ -25,12 +25,11 @@
 #ifndef _BINDINGS_OBJC_CLASS_H_
 #define _BINDINGS_OBJC_CLASS_H_
 
-#include <CoreFoundation/CoreFoundation.h>
-
-
 #include <runtime.h>
 #include <npruntime.h>
 #include <c_runtime.h>
+
+class CFDictionaryRef; //FIXME: temporary compilation fix
 
 namespace KJS {
 

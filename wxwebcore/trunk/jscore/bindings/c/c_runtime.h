@@ -25,7 +25,7 @@
 #ifndef _BINDINGS_OBJC_RUNTIME_H_
 #define _BINDINGS_OBJC_RUNTIME_H_
 
-#include <CoreFoundation/CoreFoundation.h>
+//#include <CoreFoundation/CoreFoundation.h>
 
 #include <npruntime.h>
 #include <npruntime_impl.h>

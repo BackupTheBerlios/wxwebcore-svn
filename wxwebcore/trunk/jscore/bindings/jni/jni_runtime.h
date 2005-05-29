@@ -25,8 +25,6 @@
 #ifndef _JNI_RUNTIME_H_
 #define _JNI_RUNTIME_H_
 
-#include <CoreFoundation/CoreFoundation.h>
-
 #include <jni_utility.h>
 #include <jni_instance.h>
 #include <runtime.h>

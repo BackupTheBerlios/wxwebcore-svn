@@ -25,12 +25,14 @@
 #ifndef _JNI_JSOBJECT_H_
 #define _JNI_JSOBJECT_H_
 
-#include <CoreFoundation/CoreFoundation.h>
+#include "interpreter.h"
+#include "object.h"
 
-#include <JavaScriptCore/interpreter.h>
-#include <JavaScriptCore/object.h>
-
+#if __APPLE__
 #include <JavaVM/jni.h>
+#else
+#include <jni.h>
+#endif
 
 #define jlong_to_ptr(a) ((void*)(uintptr_t)(a))
 #define jlong_to_impptr(a) (static_cast<KJS::ObjectImp*>(((void*)(uintptr_t)(a))))
@@ -63,7 +65,10 @@ struct JSObjectCallContext
     jobjectArray args;
     jint index;
     jobject value;
+#if 0
+	// FIXME: Temporary compilation fix.
     CFRunLoopRef originatingLoop;
+#endif
     jvalue result;
 };
 

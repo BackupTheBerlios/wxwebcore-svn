@@ -25,9 +25,12 @@
 #ifndef _JNI_CLASS_H_
 #define _JNI_CLASS_H_
 
-#include <CoreFoundation/CoreFoundation.h>
-
+// FIXME: it'd be nice not to have to ifdef this...
+#if __APPLE__
 #include <JavaVM/jni.h>
+#else
+#include <jni.h>
+#endif
 
 #include <runtime.h>
 #include <jni_runtime.h>
@@ -56,8 +59,11 @@ public:
     
     void _commonDelete() {
         free((void *)_name);
+// temporary compilation fixes
+#if 0
         CFRelease (_fields);
         CFRelease (_methods);
+#endif
         delete [] _constructors;
     }
     
@@ -70,8 +76,10 @@ public:
 
         _name = strdup (other._name);
 
+#if 0
         _methods = CFDictionaryCreateCopy (NULL, other._methods);
         _fields = CFDictionaryCreateCopy (NULL, other._fields);
+#endif
         
         _numConstructors = other._numConstructors;
         _constructors = new JavaConstructor[_numConstructors];
@@ -115,8 +123,10 @@ public:
     
 private:
     const char *_name;
+#if 0
     CFDictionaryRef _fields;
     CFDictionaryRef _methods;
+#endif
     JavaConstructor *_constructors;
     long _numConstructors;
 };

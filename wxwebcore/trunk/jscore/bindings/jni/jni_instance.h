@@ -25,11 +25,13 @@
 #ifndef _JNI_INSTANCE_H_
 #define _JNI_INSTANCE_H_
 
-#include <CoreFoundation/CoreFoundation.h>
-
+#if __APPLE__
 #include <JavaVM/jni.h>
+#else
+#include <jni.h>
+#endif
 
-#include <JavaScriptCore/runtime.h>
+#include "runtime.h"
 
 namespace KJS {
 
