@@ -31,26 +31,26 @@
 #include "KWQString.h"
 #include "KWQIODevice.h"
 
-class QFile 
+#include <wx/file.h>
+
+class QFile
 {
 public:
-    QFile(const QString &);
-    ~QFile();
+    QFile(const QString &n) : name(n) {}
 
-    bool exists() const;
-    bool open(int);
-    void close();
-    int readBlock(char *, uint);
+    bool exists() const { return exists(name); }
+    bool open(int mode);
+    void close() { file.Close(); }
+    int readBlock(char *buffer, uint len);
     uint size() const;
 
-    static bool exists(const QString &path);
+    static bool exists(const QString& fn);
 
 private:
-    QFile(const QFile &);
-    QFile &operator=(const QFile &);
+    QString name;
+    wxFile file;
 
-    char *name;
-    int fd;
+    DECLARE_NO_COPY_CLASS(QFile)
 };
 
 #endif // QFILE_H_
