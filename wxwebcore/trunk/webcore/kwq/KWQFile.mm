@@ -24,9 +24,10 @@
  */
 
 #import "KWQFile.h"
+#include <wx/defs.h>
 
 // This NSString call can't throw so no need to block exceptions
-QFile::QFile(const QString &n) : name(strdup(n.isEmpty() ? "" : [n.getNSString() fileSystemRepresentation])), fd(-1)
+QFile::QFile(const QString &n) : name(strdup(n.isEmpty() ? "" : wxString(n, wxConvFile).c_str())), fd(-1)
 {
 }
 
