@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 Apple Computer, Inc.  All rights reserved.
+ * Copyright (C) 2001, 2002 Apple Computer, Inc.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -22,23 +22,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
+#include <string.h>
 
-#import "KWQPtrDictImpl.h"
-
-#import <new>
+#include "KWQPtrDictImpl.h"
+#include "KWQAssertions.h"
+#include "KWQMap.h"
 
 typedef void (* DeleteFunction) (void *);
 
 class KWQPtrDictPrivate
 {
 public:
-    KWQPtrDictPrivate(int size, DeleteFunction, const CFDictionaryKeyCallBacks *cfdkcb);
+    KWQPtrDictPrivate(int size, DeleteFunction);
     KWQPtrDictPrivate(const KWQPtrDictPrivate &dp);
     ~KWQPtrDictPrivate();
     
-    CFMutableDictionaryRef cfdict;
+    QMap<void*,void*> map;
     DeleteFunction del;
-    KWQPtrDictIteratorPrivate *iterators;
+    KWQPtrDictIteratorPrivate *iterators;    
 };
 
 class KWQPtrDictIteratorPrivate
@@ -59,16 +60,14 @@ public:
     KWQPtrDictIteratorPrivate *prev;
 };
 
-
-KWQPtrDictPrivate::KWQPtrDictPrivate(int size, DeleteFunction deleteFunc, const CFDictionaryKeyCallBacks *cfdkcb) :
-    cfdict(CFDictionaryCreateMutable(NULL, 0, cfdkcb, NULL)),
-    del(deleteFunc),
-    iterators(0)
+KWQPtrDictPrivate::KWQPtrDictPrivate(int size, DeleteFunction deleteFunc)    : 
+      del(deleteFunc),
+      iterators(0)
 {
 }
 
-KWQPtrDictPrivate::KWQPtrDictPrivate(const KWQPtrDictPrivate &dp) :     
-    cfdict(CFDictionaryCreateMutableCopy(NULL, 0, dp.cfdict)),
+KWQPtrDictPrivate::KWQPtrDictPrivate(const KWQPtrDictPrivate &dp)
+    : map(dp.map),
     del(dp.del),
     iterators(0)
 {
@@ -79,63 +78,66 @@ KWQPtrDictPrivate::~KWQPtrDictPrivate()
     for (KWQPtrDictIteratorPrivate *it = iterators; it; it = it->next) {
         it->dictDestroyed();
     }
-    CFRelease(cfdict);
 }
 
-KWQPtrDictImpl::KWQPtrDictImpl(int size, DeleteFunction deleteFunc, const CFDictionaryKeyCallBacks *cfdkcb) :
-    d(new KWQPtrDictPrivate(size, deleteFunc, cfdkcb))
+
+
+KWQPtrDictImpl::KWQPtrDictImpl(int size, void (*deleteFunc)(void *))
+    :d(new KWQPtrDictPrivate(size, deleteFunc))
 {
 }
 
 KWQPtrDictImpl::KWQPtrDictImpl(const KWQPtrDictImpl &di) :
-    d(new KWQPtrDictPrivate(*di.d))
+        d(new KWQPtrDictPrivate(*di.d))
 {
 }
-
 
 KWQPtrDictImpl::~KWQPtrDictImpl()
 {
     delete d;
 }
 
-static void invokeDeleteFuncOnValue (const void *key, const void *value, void *context)
-{
-    DeleteFunction *deleteFunc = (DeleteFunction *)context;
-    (*deleteFunc)((void *)value);
-}
-
 void KWQPtrDictImpl::clear(bool deleteItems)
 {
     if (deleteItems) {
+	ASSERT(d->del);
         DeleteFunction deleteFunc = d->del;
-	CFDictionaryApplyFunction(d->cfdict, invokeDeleteFuncOnValue, &deleteFunc);
+	
+	QMap<void*,void*>::Iterator iter = d->map.begin();
+	
+	while ( iter != d->map.end()){
+	    deleteFunc(*iter);
+	    ++iter;
+	}
     }
-
-    CFDictionaryRemoveAllValues(d->cfdict);
+    
+    d->map.clear();
 }
 
 uint KWQPtrDictImpl::count() const
 {
-    return CFDictionaryGetCount(d->cfdict);
+    return d->map.count();
 }
 
 void KWQPtrDictImpl::insert(void *key, const void *value)
 {
-    CFDictionarySetValue(d->cfdict, key, value);
+    d->map.insert(key,const_cast<void*const>(value));
 }
 
 bool KWQPtrDictImpl::remove(void *key, bool deleteItem)
 {
-    void *value = find(key);
-
-    if (!value) {
-	return false;
-    }
-
-    CFDictionaryRemoveValue(d->cfdict, key);
+    QMap<void*,void*>::Iterator iter = d->map.find(key);
     
-    if (deleteItem) {
-	d->del(value);
+    if (iter == d->map.end())
+	return false;
+
+    void *value = *iter;
+    
+    d->map.remove(iter);
+    
+    if (deleteItem)
+    {		
+	d->del( value );
     }
     
     for (KWQPtrDictIteratorPrivate *it = d->iterators; it; it = it->next) {
@@ -147,7 +149,7 @@ bool KWQPtrDictImpl::remove(void *key, bool deleteItem)
 
 void *KWQPtrDictImpl::find(void *key) const
 {
-    return (void *)CFDictionaryGetValue(d->cfdict, key);
+    return *(d->map.find(key));
 }
 
 void KWQPtrDictImpl::swap(KWQPtrDictImpl &di)
@@ -162,7 +164,7 @@ void KWQPtrDictImpl::swap(KWQPtrDictImpl &di)
 KWQPtrDictImpl &KWQPtrDictImpl::assign(const KWQPtrDictImpl &di, bool deleteItems)
 {
     KWQPtrDictImpl tmp(di);
-
+    
     if (deleteItems) {
 	clear(true);
     }
@@ -175,17 +177,22 @@ KWQPtrDictImpl &KWQPtrDictImpl::assign(const KWQPtrDictImpl &di, bool deleteItem
 
 void *KWQPtrDictImpl::take(void *key)
 {
-    void *value = find(key);
-    remove(key, false);
+    QMap<void*,void*>::Iterator iter = d->map.find(key);
+    if (iter == d->map.end())
+	return 0;
+    
+    void *value = *iter;
+    d->map.remove(iter);
+    
+    for (KWQPtrDictIteratorPrivate *it = d->iterators; it; it = it->next) {
+        it->remove(key);
+    }
+    
     return value;
 }
 
-
-
-
-
 KWQPtrDictIteratorPrivate::KWQPtrDictIteratorPrivate(KWQPtrDictPrivate *d) :
-    count(CFDictionaryGetCount(d->cfdict)),
+    count(d->map.count()),
     pos(0),
     keys(new void * [count]),
     values(new void * [count]),
@@ -198,7 +205,16 @@ KWQPtrDictIteratorPrivate::KWQPtrDictIteratorPrivate(KWQPtrDictPrivate *d) :
         next->prev = this;
     }
     
-    CFDictionaryGetKeysAndValues(d->cfdict, (const void **)keys, (const void **)values);
+    unsigned int i = 0;
+    QMap<void*,void*>::Iterator it = d->map.begin();
+    QMap<void*,void*>::Iterator end = d->map.end();    
+    while (it != end) {
+	keys[i] = it.key();
+	values[i] = it.data();
+	++i;
+	++it;
+    }
+    ASSERT(i==count);	
 }
 
 KWQPtrDictIteratorPrivate::~KWQPtrDictIteratorPrivate()
@@ -216,8 +232,10 @@ KWQPtrDictIteratorPrivate::~KWQPtrDictIteratorPrivate()
     delete [] values;
 }
 
-KWQPtrDictIteratorImpl::KWQPtrDictIteratorImpl(const KWQPtrDictImpl &di) : 
-    d(new KWQPtrDictIteratorPrivate(di.d))
+
+
+KWQPtrDictIteratorImpl::KWQPtrDictIteratorImpl(const KWQPtrDictImpl &di)
+    :d(new KWQPtrDictIteratorPrivate(di.d))
 {
 }
 

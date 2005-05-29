@@ -30,14 +30,14 @@
 
 #include <stddef.h>
 
-#include <CoreFoundation/CoreFoundation.h>
+#include "KWQMapImpl.h"
     
 class KWQPtrDictPrivate;
 
 class KWQPtrDictImpl
 {
  public:
-    KWQPtrDictImpl(int size, void (*deleteFunc)(void *), const CFDictionaryKeyCallBacks *cfdkcb = NULL);
+    KWQPtrDictImpl(int size, void (*deleteFunc)(void *));
     KWQPtrDictImpl(const KWQPtrDictImpl &pdi);
     ~KWQPtrDictImpl();
     

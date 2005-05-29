@@ -127,6 +127,7 @@
         webcore/kwq/KWQPen.cpp
         webcore/kwq/KWQPoint.cpp
         webcore/kwq/KWQPointArray.cpp
+        webcore/kwq/KWQPtrDictImpl.cpp
         webcore/kwq/KWQRect.cpp
         webcore/kwq/KWQRegExp.cpp
         webcore/kwq/KWQRegion.cpp
