@@ -33,6 +33,11 @@
 
 KJavaAppletWidget::KJavaAppletWidget(const QSize &size, KJavaAppletContext *c, const QMap<QString, QString> &args)
 {
+	//FIXME: A stub implementation so that we can test without having Java applets working first :-)
+	QWidget::QWidget();
+	setSize(size);
+	
+#if 0
     KWQ_BLOCK_EXCEPTIONS;
     
     NSMutableArray *attributeNames = [[NSMutableArray alloc] init];
@@ -62,4 +67,5 @@ KJavaAppletWidget::KJavaAppletWidget(const QSize &size, KJavaAppletContext *c, c
     part->view()->addChild(this);
     
     KWQ_UNBLOCK_EXCEPTIONS;
+#endif
 }
