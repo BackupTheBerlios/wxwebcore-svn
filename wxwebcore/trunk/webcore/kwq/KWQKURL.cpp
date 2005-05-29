@@ -31,6 +31,7 @@
 #import "KWQMemArray.h"
 #import "KWQValueList.h"
 
+#include <stdlib.h>
 // FIXME: Should get this from a header.
 #ifdef __APPLE__
 extern "C" int malloc_good_size(int size);
