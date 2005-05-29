@@ -28,6 +28,9 @@
 
 #include "KWQButton.h"
 
+#include <wx/defs.h>
+#include <wx/checkbox.h>
+
 class QCheckBox : public QButton {
 public:
     QCheckBox(QWidget *);
@@ -44,8 +47,10 @@ public:
 
 private:
     const int *dimensions() const;
+	wxCheckBox* m_checkBox;
 
     KWQSignal m_stateChanged;
+	KWQSignal m_clicked;
 };
 
 #endif
