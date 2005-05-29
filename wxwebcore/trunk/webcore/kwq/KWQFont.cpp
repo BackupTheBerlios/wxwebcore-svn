@@ -86,14 +86,10 @@ void QFont::setFamily(const QString &qfamilyName)
     m_font.SetFaceName(qfamilyName);
 }
 
-#if 0
 void QFont::setFirstFamily(const KWQFontFamily& family) 
 {
     _family = family;
-    KWQRelease(_NSFont);
-    _NSFont = 0;
 }
-#endif
 
 void QFont::setPixelSize(float s)
 {

@@ -26,11 +26,7 @@
 #include "KWQString.h"
 #include "dom_atomicstring.h"
 
-#ifdef __OBJC__
-@class NSString;
-#else
-class NSString;
-#endif
+#include <wx/defs.h>
 
 class KWQFontFamily {
 public:
@@ -43,8 +39,6 @@ public:
     void setFamily(const DOM::AtomicString &);
     const DOM::AtomicString& family() const { return _family; }
     bool familyIsEmpty() const { return _family.isEmpty(); }
-    
-    NSString *getNSFamily() const;
 
     KWQFontFamily *next() { return _next; }
     const KWQFontFamily *next() const { return _next; }
@@ -63,12 +57,13 @@ public:
     
     void ref() { _refCnt++; }
     void deref() { _refCnt--; if (_refCnt == 0) delete this; }
+	
+	operator wxString() const;
     
 private:
     DOM::AtomicString _family;
     KWQFontFamily *_next;
     int _refCnt;
-    mutable NSString *_NSFamily;
 };
 
 

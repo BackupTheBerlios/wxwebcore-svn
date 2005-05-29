@@ -30,6 +30,7 @@
 #include <wx/font.h>
 
 #include "KWQString.h"
+#include "KWQFontFamily.h"
 
 class QFont {
 public:
@@ -44,14 +45,12 @@ public:
     void setFamily(const QString &);
     QString family() const;
 
-#if 0
 	// NOTE: The setter is only called from khtml/rendering/font.cpp
 	// and as far as I can tell the getters here aren't ever called.
 	// Looks like just a Cocoa helper class. 
     const KWQFontFamily *firstFamily() const { return &_family; }
     KWQFontFamily *firstFamily() { return &_family; }
-    void setFirstFamily(const KWQFontFamily &family);
-#endif
+    void setFirstFamily(const KWQFontFamily &family); 
 
     void setWeight(int);
     int weight() const;
@@ -76,6 +75,7 @@ public:
 private:
     bool _isPrinterFont;
 	wxFont m_font;
+	KWQFontFamily _family;
 };
 
 #endif
