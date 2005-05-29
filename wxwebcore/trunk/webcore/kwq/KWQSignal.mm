@@ -173,6 +173,7 @@ void KWQSignal::call(Job *j, const KURL &u) const
     }
 }
 
+#if 0
 void KWQSignal::call(Job *j, NSData *d) const
 {
     if (!_object->_signalsBlocked) {
@@ -196,3 +197,4 @@ void KWQSignal::call(Job *j, NSURLResponse *r) const
         }
     }
 }
+#endif

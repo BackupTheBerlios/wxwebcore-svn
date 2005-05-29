@@ -46,8 +46,10 @@ public:
     void call(KIO::Job *, const char *data, int size) const;
     void call(KIO::Job *, const KURL &) const;
 	//TODO: Convert these to functions taking wx data types if necessary
-    //void call(KIO::Job *, NSData *) const;
-    //void call(KIO::Job *, NSURLResponse *) const;
+#if 0
+    void call(KIO::Job *, NSData *) const;
+    void call(KIO::Job *, NSURLResponse *) const;
+#endif
     
 private:
     // forbid copying and assignment
