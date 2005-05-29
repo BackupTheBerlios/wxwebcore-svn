@@ -30,13 +30,8 @@
 
 #include "xml/dom2_eventsimpl.h"
 
-#ifdef __OBJC__
-@class NSImage;
-@class NSPasteboard;
-#else
 class NSImage;
 class NSPasteboard;
-#endif
 
 typedef unsigned NSDragOperation;
 
@@ -75,7 +70,9 @@ public:
     void setDragImageElement(const DOM::Node &, const QPoint &);
 
     // Methods for getting info in Cocoa's type system
+#if 0
     NSImage *dragNSImage(NSPoint *loc);    // loc converted from dragLoc, based on whole image size
+#endif
     bool sourceOperation(NSDragOperation *op) const;
     bool destinationOperation(NSDragOperation *op) const;
     void setSourceOperation(NSDragOperation op);
