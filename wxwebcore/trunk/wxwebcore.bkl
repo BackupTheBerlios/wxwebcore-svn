@@ -23,6 +23,8 @@
         <include>jscore/kjs</include>
         <include>jscore/pcre</include>
         <include>jscore/bindings</include>
+        <include>jscore/bindings/c</include>
+        <include>jscore/bindings/jni</include>
         <include>webcore/ForwardingHeaders</include>
         <include>webcore/kwq</include>
         <include>webcore/khtml</include>
@@ -100,13 +102,13 @@
    
     <set var="WEBCORE_KWQ_SRC">
         webcore/kwq/KWQArrayImpl.cpp
-        webcore/kwq/KWQAssertions.c
         webcore/kwq/KWQBuffer.cpp
         webcore/kwq/KWQChar.cpp
         webcore/kwq/KWQColor.cpp
         webcore/kwq/KWQColorData.c
         webcore/kwq/KWQCursor.cpp
         webcore/kwq/KWQCString.cpp
+        webcore/kwq/KWQFile.cpp
         webcore/kwq/KWQFont.cpp
         webcore/kwq/KWQGlobal.cpp
         webcore/kwq/KWQGuardedPtr.cpp
@@ -120,7 +122,6 @@
         webcore/kwq/KWQKWinModule.cpp
         webcore/kwq/KWQLabel.cpp
         webcore/kwq/KWQListImpl.cpp
-        webcore/kwq/KWQLogging.c
         webcore/kwq/KWQMapImpl.cpp
         webcore/kwq/KWQPaintDeviceMetrics.cpp
         webcore/kwq/KWQPen.cpp
@@ -129,6 +130,7 @@
         webcore/kwq/KWQRect.cpp
         webcore/kwq/KWQRegExp.cpp
         webcore/kwq/KWQRegion.cpp
+        webcore/kwq/KWQSignal.cpp
         webcore/kwq/KWQSize.cpp
         webcore/kwq/KWQString.cpp
         webcore/kwq/KWQStringList.cpp
