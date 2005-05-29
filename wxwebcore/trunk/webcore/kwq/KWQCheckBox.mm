@@ -24,7 +24,6 @@
  */
 
 #import "KWQCheckBox.h"
-#import "KWQExceptions.h"
 
 enum {
     topMargin,
@@ -37,19 +36,17 @@ enum {
 };
 
 QCheckBox::QCheckBox(QWidget *w)
-    : m_stateChanged(this, SIGNAL(stateChanged(int)))
+    : m_stateChanged(this, SIGNAL(stateChanged(int))), m_clicked(this, SIGNAL(clicked()))
 {
-    KWQ_BLOCK_EXCEPTIONS;
-
-    NSButton *button = (NSButton *)getView();
-    [button setButtonType:NSSwitchButton];
-
-    KWQ_UNBLOCK_EXCEPTIONS;
+	m_checkBox = new wxCheckBox(w->GetView(), -1, wxEmptyString);
 }
 
 QSize QCheckBox::sizeHint() const 
 {
-    return QSize(dimensions()[dimWidth], dimensions()[dimHeight]);
+	QSize size(-1, -1);
+    if (m_checkBox)
+		size = m_checkBox->GetBestSize();
+    return size;
 }
 
 QRect QCheckBox::frameGeometry() const
@@ -69,20 +66,14 @@ void QCheckBox::setFrameGeometry(const QRect &r)
 
 void QCheckBox::setChecked(bool isChecked)
 {
-    KWQ_BLOCK_EXCEPTIONS;
-
-    NSButton *button = (NSButton *)getView();
-    [button setState:isChecked ? NSOnState : NSOffState];
-
-    KWQ_UNBLOCK_EXCEPTIONS;
+	if (m_checkBox)
+		m_checkBox->SetValue(isChecked);
 }
 
 bool QCheckBox::isChecked()
 {
-    KWQ_BLOCK_EXCEPTIONS;
-    NSButton *button = (NSButton *)getView();
-    return [button state] == NSOnState;
-    KWQ_UNBLOCK_EXCEPTIONS;
+	if (m_checkBox)
+		return m_checkBox->IsChecked();
 
     return false;
 }
@@ -95,7 +86,7 @@ void QCheckBox::clicked()
     // was the languages radio buttons and check boxes at google.com prefs.
     
     m_stateChanged.call(isChecked() ? 2 : 0);
-    QButton::clicked();
+	m_clicked.call();
 }
 
 int QCheckBox::baselinePosition(int height) const
@@ -114,9 +105,5 @@ const int *QCheckBox::dimensions() const
     };
     NSControl * const button = static_cast<NSControl *>(getView());
 
-    KWQ_BLOCK_EXCEPTIONS;
-    return w[[[button cell] controlSize]];
-    KWQ_UNBLOCK_EXCEPTIONS;
-
-    return w[NSSmallControlSize];
+    return w[0];
 }
