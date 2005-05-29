@@ -148,9 +148,11 @@ KWQSlot::KWQSlot(QObject *object, const char *member)
 	} else {
 	    m_function = slotRedirection_XMLHttpRequest;
 	}
+#if 0
     } else if (KWQNamesMatch(member, SLOT(slotFinished(KIO::Job *, NSData *)))) {
 	ASSERT(dynamic_cast<khtml::Loader *>(object));
 	m_function = slotFinished_Loader;        
+#endif
     } else if (KWQNamesMatch(member, SLOT(slotFinished(KIO::Job *)))) {
 	ASSERT(dynamic_cast<KHTMLPart *>(object) || dynamic_cast<XMLHttpRequestQObject *>(object));
 	if (dynamic_cast<KHTMLPart *>(object)) {
@@ -158,9 +160,11 @@ KWQSlot::KWQSlot(QObject *object, const char *member)
 	} else {
 	    m_function = slotFinished_XMLHttpRequest;
 	}
+#if 0
     } else if (KWQNamesMatch(member, SLOT(slotReceivedResponse(KIO::Job *, NSURLResponse *)))) {
 	ASSERT(dynamic_cast<khtml::Loader *>(object));
 	m_function = slotReceivedResponse;
+#endif
     } else {
         ERROR("trying to create a slot for unknown member %s", member);
         return;
@@ -317,7 +321,7 @@ void KWQSlot::call(Job *job, const KURL &url) const
     call();
 }
 
-/*
+#if 0
 void KWQSlot::call(KIO::Job *job, NSData *allData) const
 {
     if (m_object.isNull()) {
@@ -347,7 +351,7 @@ void KWQSlot::call(KIO::Job *job, NSURLResponse *response) const
     
     call();
 }
-*/
+#endif
 
 void KWQSlot::call(DocLoader *loader, CachedObject *cachedObject) const
 {

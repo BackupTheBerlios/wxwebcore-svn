@@ -60,10 +60,10 @@ public:
     void call(KIO::Job *, const char *, int) const;
     void call(KIO::Job *, const KURL &) const;
 	
-	/*
+#if 0
     void call(KIO::Job *, NSData *) const;
     void call(KIO::Job *, NSURLResponse *) const;
-	*/
+#endif
 	
     friend bool operator==(const KWQSlot &, const KWQSlot &);
 
