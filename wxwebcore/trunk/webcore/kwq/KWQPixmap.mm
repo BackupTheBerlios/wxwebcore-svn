@@ -1,4 +1,27 @@
 /*
+ * Copyright (c) 2005 Kevin Ollivier
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to
+ * deal in the Software without restriction, including without limitation the
+ * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+ * sell copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+ * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+ * IN THE SOFTWARE.
+ *
+ */
+
+/*
  * Copyright (C) 2004 Apple Computer, Inc.  All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -25,188 +48,107 @@
 #import "loader.h"
 
 #import "KWQPixmap.h"
-#import "KWQFoundationExtras.h"
-
-#import "WebCoreImageRenderer.h"
-#import "WebCoreImageRendererFactory.h"
 
 QPixmap *KWQLoadPixmap(const char *name)
 {
-    QPixmap *p = new QPixmap([[WebCoreImageRendererFactory sharedFactory] imageRendererWithName:[NSString stringWithCString:name]]);
+	// wxImage supports more formats than wxBitmap, so create
+	// then convert.
+	wxImage newImage(wxString(name));
+	
+    QPixmap *p = new QPixmap(wxBitmap(newImage));
     return p;
 }
 
 bool canRenderImageType(const QString &type)
 {
-    return [[[WebCoreImageRendererFactory sharedFactory] supportedMIMETypes] containsObject:type.getNSString()];
+	return true;
 }
 
 QPixmap::QPixmap()
 {
-    imageRenderer = nil;
-    MIMEType = nil;
+    m_bitmap = wxBitmap();
+    MIMEType = wxEmptyString;
     needCopyOnWrite = false;
 }
 
-QPixmap::QPixmap(WebCoreImageRendererPtr r)
+QPixmap::QPixmap(const wxBitmap& bitmap)
 {
-    imageRenderer = KWQRetain(r);
-    MIMEType = nil;
+    m_bitmap = bitmap;
+    MIMEType = wxEmptyString;
     needCopyOnWrite = false;
 }
 
-QPixmap::QPixmap(void *MIME)
+QPixmap::QPixmap(QString MIME)
 {
-    imageRenderer = nil;
-    MIMEType = KWQRetainNSRelease([(NSString *)MIME copy]);
+    m_bitmap = wxBitmap();
+    MIMEType = MIME;
     needCopyOnWrite = false;
 }
 
 QPixmap::QPixmap(const QSize &sz)
 {
-    imageRenderer = KWQRetain([[WebCoreImageRendererFactory sharedFactory] imageRendererWithSize:NSMakeSize(sz.width(), sz.height())]);
-    MIMEType = nil;
+    m_bitmap = wxBitmap(sz.width(), sz.height());
+    MIMEType = wxEmptyString;
     needCopyOnWrite = false;
 }
 
 QPixmap::QPixmap(const QByteArray &bytes)
 {
-    imageRenderer = KWQRetain([[WebCoreImageRendererFactory sharedFactory] imageRendererWithBytes:bytes.data() length:bytes.size()]);
-    MIMEType = nil;
+	//TODO: wxBitmap/Image need to have dimensions passed in...
+    //m_bitmap = wxBitmap();
+	MIMEType = wxEmptyString;
     needCopyOnWrite = false;
 }
 
-QPixmap::QPixmap(const QByteArray &bytes, NSString *MIME)
+QPixmap::QPixmap(const QByteArray &bytes, const wxString& MIME)
 {
-    MIMEType = KWQRetainNSRelease([MIME copy]);
-    imageRenderer = KWQRetain([[WebCoreImageRendererFactory sharedFactory] imageRendererWithBytes:bytes.data() length:bytes.size() MIMEType:MIMEType]);
+    MIMEType = wxString(MIME);
+	//TODO: wxBitmap/Image need to have dimensions passed in...
+    //m_bitmap = wxBitmap();
     needCopyOnWrite = false;
 }
 
 QPixmap::QPixmap(int w, int h)
 {
-    imageRenderer = KWQRetain([[WebCoreImageRendererFactory sharedFactory] imageRendererWithSize:NSMakeSize(w, h)]);
-    MIMEType = nil;
+    m_bitmap = wxBitmap(w, h);
+    MIMEType = wxEmptyString;
     needCopyOnWrite = false;
 }
 
 QPixmap::QPixmap(const QPixmap &copyFrom) : QPaintDevice(copyFrom)
 {
-#if BUILDING_ON_PANTHER
-    imageRenderer = KWQRetain(copyFrom.imageRenderer);
-    copyFrom.needCopyOnWrite = true;
-    needCopyOnWrite = true;
-#else
-    imageRenderer = KWQRetainNSRelease([copyFrom.imageRenderer copyWithZone:NULL]);;
+    imageRenderer = copyFrom.imageRenderer;
     needCopyOnWrite = false;
-#endif
-    MIMEType = KWQRetainNSRelease([copyFrom.MIMEType copy]);
+    MIMEType = copyFrom.MIMEType;
 }
 
 QPixmap::~QPixmap()
 {
-    KWQRelease(MIMEType);
-    KWQRelease(imageRenderer);
+    if (imageRenderer){
+		imageRenderer = NULL;
+	}
 }
 
-CGImageRef QPixmap::imageRef()
+wxBitmap* QPixmap::imageRef()
 {
-    return [imageRenderer imageRef];
+	if (m_bitmap.Ok())
+		return &m_bitmap;
+	
+	return NULL;
 }
 
 void QPixmap::resetAnimation()
 {
-    if (imageRenderer) {
-        [imageRenderer resetAnimation];
-    }
 }
-
-
-#if !defined(BUILDING_ON_PANTHER)
-@interface WebImageCallback : NSObject
-{
-    khtml::CachedImageCallback *callback;
-    CGImageSourceStatus status;
-}
-- (void)notify;
-- (void)setImageSourceStatus:(CGImageSourceStatus)status;
-- (CGImageSourceStatus)status;
-@end
-@implementation WebImageCallback
-- initWithCallback:(khtml::CachedImageCallback *)c
-{
-    self = [super init];
-    callback = c;
-    c->ref();
-    return self;
-}
-
-- (void)_commonTermination
-{
-    callback->deref();
-}
-
-- (void)dealloc
-{
-    [self _commonTermination];
-    [super dealloc];
-}
-
-- (void)finalize
-{
-    [self _commonTermination];
-    [super finalize];
-}
-
-- (void)notify
-{
-    if (status < kCGImageStatusReadingHeader)
-        callback->notifyDecodingError();
-    else if (status == kCGImageStatusIncomplete) {
-        callback->notifyUpdate();
-    }
-    else if (status == kCGImageStatusComplete) {
-        callback->notifyFinished();
-    }
-}
-
-- (void)setImageSourceStatus:(CGImageSourceStatus)s
-{
-    status = s;
-}
-
-- (CGImageSourceStatus)status
-{
-    return status;
-}
-
-@end
-#endif
 
 bool QPixmap::shouldUseThreadedDecoding()
 {
-    return [WebCoreImageRendererFactory shouldUseThreadedDecoding] ? true : false;
+    return false;
 }
 
 bool QPixmap::receivedData(const QByteArray &bytes, bool isComplete, khtml::CachedImageCallback *decoderCallback)
 {
-    if (imageRenderer == nil) {
-        imageRenderer = KWQRetain([[WebCoreImageRendererFactory sharedFactory] imageRendererWithMIMEType:MIMEType]);
-    }
-    
-#if !defined(BUILDING_ON_PANTHER)
-    WebImageCallback *callbackWrapper = 0;
-    if (decoderCallback)
-        callbackWrapper = [[WebImageCallback alloc] initWithCallback:decoderCallback];
-
-    bool result = [imageRenderer incrementalLoadWithBytes:bytes.data() length:bytes.size() complete:isComplete callback:callbackWrapper];
-
-    [callbackWrapper release];
-#else
-    bool result = [imageRenderer incrementalLoadWithBytes:bytes.data() length:bytes.size() complete:isComplete callback:0];
-#endif
-    
-    return result;
+	return false;
 }
 
 bool QPixmap::mask() const
@@ -216,41 +158,39 @@ bool QPixmap::mask() const
 
 bool QPixmap::isNull() const
 {
-    return imageRenderer == nil || [imageRenderer isNull];
+    return m_bitmap.Ok();
 }
 
 QSize QPixmap::size() const
 {
-    if (imageRenderer == nil) {
-        return QSize(0, 0);
-    }
-    NSSize sz = [imageRenderer size];
-    return QSize((int)sz.width, (int)sz.height);
+	if (m_bitmap.Ok())
+		return QSize(m_bitmap.GetWidth(), m_bitmap.GetHeight());
+
+	return QSize(0, 0);
 }
 
 QRect QPixmap::rect() const
 {
-    if (imageRenderer == nil) {
-        return QRect(0, 0, 0, 0);
-    }
-    NSSize sz = [imageRenderer size];
-    return QRect(0, 0, (int)sz.width, (int)sz.height);
+    if (m_bitmap.Ok()) 
+	    return QRect(0, 0, m_bitmap.GetWidth(), m_bitmap.GetHeight());
+	
+	return QRect(0, 0, 0, 0);
 }
 
 int QPixmap::width() const
 {
-    if (imageRenderer == nil) {
-        return 0;
+    if (m_bitmap.Ok()) {
+        return m_bitmap.GetWidth();
     }
-    return (int)[imageRenderer size].width;
+    return 0;
 }
 
 int QPixmap::height() const
 {
-    if (imageRenderer == nil) {
-        return 0;
+    if (m_bitmap.Ok()) {
+        return m_bitmap.GetHeight();
     }
-    return (int)[imageRenderer size].height;
+    return 0;
 }
 
 void QPixmap::resize(const QSize &sz)
@@ -260,13 +200,12 @@ void QPixmap::resize(const QSize &sz)
 
 void QPixmap::resize(int w, int h)
 {
-    if (needCopyOnWrite) {
-        id <WebCoreImageRenderer> newImageRenderer = KWQRetainNSRelease([imageRenderer copyWithZone:NULL]);
-        KWQRelease(imageRenderer);
-        imageRenderer = newImageRenderer;
-        needCopyOnWrite = false;
-    }
-    [imageRenderer resize:NSMakeSize(w, h)];
+    if (m_bitmap.Ok()){
+		// TODO: consider making QPixmap a wxImage depending on which would 
+		// overall be more efficient
+		wxImage resizer = m_bitmap.ConvertToImage();
+		m_bitmap = wxBitmap(resizer.Scale(w, h));
+	}	
 }
 
 QPixmap QPixmap::xForm(const QWMatrix &xmatrix) const
@@ -282,33 +221,25 @@ QPixmap QPixmap::xForm(const QWMatrix &xmatrix) const
 
 QPixmap &QPixmap::operator=(const QPixmap &assignFrom)
 {
-    id <WebCoreImageRenderer> oldImageRenderer = imageRenderer;
-    imageRenderer = KWQRetainNSRelease([assignFrom.imageRenderer retainOrCopyIfNeeded]);
-    KWQRelease(oldImageRenderer);
-    NSString *newMIMEType = KWQRetainNSRelease([assignFrom.MIMEType copy]);
-    KWQRelease(MIMEType);
-    MIMEType = newMIMEType;
+    MIMEType = assignFrom.MIMEType;
     assignFrom.needCopyOnWrite = true;
     needCopyOnWrite = true;
+	m_bitmap = assignFrom.m_bitmap;
     return *this;
 }
 
 void QPixmap::increaseUseCount() const
 {
-    [imageRenderer increaseUseCount];
 }
 
 void QPixmap::decreaseUseCount() const
 {
-    [imageRenderer decreaseUseCount];
 }
 
 void QPixmap::stopAnimations()
 {
-    [imageRenderer stopAnimation];
 }
 
 void QPixmap::flushRasterCache()
 {
-    [imageRenderer flushRasterCache];
 }

@@ -35,16 +35,11 @@
 #include "KWQRect.h"
 #include "KWQPainter.h"
 
-#ifdef __OBJC__
-@protocol WebCoreImageRenderer;
-typedef id <WebCoreImageRenderer> WebCoreImageRendererPtr;
-@class NSString;
-#else
-class WebCoreImageRenderer;
-typedef WebCoreImageRenderer *WebCoreImageRendererPtr;
-class NSString;
-#endif
+#include <wx/defs.h>
+#include <wx/bitmap.h>
+#include <wx/image.h>
 
+typedef void* WebCoreImageRendererPtr;
 class QWMatrix;
 
 namespace khtml
@@ -58,12 +53,12 @@ QPixmap *KWQLoadPixmap(const char *name);
 class QPixmap : public QPaintDevice, public Qt {
 public:
     QPixmap();
-    QPixmap(void *MIMEType);
+    QPixmap(QString MIMEType); 
     QPixmap(const QSize&);
     QPixmap(const QByteArray&);
-    QPixmap(const QByteArray&, NSString *MIMEType);
+    QPixmap(const QByteArray&, const wxString& MIMEType);
     QPixmap(int, int);
-    QPixmap(WebCoreImageRendererPtr);
+    QPixmap(const wxBitmap&);
     QPixmap(const QPixmap &);
     ~QPixmap();
     
@@ -93,7 +88,7 @@ public:
     
     void flushRasterCache();
     
-    CGImageRef imageRef();
+    wxBitmap* imageRef();
     
     static bool shouldUseThreadedDecoding();
 
@@ -105,7 +100,9 @@ private:
         
     mutable bool needCopyOnWrite;
     
-    NSString *MIMEType;
+    wxString MIMEType;
+	
+	wxBitmap m_bitmap;
     
     friend class QPainter;
 
