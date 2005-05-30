@@ -306,7 +306,7 @@ bool QWidget::isVisible() const
 void QWidget::setCursor(const QCursor &cur)
 {
 	if (data->view)
-		data->view->SetCursor(cur.handle());
+		data->view->SetCursor(cur);
 }
 
 QCursor QWidget::cursor()
@@ -358,17 +358,17 @@ QPoint QWidget::mapFromGlobal(const QPoint &p) const
     wxPoint bp(0,0);
 
 	if (data->view)
-		data->view->ScreenToClient(&bp);
+		data->view->ScreenToClient(bp);
 
     return QPoint(bp);
 }
 
-wxWindow *QWidget::getView() const
+wxWindow *QWidget::getView()
 {
     return data->view;
 }
 
-void QWidget::setView(NSView *view)
+void QWidget::setView(wxWindow *view)
 {
 	// we'll leave this func in for now, but we should be able to just create
 	// the view from the constructor in all cases. Being able to dynamically switch
