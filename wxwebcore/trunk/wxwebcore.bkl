@@ -20,11 +20,14 @@
         <warnings>max</warnings>
         <dirname>.</dirname>
 
+        <include>jscore</include>
+        <include>jscore/ForwardingHeaders</include>
         <include>jscore/kjs</include>
         <include>jscore/pcre</include>
         <include>jscore/bindings</include>
         <include>jscore/bindings/c</include>
         <include>jscore/bindings/jni</include>
+        <include>webcore</include>
         <include>webcore/ForwardingHeaders</include>
         <include>webcore/kwq</include>
         <include>webcore/khtml</include>
