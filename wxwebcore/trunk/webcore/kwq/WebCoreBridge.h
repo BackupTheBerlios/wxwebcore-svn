@@ -462,7 +462,6 @@ private:
     KHTMLRenderPart *_renderPart;
     RenderArena *_renderPartArena;
     bool _shouldCreateRenderers;
-}
 
 // The WebCoreBridge protocol contains methods for use by the WebCore side of the bridge.
 
@@ -477,17 +476,12 @@ private:
 // KO: This is actually a complete TLW interface, as it manipulates status bar, toolbars, etc.
 // I think we can actually change this as we need to, I don't see anywhere within WebCore that this interface is implemented
 
-class WebCoreBridgeInterface : public wxObject {
-
 public:
-	WebCoreBridgeInterface();
-	~WebCoreBridgeInterface();
-
 	virtual wxList& childFrames(); // WebCoreBridge objects
 	virtual WebCoreBridge* mainFrame();
 	virtual WebCoreBridge* findFrameNamed(const wxString& name);
 	/* Creates a name for an frame unnamed in the HTML.  It should produce repeatable results for loads of the same frameset. */
-	virtual wxString& generateFrameName() const;
+	virtual wxString& generateFrameName();
 	virtual void frameDetached();
 	virtual wxWindow* documentView();
 
@@ -655,7 +649,7 @@ public:
 
 - (BOOL)isCharacterSmartReplaceExempt:(unichar)c isPreviousCharacter:(BOOL)isPreviousCharacter;
 #endif
-}
+};
 
 
 // This interface definition allows those who hold a WebCoreBridge * to call all the methods
