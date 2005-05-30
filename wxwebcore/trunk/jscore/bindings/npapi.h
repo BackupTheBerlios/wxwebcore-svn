@@ -72,7 +72,11 @@
 #endif /* __MWERKS__ */
 
 #if defined(__APPLE_CC__) && !defined(__MACOS_CLASSIC__)
+// We emulate some Apple APIs, like the CFStringEncodings enum, so if the "real" ones
+// are included we get multiple definition errors. 
+#if 0
 #   define XP_MACOSX
+#endif
 #endif
 
 #ifdef XP_MAC
