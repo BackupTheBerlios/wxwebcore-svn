@@ -23,7 +23,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
 
+#if 0
 @class WebCoreBridge;
+#endif
 
 // This protocol is a way for an NSScrollView to detect
 // that the view it's embedded in is one that should be resized when the
