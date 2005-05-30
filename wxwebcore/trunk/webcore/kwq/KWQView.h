@@ -22,7 +22,8 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
  */
- 
+
+#if 0
 #import <Cocoa/Cocoa.h>
 
 class QWidget;
@@ -31,3 +32,4 @@ class QWidget;
 @protocol KWQWidgetHolder
 - (QWidget *)widget;
 @end
+#endif

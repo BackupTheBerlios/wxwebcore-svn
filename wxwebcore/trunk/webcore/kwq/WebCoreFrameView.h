@@ -35,6 +35,7 @@ typedef enum {
     WebCoreScrollBarAlwaysOn
 } WebCoreScrollBarMode;
 
+#if 0
 @protocol WebCoreFrameView
 - (void)setHorizontalScrollingMode:(WebCoreScrollBarMode)mode;
 - (void)setVerticalScrollingMode:(WebCoreScrollBarMode)mode;
@@ -52,3 +53,4 @@ typedef enum {
 @protocol WebCoreBridgeHolder
 - (WebCoreBridge *) webCoreBridge;
 @end
+#endif
