@@ -48,6 +48,38 @@
 
 #import "KWQDateTime.h"
 
+static wxDateTime::Month intToMonth(int monthNum){
+	switch (monthNum){
+		case 1:
+			return wxDateTime::Jan;
+		case 2:
+			return wxDateTime::Feb;
+		case 3:
+			return wxDateTime::Mar;
+		case 4:
+			return wxDateTime::Apr;
+		case 5:
+			return wxDateTime::May;
+		case 6:
+			return wxDateTime::Jun;
+		case 7:
+			return wxDateTime::Jul;
+		case 8:
+			return wxDateTime::Aug;
+		case 9:
+			return wxDateTime::Sep;
+		case 10:
+			return wxDateTime::Oct;
+		case 11:
+			return wxDateTime::Nov;
+		case 12:
+			return wxDateTime::Dec;
+		default:
+			return wxDateTime::Inv_Month;
+	};
+
+}
+
 QTime::QTime(int hours, int minutes)
 {
 	timeInSeconds = wxDateTime();
@@ -56,8 +88,7 @@ QTime::QTime(int hours, int minutes)
 
 int QTime::msec() const
 {
-    if (timeInSeconds)
-		return timeInSeconds.GetMillisecond();
+	return timeInSeconds.GetMillisecond();
 }
 
 int QTime::elapsed() const
@@ -70,10 +101,9 @@ int QTime::elapsed() const
 
 int QTime::restart()
 {
-    CFAbsoluteTime currentTime = CFAbsoluteTimeGetCurrent();
-    CFTimeInterval elapsed = currentTime - timeInSeconds;    
-    timeInSeconds = currentTime;
-    return (int)(elapsed * 1000);
+	int timeElapsed = elapsed();
+	timeInSeconds = wxDateTime::Now();
+    return (int)(timeElapsed * 1000);
 }
 
 QDate::QDate(int y, int m, int d)
@@ -86,11 +116,11 @@ QDateTime::QDateTime(const QDate &d, const QTime &t)
 	
     dateInSeconds = wxDateTime();
 	dateInSeconds.SetYear(d.year);
-	dateInSeconds.SetMonth(d.month-1);
+	dateInSeconds.SetMonth(intToMonth(d.month));
 	dateInSeconds.SetDay(d.day);
-	dateInSeconds.SetHours(t.timeInSeconds.GetHours());
-	dateInSeconds.SetMinutes(t.timeInSeconds.GetMinutes());
-	dateInSeconds.SetSeconds(t.timeInSeconds.GetSeconds());
+	dateInSeconds.SetHour(t.timeInSeconds.GetHour());
+	dateInSeconds.SetMinute(t.timeInSeconds.GetMinute());
+	dateInSeconds.SetSecond(t.timeInSeconds.GetSecond());
 }
 
 int QDateTime::secsTo(const QDateTime &b) const
