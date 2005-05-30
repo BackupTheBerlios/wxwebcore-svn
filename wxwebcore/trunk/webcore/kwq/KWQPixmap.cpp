@@ -53,7 +53,7 @@ QPixmap *KWQLoadPixmap(const char *name)
 {
 	// wxImage supports more formats than wxBitmap, so create
 	// then convert.
-	wxImage newImage(wxString(name));
+	wxImage newImage = wxImage(wxString(name, wxConvFile));
 	
     QPixmap *p = new QPixmap(wxBitmap(newImage));
     return p;
