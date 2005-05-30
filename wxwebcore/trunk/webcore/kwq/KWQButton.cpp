@@ -48,7 +48,7 @@ QButton::~QButton()
 void QButton::setText(const QString &s)
 {
     if (m_button)
-		m_button->SetLabel(s));
+		m_button->SetLabel(s);
 }
 
 QString QButton::text() const
