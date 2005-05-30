@@ -109,10 +109,12 @@
         webcore/kwq/KWQColorData.c
         webcore/kwq/KWQCursor.cpp
         webcore/kwq/KWQCString.cpp
+        webcore/kwq/KWQDateTime.cpp
         webcore/kwq/KWQFile.cpp
         webcore/kwq/KWQFont.cpp
         webcore/kwq/KWQGlobal.cpp
         webcore/kwq/KWQGuardedPtr.cpp
+        webcore/kwq/KWQKCookieJar.cpp
         webcore/kwq/KWQKCursor.cpp
         webcore/kwq/KWQKGlobalSettings.cpp
         webcore/kwq/KWQKJob.cpp
@@ -126,6 +128,7 @@
         webcore/kwq/KWQMapImpl.cpp
         webcore/kwq/KWQPaintDeviceMetrics.cpp
         webcore/kwq/KWQPen.cpp
+        webcore/kwq/KWQPixmap.cpp
         webcore/kwq/KWQPoint.cpp
         webcore/kwq/KWQPointArray.cpp
         webcore/kwq/KWQPtrDictImpl.cpp
