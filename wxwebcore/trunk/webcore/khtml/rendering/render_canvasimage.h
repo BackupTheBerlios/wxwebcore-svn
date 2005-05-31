@@ -34,6 +34,7 @@
 #include <qmap.h>
 #include <qpixmap.h>
 
+#if 0 // FIXME
 #include <ApplicationServices/ApplicationServices.h>
 
 extern "C" {
@@ -42,6 +43,7 @@ extern void CGContextReplacePathWithStrokedPath(CGContextRef c);
 extern CGImageRef CGBitmapContextCreateImage(CGContextRef c);
 
 }
+#endif
 
 
 namespace khtml {
@@ -67,15 +69,20 @@ public:
     { return static_cast<DOM::HTMLElementImpl*>(RenderObject::element()); }
     
     void updateDrawnImage();
+
+#if 0 // FIXME
     CGContextRef drawingContext();
+#endif
     
 private:
+#if 0 // FIXME
     void createDrawingContext();
     CGImageRef drawnImage();
 
     CGContextRef _drawingContext;
     void *_drawingContextData;
     CGImageRef _drawnImage;
+#endif
     
     unsigned _needsImageUpdate:1;
 };
