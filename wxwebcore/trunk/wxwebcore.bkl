@@ -276,7 +276,7 @@
 
         webcore/khtml/xbl/xbl_binding.cpp
         webcore/khtml/xbl/xbl_binding_manager.cpp
-        webcore/khtml/xbl/xbl_docimpl.cpp
+        <!-- webcore/khtml/xbl/xbl_docimpl.cpp -->
         webcore/khtml/xbl/xbl_protobinding.cpp
         webcore/khtml/xbl/xbl_protohandler.cpp
         webcore/khtml/xbl/xbl_protoimplementation.cpp
