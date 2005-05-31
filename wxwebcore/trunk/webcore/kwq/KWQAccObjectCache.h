@@ -23,8 +23,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#if 0 // FIXME
 #include <CoreFoundation/CoreFoundation.h>
 #include <ApplicationServices/ApplicationServicesPriv.h>
+#endif
+
 #include "visible_position.h"
 
 #ifdef __OBJC__
@@ -54,11 +57,13 @@ public:
 
     KWQAccObjectID getAccObjectID(KWQAccObject* accObject);
     void removeAccObjectID(KWQAccObject* accObject);
+#if 0 // FIXME - should we define OMIT_TIGER_FEATURES instead?
 #if OMIT_TIGER_FEATURES
 // no parameterized attributes in Panther... they were introduced in Tiger
 #else
     AXTextMarkerRef textMarkerForVisiblePosition (const khtml::VisiblePosition &);
     khtml::VisiblePosition visiblePositionForTextMarker (AXTextMarkerRef textMarker);
+#endif
 #endif
 
     void detach(khtml::RenderObject* renderer);
@@ -76,7 +81,9 @@ private:
     static bool gAccessibilityEnabled;
 
 private:
+#if 0 // FIXME
     CFMutableDictionaryRef accCache;
     CFMutableDictionaryRef accCacheByID;
     KWQAccObjectID accObjectIDSource;
+#endif
 };
