@@ -218,9 +218,69 @@
         <!-- webcore/khtml/ecma/xmlhttprequest.cpp -->
         webcore/khtml/ecma/xmlserializer.cpp
 
+        webcore/khtml/html/dtd.cpp
+        webcore/khtml/html/html_baseimpl.cpp
+        webcore/khtml/html/html_blockimpl.cpp
+        webcore/khtml/html/html_canvasimpl.cpp
+        webcore/khtml/html/html_documentimpl.cpp
+        webcore/khtml/html/html_elementimpl.cpp
+        webcore/khtml/html/html_formimpl.cpp
+        webcore/khtml/html/html_headimpl.cpp
+        webcore/khtml/html/html_imageimpl.cpp
+        webcore/khtml/html/html_inlineimpl.cpp
+        webcore/khtml/html/html_listimpl.cpp
+        webcore/khtml/html/html_miscimpl.cpp
+        <!-- webcore/khtml/html/html_objectimpl.cpp -->
+        webcore/khtml/html/htmlparser.cpp
+        webcore/khtml/html/html_tableimpl.cpp
+        webcore/khtml/html/htmltokenizer.cpp
+
         webcore/khtml/khtml_events.cpp
         webcore/khtml/khtml_part.cpp
         <!-- webcore/khtml/khtmlview.cpp -->
+
+        webcore/khtml/misc/arena.cpp
+        webcore/khtml/misc/decoder.cpp
+        webcore/khtml/misc/formdata.cpp
+        webcore/khtml/misc/helper.cpp
+        webcore/khtml/misc/htmlhashes.cpp
+        <!-- webcore/khtml/misc/loader.cpp -->
+        webcore/khtml/misc/stringit.cpp
+
+        webcore/khtml/rendering/bidi.cpp
+        <!-- webcore/khtml/rendering/break_lines.cpp -->
+        webcore/khtml/rendering/font.cpp
+        webcore/khtml/rendering/render_applet.cpp
+        <!-- webcore/khtml/rendering/render_arena.cpp -->
+        webcore/khtml/rendering/render_block.cpp
+        webcore/khtml/rendering/render_box.cpp
+        webcore/khtml/rendering/render_br.cpp
+        webcore/khtml/rendering/render_canvas.cpp
+        <!-- webcore/khtml/rendering/render_canvasimage.cpp -->
+        webcore/khtml/rendering/render_container.cpp
+        webcore/khtml/rendering/render_flexbox.cpp
+        webcore/khtml/rendering/render_flow.cpp
+        <!-- webcore/khtml/rendering/render_form.cpp -->
+        <!-- webcore/khtml/rendering/render_frames.cpp -->
+        webcore/khtml/rendering/render_image.cpp
+        webcore/khtml/rendering/render_inline.cpp
+        webcore/khtml/rendering/render_layer.cpp
+        webcore/khtml/rendering/render_line.cpp
+        webcore/khtml/rendering/render_list.cpp
+        webcore/khtml/rendering/render_object.cpp
+        <!-- webcore/khtml/rendering/render_replaced.cpp -->
+        webcore/khtml/rendering/render_style.cpp
+        webcore/khtml/rendering/render_table.cpp
+        webcore/khtml/rendering/render_text.cpp
+        webcore/khtml/rendering/table_layout.cpp
+
+        webcore/khtml/xbl/xbl_binding.cpp
+        webcore/khtml/xbl/xbl_binding_manager.cpp
+        webcore/khtml/xbl/xbl_docimpl.cpp
+        webcore/khtml/xbl/xbl_protobinding.cpp
+        webcore/khtml/xbl/xbl_protohandler.cpp
+        webcore/khtml/xbl/xbl_protoimplementation.cpp
+        <!-- webcore/khtml/xbl/xbl_tokenizer.cpp -->
 
         webcore/khtml/xml/dom2_eventsimpl.cpp
         webcore/khtml/xml/dom2_rangeimpl.cpp
