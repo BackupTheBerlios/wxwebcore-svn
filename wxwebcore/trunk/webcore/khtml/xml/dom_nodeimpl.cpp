@@ -471,8 +471,8 @@ bool NodeImpl::dispatchEvent(EventImpl *evt, int &exceptioncode, bool tempEvent)
     // that anyway.
     // FIXME: Much code in this class assumes document is non-nil; it would be better to
     // ensure that document can never be nil.
-    KHTMLPart *part = nil;
-    KHTMLView *view = nil;
+    KHTMLPart *part = NULL;
+    KHTMLView *view = NULL;
     
     if (document && document->document()) {
         part = document->document()->part();
@@ -1357,7 +1357,7 @@ void NodeImpl::createRendererIfNeeded()
         if (getDocument()->bindingManager()->loadBindings(this, style->bindingURIs(), true, &resolveStyle) && 
             rendererIsNeeded(style)) {
             if (resolveStyle) {
-                style->deref();
+                style->deref(getDocument()->renderArena());
                 style = styleForRenderer(parentRenderer);
             }
 #else
