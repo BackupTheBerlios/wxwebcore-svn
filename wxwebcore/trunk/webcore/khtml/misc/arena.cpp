@@ -44,6 +44,8 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <assert.h>
+#include <algorithm>
 #include "arena.h"
 
 //#define DEBUG_ARENA_MALLOC
@@ -163,7 +165,7 @@ void* ArenaAllocate(ArenaPool *pool, unsigned int nb)
 
     /* attempt to allocate from the heap */ 
     {  
-        unsigned int sz = MAX(pool->arenasize, nb);
+        unsigned int sz = std::max(pool->arenasize, nb);
         sz += sizeof *a + pool->mask;  /* header and alignment slop */
 #ifdef DEBUG_ARENA_MALLOC
         i++;

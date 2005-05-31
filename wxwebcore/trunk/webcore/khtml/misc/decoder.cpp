@@ -41,6 +41,11 @@ using namespace khtml;
 #include <kdebug.h>
 #include <klocale.h>
 
+#ifdef UNICODE
+    // somebody even is overwriting our symbol!
+    #undef UNICODE
+#endif
+
 class KanjiCode
 {
 public:
