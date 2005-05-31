@@ -33,7 +33,7 @@
 class NSImage;
 class NSPasteboard;
 
-typedef unsigned NSDragOperation;
+typedef int NSDragOperation;
 
 class KWQKHTMLPart;
 
