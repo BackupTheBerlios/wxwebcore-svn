@@ -29,3 +29,4 @@ typedef enum {
     // this flag may be or'ed with either of the two above
     WebCoreKeyboardAccessTabsToLinks = 0x10000000, 
 } WebCoreKeyboardUIMode;
+
