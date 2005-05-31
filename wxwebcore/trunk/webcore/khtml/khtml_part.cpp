@@ -103,10 +103,6 @@ using namespace DOM;
 
 #include "khtmlpart_p.h"
 
-#if APPLE_CHANGES
-#include <CoreServices/CoreServices.h>
-#endif
-
 using khtml::ApplyStyleCommand;
 using khtml::CHARACTER;
 using khtml::ChildFrame;

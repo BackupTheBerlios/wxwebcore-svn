@@ -3400,7 +3400,7 @@ void CSSStyleSelector::applyProperty( int id, DOM::CSSValueImpl *value )
                     firstBinding = false;
                     style->deleteBindingURIs();
                 }
-                style->addBindingURI(val->getStringValue());
+                style->addBindingURI(val->getStringValue().implementation());
             }
         }
 #endif
