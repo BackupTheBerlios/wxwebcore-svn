@@ -204,6 +204,20 @@
         webcore/khtml/dom/html_object.cpp
         webcore/khtml/dom/html_table.cpp
 
+        webcore/khtml/ecma/kjs_binding.cpp
+        webcore/khtml/ecma/kjs_css.cpp
+        <!-- webcore/khtml/ecma/kjs_dom.cpp -->
+        <!-- webcore/khtml/ecma/kjs_events.cpp -->
+        <!-- webcore/khtml/ecma/kjs_html.cpp -->
+        webcore/khtml/ecma/kjs_navigator.cpp
+        <!-- webcore/khtml/ecma/kjs_proxy.cpp -->
+        webcore/khtml/ecma/kjs_range.cpp
+        webcore/khtml/ecma/kjs_traversal.cpp
+        webcore/khtml/ecma/kjs_views.cpp
+        <!-- webcore/khtml/ecma/kjs_window.cpp -->
+        <!-- webcore/khtml/ecma/xmlhttprequest.cpp -->
+        webcore/khtml/ecma/xmlserializer.cpp
+
         webcore/khtml/khtml_events.cpp
         webcore/khtml/khtml_part.cpp
         <!-- webcore/khtml/khtmlview.cpp -->
