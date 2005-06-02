@@ -29,6 +29,8 @@
 #include "KWQColor.h"
 #include "KWQNamespace.h"
 
+#include <wx/gdicmn.h>
+
 class QBrush : public Qt {
 public: 
     QBrush::QBrush(const QColor &c = black, BrushStyle style = SolidPattern)
@@ -41,6 +43,8 @@ public:
     
     bool operator==(const QBrush &b) const { return brushColor == b.brushColor && brushStyle == b.brushStyle; }
     bool operator!=(const QBrush &b) const { return !(*this == b); }
+	
+	operator wxBrush() const { return wxBrush(brushColor, (brushStyle == NoBrush) ? wxTRANSPARENT : wxSOLID); }
 
 private:
     QColor brushColor;
