@@ -71,4 +71,27 @@ bool QPen::operator!=(const QPen &compareTo) const
     return !(*this == compareTo);
 }
 
+wxPen QPen::operator wxPen() const
+{
+	int style;
+	PenStyle thisStyle;
+	select (thisStyle){
+		case SolidLine:
+			style = wxSOLID;
+			break;
+		case DotLine:
+			style = wxDOT;
+			break;
+		case DashLine:
+			style = wxLONG_DASH;
+			break;
+		case NoPen:
+		default:
+			style = wxTRANSPARENT;
+	};
+
+	return wxPen(color(), width(), style);
+
+}
+
 

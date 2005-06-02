@@ -43,6 +43,8 @@ public:
 
     bool operator==(const QPen &) const;
     bool operator!=(const QPen &) const;
+	
+	operator wxPen() const;
     
 private:
     PenStyle  penStyle;
