@@ -26,7 +26,6 @@
 #import "KWQPainter.h"
 
 #import "KWQAssertions.h"
-#import "KWQExceptions.h"
 #import "KWQFontMetrics.h"
 #import "KWQKHTMLPart.h"
 #import "KWQPaintDevice.h"
@@ -35,16 +34,11 @@
 #import "KWQPrinter.h"
 #import "KWQPtrStack.h"
 #import "KWQWidget.h"
-#import "KWQFoundationExtras.h"
 #import "WebCoreGraphicsBridge.h"
 #import "WebCoreImageRenderer.h"
 #import "WebCoreImageRendererFactory.h"
 #import "WebCoreTextRenderer.h"
 #import "WebCoreTextRendererFactory.h"
-
-// NSColor, NSBezierPath, NSGraphicsContext and WebCoreTextRenderer
-// calls in this file are all exception-safe, so we don't block
-// exceptions for those.
 
 struct QPState {
     QPState() : paintingDisabled(false) { }
@@ -58,19 +52,17 @@ struct QPState {
 struct QPainterPrivate {
     QPainterPrivate() : textRenderer(0), focusRingPath(0), focusRingWidth(0), focusRingOffset(0),
                         hasFocusRingColor(false) { }
-    ~QPainterPrivate() { KWQRelease(textRenderer); KWQRelease(focusRingPath); }
+    ~QPainterPrivate() { }
     QPState state;
     QPtrStack<QPState> stack;
-    id <WebCoreTextRenderer> textRenderer;
     QFont textRendererFont;
-    NSBezierPath *focusRingPath;
     int focusRingWidth;
     int focusRingOffset;
     bool hasFocusRingColor;
     QColor focusRingColor;
 };
 
-
+#if 0
 static CGColorRef CGColorFromNSColor(NSColor *color)
 {
     // this needs to always use device colorspace so it can de-calibrate the color for
@@ -87,13 +79,17 @@ static CGColorRef CGColorFromNSColor(NSColor *color)
     CGColorSpaceRelease(colorSpace);
     return cgColor;
 }
+#endif
 
 QPainter::QPainter() : data(new QPainterPrivate), _isForPrinting(false), _usesInactiveTextBackgroundColor(false), _drawsFocusRing(true)
 {
+	m_dc = wxClientDC();
 }
 
 QPainter::QPainter(bool forPrinting) : data(new QPainterPrivate), _isForPrinting(forPrinting), _usesInactiveTextBackgroundColor(false), _drawsFocusRing(true)
 {
+	// TODO: do we need to use wxPrinterDC if forPrinting is true here?
+	m_dc = wxDC();
 }
 
 QPainter::~QPainter()
@@ -178,8 +174,6 @@ QRect QPainter::xForm(const QRect &aRect) const
 void QPainter::save()
 {
     data->stack.push(new QPState(data->state));
-
-    [NSGraphicsContext saveGraphicsState]; 
 }
 
 void QPainter::restore()
@@ -191,8 +185,6 @@ void QPainter::restore()
     QPState *ps = data->stack.pop();
     data->state = *ps;
     delete ps;
-
-    [NSGraphicsContext restoreGraphicsState];
 }
 
 // Draws a filled rectangle with a stroked border.
@@ -206,210 +198,63 @@ void QPainter::drawRect(int x, int y, int w, int h)
 
     if (data->state.pen.style() != NoPen) {
         _setColorFromPen();
-        NSFrameRect(NSMakeRect(x, y, w, h));
+        drawLine(x, y, w, h);
     }
 }
 
 void QPainter::_setColorFromBrush()
 {
-    [data->state.brush.color().getNSColor() set];
+    m_dc.SetBackground(data->state.brush.color().getNSColor());
 }
 
 void QPainter::_setColorFromPen()
 {
-    [data->state.pen.color().getNSColor() set];
+    m_dc.SetTextForeground(data->state.pen.color());
 }
 
 // This is only used to draw borders.
 void QPainter::drawLine(int x1, int y1, int x2, int y2)
 {
-    if (data->state.paintingDisabled)
+    if (data->state.paintingDisabled || !m_dc.Ok())
         return;
 
     PenStyle penStyle = data->state.pen.style();
     if (penStyle == NoPen)
         return;
-    float width = data->state.pen.width();
-    if (width < 1)
-        width = 1;
+    
+	m_dc.SetPen(data->state.pen);
 
-    NSPoint p1 = NSMakePoint(x1, y1);
-    NSPoint p2 = NSMakePoint(x2, y2);
-    
-    // For odd widths, we add in 0.5 to the appropriate x/y so that the float arithmetic
-    // works out.  For example, with a border width of 3, KHTML will pass us (y1+y2)/2, e.g.,
-    // (50+53)/2 = 103/2 = 51 when we want 51.5.  It is always true that an even width gave
-    // us a perfect position, but an odd width gave us a position that is off by exactly 0.5.
-    if (penStyle == DotLine || penStyle == DashLine) {
-        if (x1 == x2) {
-            p1.y += width;
-            p2.y -= width;
-        }
-        else {
-            p1.x += width;
-            p2.x -= width;
-        }
-    }
-    
-    if (((int)width)%2) {
-        if (x1 == x2) {
-            // We're a vertical line.  Adjust our x.
-            p1.x += 0.5;
-            p2.x += 0.5;
-        }
-        else {
-            // We're a horizontal line. Adjust our y.
-            p1.y += 0.5;
-            p2.y += 0.5;
-        }
-    }
-    
-    NSBezierPath *path = [[NSBezierPath alloc] init];
-    [path setLineWidth:width];
-
-    int patWidth = 0;
-    switch (penStyle) {
-    case NoPen:
-    case SolidLine:
-        break;
-    case DotLine:
-        patWidth = (int)width;
-        break;
-    case DashLine:
-        patWidth = 3*(int)width;
-        break;
-    }
-
-    _setColorFromPen();
-    
-    NSGraphicsContext *graphicsContext = [NSGraphicsContext currentContext];
-    BOOL flag = [graphicsContext shouldAntialias];
-    [graphicsContext setShouldAntialias: NO];
-    
-    if (patWidth) {
-        // Do a rect fill of our endpoints.  This ensures we always have the
-        // appearance of being a border.  We then draw the actual dotted/dashed line.
-        if (x1 == x2) {
-            _fillRect(p1.x-width/2, p1.y-width, width, width, data->state.pen.color());
-            _fillRect(p2.x-width/2, p2.y, width, width, data->state.pen.color());
-        }
-        else {
-            _fillRect(p1.x-width, p1.y-width/2, width, width, data->state.pen.color());
-            _fillRect(p2.x, p2.y-width/2, width, width, data->state.pen.color());
-        }
-        
-        // Example: 80 pixels with a width of 30 pixels.
-        // Remainder is 20.  The maximum pixels of line we could paint
-        // will be 50 pixels.
-        int distance = ((x1 == x2) ? (y2 - y1) : (x2 - x1)) - 2*(int)width;
-        int remainder = distance%patWidth;
-        int coverage = distance-remainder;
-        int numSegments = coverage/patWidth;
-
-        float patternOffset = 0;
-        // Special case 1px dotted borders for speed.
-        if (patWidth == 1)
-            patternOffset = 1.0;
-        else {
-            bool evenNumberOfSegments = numSegments%2 == 0;
-            if (remainder)
-                evenNumberOfSegments = !evenNumberOfSegments;
-            if (evenNumberOfSegments) {
-                if (remainder) {
-                    patternOffset += patWidth - remainder;
-                    patternOffset += remainder/2;
-                }
-                else
-                    patternOffset = patWidth/2;
-            }
-            else if (!evenNumberOfSegments) {
-                if (remainder)
-                    patternOffset = (patWidth - remainder)/2;
-            }
-        }
-        
-        const float dottedLine[2] = { patWidth, patWidth };
-        [path setLineDash:dottedLine count:2 phase:patternOffset];
-    }
-    
-    [path moveToPoint:p1];
-    [path lineToPoint:p2];
-
-    [path stroke];
-    
-    [path release];
-
-    [graphicsContext setShouldAntialias: flag];
+	m_dc.DrawLine(x1, y1, x2, y2);
 }
 
 
 // This method is only used to draw the little circles used in lists.
 void QPainter::drawEllipse(int x, int y, int w, int h)
 {
-    // This code can only handle circles, not ellipses. But khtml only
-    // uses it for circles.
-    ASSERT(w == h);
-
-    if (data->state.paintingDisabled)
+    if (data->state.paintingDisabled || !m_dc.Ok())
         return;
-        
-    CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
-    CGContextBeginPath(context);
-    float r = (float)w / 2;
-    CGContextAddArc(context, x + r, y + r, r, 0, 2*M_PI, true);
-    CGContextClosePath(context);
 
-    if (data->state.brush.style() != NoBrush) {
-        _setColorFromBrush();
-	if (data->state.pen.style() != NoPen) {
-	    // stroke and fill
-	    _setColorFromPen();
-	    uint penWidth = data->state.pen.width();
-	    if (penWidth == 0) 
-		penWidth++;
-	    CGContextSetLineWidth(context, penWidth);
-	    CGContextDrawPath(context, kCGPathFillStroke);
-	} else {
-	    CGContextFillPath(context);
-	}
-    }
-    if (data->state.pen.style() != NoPen) {
-        _setColorFromPen();
-	uint penWidth = data->state.pen.width();
-	if (penWidth == 0) 
-	    penWidth++;
-        CGContextSetLineWidth(context, penWidth);
-        CGContextStrokePath(context);
-    }
+	m_dc.SetPen(data->state.pen);
+	
+	m_dc.DrawEllipse(x, y, w, h);
 }
 
 
 void QPainter::drawArc (int x, int y, int w, int h, int a, int alen)
 { 
-    // Only supports arc on circles.  That's all khtml needs.
-    ASSERT(w == h);
-
-    if (data->state.paintingDisabled)
+    if (data->state.paintingDisabled || !m_dc.Ok())
         return;
     
     if (data->state.pen.style() != NoPen) {
-        CGContextRef context = (CGContextRef)[[NSGraphicsContext currentContext] graphicsPort];
-        CGContextBeginPath(context);
-	
-	float r = (float)w / 2;
-        float fa = (float)a / 16;
-        float falen =  fa + (float)alen / 16;
-        CGContextAddArc(context, x + r, y + r, r, -fa * M_PI/180, -falen * M_PI/180, true);
-	
-        _setColorFromPen();
-        CGContextSetLineWidth(context, data->state.pen.width());
-        CGContextStrokePath(context);
+		// Qt specifies angles in 1/16 degrees, wx uses full degrees
+		// not sure if that will be a problem for us or not...
+        m_dc.DrawEllipticArc(x, y, w, h, (a/16), (alen/16));
     }
 }
 
 void QPainter::drawLineSegments(const QPointArray &points, int index, int nlines)
-{
-    if (data->state.paintingDisabled)
+{	
+    if (data->state.paintingDisabled || !m_dc.Ok())
         return;
     
     _drawPoints (points, 0, index, nlines, false);
@@ -423,7 +268,11 @@ void QPainter::drawPolyline(const QPointArray &points, int index, int npoints)
 void QPainter::drawPolygon(const QPointArray &points, bool winding, int index, 
     int npoints)
 {
-    _drawPoints (points, winding, index, npoints, true);
+    if (data->state.paintingDisabled || !m_dc.Ok())
+		return; 
+		
+	_drawPoints(points, winding, index, npoints, true);
+	
 }
 
 void QPainter::drawConvexPolygon(const QPointArray &points)
@@ -433,33 +282,38 @@ void QPainter::drawConvexPolygon(const QPointArray &points)
 
 void QPainter::_drawPoints (const QPointArray &_points, bool winding, int index, int _npoints, bool fill)
 {
-    if (data->state.paintingDisabled)
+    if (data->state.paintingDisabled || !m_dc.Ok())
         return;
-        
+	
+	// NOTE: I'm unclear as to why they do things this way. There's no 
+	// npoints param in Qt docs, and it seems if npoints is specified
+	// it overrides index, which IS in Qt docs. In any case, I chose to  
+	// mirror the implementation as it works for WebCore.
+	// This is also done in drawPolygon above.
+	  
     int npoints = _npoints != -1 ? _npoints : _points.size()-index;
-    NSPoint points[npoints];
+    wxPoint points[npoints];
     for (int i = 0; i < npoints; i++) {
-        points[i].x = _points[index+i].x();
-        points[i].y = _points[index+i].y();
+        points[i] = wxPoint(_points[index+i]);
     }
-            
-    NSBezierPath *path = [[NSBezierPath alloc] init];
-    [path appendBezierPathWithPoints:&points[0] count:npoints];
-    [path closePath]; // Qt always closes the path.  Determined empirically.
+	
+	m_dc.SetPen(data->state.pen);
+	m_dc.SetBrush(data->state.brush);
     
-    if (fill && data->state.brush.style() != NoBrush) {
-        [path setWindingRule:winding ? NSNonZeroWindingRule : NSEvenOddWindingRule];
-        _setColorFromBrush();
-        [path fill];
+    if (!fill) {
+        m_dc.SetBrush(wxNullBrush);
     }
 
-    if (data->state.pen.style() != NoPen) {
-        _setColorFromPen();
-        [path setLineWidth:data->state.pen.width()];
-        [path stroke];
-    }
-    
-    [path release];
+	int windingRule = wxODDEVEN_RULE;
+	if (winding)
+		windingRule = wxWINDING_RULE;
+		
+	// A note from Apple's impl states that they confirmed that all the above
+	// functions close the path, and from Qt's docs, drawConvexPolygon gives 
+	//"undefined results" if given points that don't create a convex polygon.
+	// So all of these functions draw a polygon...
+	
+	m_dc.DrawPolygon(npoints, wxPoints, 0, 0, windingRule);
 }
 
 
@@ -482,8 +336,8 @@ struct CompositeOperator
 
 #define NUM_COMPOSITE_OPERATORS 14
 struct CompositeOperator compositeOperators[NUM_COMPOSITE_OPERATORS] = {
-    { "clear", NSCompositeClear },
-    { "copy", NSCompositeCopy },
+    { "clear", wxCLEAR },
+    { "copy", wxCOPY },
     { "source-over", NSCompositeSourceOver },
     { "source-in", NSCompositeSourceIn },
     { "source-out", NSCompositeSourceOut },
@@ -492,7 +346,7 @@ struct CompositeOperator compositeOperators[NUM_COMPOSITE_OPERATORS] = {
     { "destination-in", NSCompositeDestinationIn },
     { "destination-out", NSCompositeDestinationOut },
     { "destination-atop", NSCompositeDestinationAtop },
-    { "xor", NSCompositeXOR },
+    { "xor", wxXOR },
     { "darker", NSCompositePlusDarker },
     { "highlight", NSCompositeHighlight },
     { "lighter", NSCompositePlusLighter }
@@ -500,21 +354,29 @@ struct CompositeOperator compositeOperators[NUM_COMPOSITE_OPERATORS] = {
 
 int QPainter::getCompositeOperation(CGContextRef context)
 {
+	return 0;
+#if 0
     return (int)[[WebCoreImageRendererFactory sharedFactory] CGCompositeOperationInContext:context];
+#endif
 }
 
 void QPainter::setCompositeOperation (CGContextRef context, QString op)
 {
+#if 0
     [[WebCoreImageRendererFactory sharedFactory] setCGCompositeOperationFromString:op.getNSString() inContext:context];
+#endif
 }
 
 void QPainter::setCompositeOperation (CGContextRef context, int op)
 {
+#if 0
     [[WebCoreImageRendererFactory sharedFactory] setCGCompositeOperation:op inContext:context];
+#endif
 }
 
 int QPainter::compositeOperatorFromString (QString aString)
 {
+#if 0
     NSCompositingOperation op = NSCompositeSourceOver;
     
     if (aString.length()) {
@@ -528,6 +390,9 @@ int QPainter::compositeOperatorFromString (QString aString)
         }
     }
     return (int)op;
+#endif
+
+	return 0;
 }
 
 void QPainter::drawPixmap(const QPoint &p, const QPixmap &pix, const QRect &r, const QString &compositeOperator)
@@ -550,9 +415,9 @@ void QPainter::drawPixmap( int x, int y, int w, int h, const QPixmap &pixmap,
 void QPainter::drawFloatPixmap( float x, float y, float w, float h, const QPixmap &pixmap,
                            float sx, float sy, float sw, float sh, int compositeOperator, CGContextRef context)
 {
-    if (data->state.paintingDisabled)
+    if (data->state.paintingDisabled || !m_dc.Ok())
         return;
-        
+	
     if (sw == -1)
         sw = pixmap.width();
     if (sh == -1)
@@ -563,28 +428,45 @@ void QPainter::drawFloatPixmap( float x, float y, float w, float h, const QPixma
     if (h == -1)
         h = pixmap.height();
 
-    NSRect inRect = NSMakeRect(x, y, w, h);
-    NSRect fromRect = NSMakeRect(sx, sy, sw, sh);
-    
-    KWQ_BLOCK_EXCEPTIONS;
-    [pixmap.imageRenderer drawImageInRect:inRect
-                                      fromRect:fromRect compositeOperator:(NSCompositingOperation)compositeOperator context:context];
-    KWQ_UNBLOCK_EXCEPTIONS;
+    wxRect paintInRect = wxRect(x, y, w, h);
+	wxRect portionToPaint = wxRect(sx, sy, sw, sh);
+	
+	// the s* params are the portion of the pixmap that are to be drawn
+	// so we need to crop the bitmap first
+	wxBitmap bitmap = pixmap;
+	wxBitmap paintBitmap = wxBitmap(bitmap.GetSubBitmap(portionToPaint));
+	
+	m_dc.DrawBitmap(paintBitmap, x, y, true); // FIXME: anyway we can support the w and h params??
 }
 
 void QPainter::drawTiledPixmap( int x, int y, int w, int h,
 				const QPixmap &pixmap, int sx, int sy, CGContextRef context)
 {
-    if (data->state.paintingDisabled)
+    if (data->state.paintingDisabled || !m_dc.Ok())
         return;
     
-    KWQ_BLOCK_EXCEPTIONS;
-    [pixmap.imageRenderer tileInRect:NSMakeRect(x, y, w, h) fromPoint:NSMakePoint(sx, sy) context:context];
-    KWQ_UNBLOCK_EXCEPTIONS;
+	wxBitmap bitmap = pixmap;
+    int width = bitmap.GetWidth();
+    int height = bitmap.GetHeight();
+    
+	wxBitmap paintBitmap = bitmap;
+	if (sx > 0 || sy > 0) {
+		// again, we need to deal with sx, sy
+		wxRect subRect = wxRect(sx, sy, width-sx, height-sy);
+		paintBitmap = bitmap.GetSubBitmap(subRect);
+	}
+		
+    int i, j;
+    for (i = x; i < x + w; i += width)
+    {
+        for (j = y; j < y + h; j+= height)
+            dc.DrawBitmap(bitmap, i, j);
+    }
 }
 
 void QPainter::_updateRenderer()
 {
+#if 0
     if (data->textRenderer == 0 || data->state.font != data->textRendererFont) {
         data->textRendererFont = data->state.font;
         id <WebCoreTextRenderer> oldRenderer = data->textRenderer;
@@ -595,21 +477,29 @@ void QPainter::_updateRenderer()
         KWQRelease(oldRenderer);
 	KWQ_UNBLOCK_EXCEPTIONS;
     }
+#endif
 }
     
 void QPainter::drawText(int x, int y, int, int, int alignmentFlags, const QString &qstring)
 {
-    if (data->state.paintingDisabled)
+    if (data->state.paintingDisabled || !m_dc.Ok())
         return;
-
-    // Avoid allocations, use stack array to pass font families.  Normally these
-    // css fallback lists are small <= 3.
-    CREATE_FAMILY_ARRAY(data->state.font, families);    
 
     _updateRenderer();
 
-    const UniChar* str = (const UniChar*)qstring.unicode();
+    wxString text = qstring;
 
+	m_dc.SetPen(data->style.pen);
+	m_dc.SetFont(data->style.font);
+	m_dc.SetBrush(data->style.brush);
+	
+	// TODO: For both drawText methods, we need to determine a way to handle text "families"
+	// i.e. sets of equivalent fonts for when one is not available
+	
+	
+	m_dc.DrawText(qstring, x, y);
+
+#if 0
     WebCoreTextRun run;
     WebCoreInitializeTextRun(&run, str, qstring.length(), 0, qstring.length());
     
@@ -617,20 +507,22 @@ void QPainter::drawText(int x, int y, int, int, int alignmentFlags, const QStrin
     WebCoreInitializeEmptyTextStyle(&style);
     style.textColor = data->state.pen.color().getNSColor();
     style.families = families;
-    
+
+	// FIXME: Can wx handle aligned text??
     if (alignmentFlags & Qt::AlignRight)
         x -= ROUND_TO_INT([data->textRenderer floatWidthForRun:&run style:&style widths:0]);
 
     WebCoreTextGeometry geometry;
     WebCoreInitializeEmptyTextGeometry(&geometry);
     geometry.point = NSMakePoint(x, y);
-     
+
     [data->textRenderer drawRun:&run style:&style geometry:&geometry];
+#endif
 }
 
 void QPainter::drawText(int x, int y, const QChar *str, int len, int from, int to, int toAdd, const QColor &backgroundColor, QPainter::TextDirection d, bool visuallyOrdered, int letterSpacing, int wordSpacing, bool smallCaps)
 {
-    if (data->state.paintingDisabled || len <= 0)
+    if (data->state.paintingDisabled || len <= 0 || !m_dc.Ok())
         return;
 
     // Avoid allocations, use stack array to pass font families.  Normally these
@@ -643,7 +535,19 @@ void QPainter::drawText(int x, int y, const QChar *str, int len, int from, int t
         from = 0;
     if (to < 0)
         to = len;
-        
+		
+	m_dc.SetPen(data->style.pen);
+	m_dc.SetFont(data->style.font);
+	m_dc.SetBrush(data->style.brush);
+	
+	m_dc.SetBackground(wxBrush(backgroundColor, wxSOLID));
+	// TODO: For both drawText methods, we need to determine a way to handle text "families"
+	// i.e. sets of equivalent fonts for when one is not available
+	wxString cutString = wxString(str);
+	
+	m_dc.DrawText(cutString.Mid(from, to-from), x, y);
+
+#if 0
     WebCoreTextRun run;
     WebCoreInitializeTextRun(&run, (const UniChar *)str, len, from, to);    
     WebCoreTextStyle style;
@@ -662,15 +566,22 @@ void QPainter::drawText(int x, int y, const QChar *str, int len, int from, int t
     geometry.point = NSMakePoint(x, y);
     
     [data->textRenderer drawRun:&run style:&style geometry:&geometry];
+#endif
 }
 
 void QPainter::drawHighlightForText(int x, int y, int h, 
     const QChar *str, int len, int from, int to, int toAdd, const QColor &backgroundColor, 
     QPainter::TextDirection d, bool visuallyOrdered, int letterSpacing, int wordSpacing, bool smallCaps)
 {
-    if (data->state.paintingDisabled || len <= 0)
+    if (data->state.paintingDisabled || len <= 0 || !m_dc.Ok())
         return;
 
+	drawText(x, y, str, len, from, to, toAdd, backgroundColor, d, visuallyOrdered, letterSpacing, wordSpacing, smallCaps);
+	return;
+	
+	// FIXME: I believe this draws the selection color around text, but I don't see why
+	// there needs to be a special method for this... 
+	
     // Avoid allocations, use stack array to pass font families.  Normally these
     // css fallback lists are small <= 3.
     CREATE_FAMILY_ARRAY(data->state.font, families);
@@ -682,6 +593,7 @@ void QPainter::drawHighlightForText(int x, int y, int h,
     if (to < 0)
         to = len;
         
+#if 0		
     WebCoreTextRun run;
     WebCoreInitializeTextRun(&run, (const UniChar *)str, len, from, to);    
     WebCoreTextStyle style;
@@ -702,32 +614,52 @@ void QPainter::drawHighlightForText(int x, int y, int h,
     geometry.selectionHeight = h;
     geometry.useFontMetricsForSelectionYAndHeight = false;
     [data->textRenderer drawHighlightForRun:&run style:&style geometry:&geometry];
+#endif
 }
 
 void QPainter::drawLineForText(int x, int y, int yOffset, int width)
 {
-    if (data->state.paintingDisabled)
+    if (data->state.paintingDisabled || !m_dc.Ok())
         return;
     _updateRenderer();
+	
+	m_dc.SetBrush(data->style.brush);
+	m_dc.SetPen(data->style.pen);
+	// TODO: will SetDeviceOrigin handle yOffset?
+	m_dc.DrawLine(x, y, x+width, y);
+	
+#if 0
     [data->textRenderer
         drawLineForCharacters: NSMakePoint(x, y)
                yOffset:(float)yOffset
                  width: width
                  color:data->state.pen.color().getNSColor()
              thickness:data->state.pen.width()];
+#endif
 }
 
 void QPainter::drawLineForMisspelling(int x, int y, int width)
 {
-    if (data->state.paintingDisabled)
+    if (data->state.paintingDisabled || !m_dc.Ok())
         return;
     _updateRenderer();
+	
+	m_dc.SetBrush(data->style.brush);
+	m_dc.SetPen(wxPen(wxRED, 2, wxSHORT_DASH));
+	
+	m_dc.DrawLine(x, y, x+width, y);
+	
+#if 0
     [data->textRenderer drawLineForMisspelling:NSMakePoint(x, y) withWidth:width];
+#endif
 }
 
 int QPainter::misspellingLineThickness() const
 {
+	return 1;
+#if 0
     return [data->textRenderer misspellingLineThickness];
+#endif
 }
 
 static int getBlendedColorComponent(int c, int a)
@@ -741,13 +673,19 @@ static int getBlendedColorComponent(int c, int a)
 
 QColor QPainter::selectedTextBackgroundColor() const
 {
+#if 0
     NSColor *color = _usesInactiveTextBackgroundColor ? [NSColor secondarySelectedControlColor] : [NSColor selectedTextBackgroundColor];
     // this needs to always use device colorspace so it can de-calibrate the color for
     // QColor to possibly recalibrate it
     color = [color colorUsingColorSpaceName:NSDeviceRGBColorSpace];
     
     QColor col = QColor((int)(255 * [color redComponent]), (int)(255 * [color greenComponent]), (int)(255 * [color blueComponent]));
-    
+#endif
+
+	// FIXME: Is this the appropriate color for selected text on all platforms?
+	
+	QColor col = QColor(wxColour(wxSYS_COLOUR_HIGHLIGHTTEXT));
+	
     // Attempt to make the selection 60% transparent.  We do this by applying a standard blend and then
     // seeing if the resultant color is still within the 0-255 range.
     int alpha = 153;
@@ -759,11 +697,11 @@ QColor QPainter::selectedTextBackgroundColor() const
     return col;
 }
 
-// A fillRect designed to work around buggy behavior in NSRectFill.
-void QPainter::_fillRect(float x, float y, float w, float h, const QColor& col)
+void QPainter::_fillRect(int x, int y, int w, int h, const QColor& col)
 {
-    [col.getNSColor() set];
-    NSRectFillUsingOperation(NSMakeRect(x,y,w,h), NSCompositeSourceOver);
+	m_dc.SetBackground(col);
+	m_dc.SetPen(wxNullPen);
+	m_dc.DrawRect(x, y, w, h);
 }
 
 void QPainter::fillRect(int x, int y, int w, int h, const QBrush &brush)
@@ -782,7 +720,7 @@ void QPainter::fillRect(const QRect &rect, const QBrush &brush)
 
 void QPainter::addClip(const QRect &rect)
 {
-    [NSBezierPath clipRect:rect];
+	m_dc.SetClippingRegion(rect);
 }
 
 Qt::RasterOp QPainter::rasterOp() const
@@ -804,29 +742,29 @@ bool QPainter::paintingDisabled() const
     return data->state.paintingDisabled;
 }
 
-CGContextRef QPainter::currentContext()
-{
-    return (CGContextRef)([[NSGraphicsContext currentContext] graphicsPort]);
-}
-
 void QPainter::beginTransparencyLayer(float opacity)
 {
+#if 0
     [NSGraphicsContext saveGraphicsState];
     CGContextRef context = (CGContextRef)([[NSGraphicsContext currentContext] graphicsPort]);
     CGContextSetAlpha(context, opacity);
     CGContextBeginTransparencyLayer(context, 0);
+#endif
 }
 
 void QPainter::endTransparencyLayer()
 {
+#if 0
     CGContextRef context = (CGContextRef)([[NSGraphicsContext currentContext] graphicsPort]);
     CGContextEndTransparencyLayer(context);
     [NSGraphicsContext restoreGraphicsState];
+#endif
 }
 
 void QPainter::setShadow(int x, int y, int blur, const QColor& color)
 {
-    // Check for an invalid color, as this means that the color was not set for the shadow
+#if 0
+    //Check for an invalid color, as this means that the color was not set for the shadow
     // and we should therefore just use the default shadow color.
     CGContextRef context = (CGContextRef)([[NSGraphicsContext currentContext] graphicsPort]);
     if (!color.isValid()) {
@@ -839,16 +777,20 @@ void QPainter::setShadow(int x, int y, int blur, const QColor& color)
                                     cgColor);
         CGColorRelease(cgColor);
     }
+#endif
 }
 
 void QPainter::clearShadow()
 {
+#if 0
     CGContextRef context = (CGContextRef)([[NSGraphicsContext currentContext] graphicsPort]);
     CGContextSetShadowWithColor(context, CGSizeZero, 0, NULL);
+#endif
 }
 
 void QPainter::initFocusRing(int width, int offset)
 {
+#if 0
     if (!_drawsFocusRing)
         return;
 
@@ -858,20 +800,24 @@ void QPainter::initFocusRing(int width, int offset)
     data->focusRingOffset = offset;
     data->focusRingPath = KWQRetainNSRelease([[NSBezierPath alloc] init]);
     [data->focusRingPath setWindingRule:NSNonZeroWindingRule];
+#endif
 }
 
 void QPainter::initFocusRing(int width, int offset, const QColor &color)
 {
+#if 0
     if (!_drawsFocusRing)
         return;
 
     initFocusRing(width, offset);
     data->hasFocusRingColor = true;
     data->focusRingColor = color;
+#endif
 }
 
 void QPainter::addFocusRingRect(int x, int y, int width, int height)
 {
+#if 0
     if (!_drawsFocusRing)
         return;
 
@@ -880,10 +826,12 @@ void QPainter::addFocusRingRect(int x, int y, int width, int height)
     int offset = (data->focusRingWidth-1)/2 + data->focusRingOffset;
     rect = NSInsetRect(rect, -offset, -offset);
     [data->focusRingPath appendBezierPathWithRect:rect];
+#endif
 }
 
 void QPainter::drawFocusRing()
 {
+#if 0
     if (!_drawsFocusRing)
         return;
     
@@ -905,29 +853,15 @@ void QPainter::drawFocusRing()
         [data->focusRingPath fill];
         [NSGraphicsContext restoreGraphicsState];   
     }
+#endif
 }
 
 void QPainter::clearFocusRing()
 {
+#if 0
     if (data->focusRingPath) {
         KWQRelease(data->focusRingPath);
         data->focusRingPath = nil;
     }
+#endif
 }
-
-CGColorSpaceRef QPainter::rgbColorSpace()
-{
-    return [[WebCoreGraphicsBridge sharedBridge] createRGBColorSpace];
-}
-
-CGColorSpaceRef QPainter::grayColorSpace()
-{
-    return [[WebCoreGraphicsBridge sharedBridge] createGrayColorSpace];
-}
-
-CGColorSpaceRef QPainter::cmykColorSpace()
-{
-    return [[WebCoreGraphicsBridge sharedBridge] createCMYKColorSpace];
-}
-
-
