@@ -28,11 +28,8 @@
 
 #include "KWQFrame.h"
 
-#ifdef __OBJC__
-@class NSView;
-#else
-class NSView;
-#endif
+#include <wx/defs.h>
+#include <wx/scrolwin.h>
 
 class QScrollView : public QFrame {
 public:
@@ -93,9 +90,10 @@ public:
     void ensureVisible(int,int,int,int);
     void ensureRectVisibleCentered(const QRect &r, bool forceCentering=false);
         
-    NSView *getDocumentView() const;
+    wxWindow *getDocumentView() const;
 
 private:
+	wxScrolledWindow* m_scrollWin;
     virtual bool isQScrollView() const;
 };
 

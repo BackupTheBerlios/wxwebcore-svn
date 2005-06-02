@@ -37,11 +37,14 @@
 #include "KWQString.h"
 #include "KWQFontMetrics.h"
 
+#include <wx/defs.h>
+#include <wx/dc.h>
+
 // FIXME: temporary compilation fix
 typedef int CGContextRef;
 typedef int CGColorSpaceRef;
-typedef int CGImageRef;
 
+typedef int CGImageRef;
 
 
 class QFont;
@@ -137,22 +140,18 @@ public:
     void clearFocusRing();
     void setDrawsFocusRing(bool flag) { _drawsFocusRing = flag; }
     
-    CGContextRef currentContext();
-    
     static int compositeOperatorFromString (QString aString);
     static int getCompositeOperation(CGContextRef context);
     static void setCompositeOperation (CGContextRef context, QString operation);
     static void setCompositeOperation (CGContextRef context, int operation);
-
-    static CGColorSpaceRef rgbColorSpace();
-    static CGColorSpaceRef grayColorSpace();
-    static CGColorSpaceRef cmykColorSpace();
 
 private:
     // no copying or assignment
     QPainter(const QPainter &);
     QPainter &operator=(const QPainter &);
 
+	wxClientDC m_dc;
+	
     void _setColorFromBrush();
     void _setColorFromPen();
 
