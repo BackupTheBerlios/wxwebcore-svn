@@ -31,6 +31,7 @@
 
 #include <wx/defs.h>
 #include <wx/timer.h>
+#include <wx/datetime.h>
 
 class QTimer : public QObject {
 public:
@@ -50,9 +51,13 @@ public:
 	// TODO: Determine if this will still be needed.
     void setMonitor(void (*monitorFunction)(void *context), void *context);
     wxTimer *getTimer() { return m_timer; }
+	
+	// NOTE: This is needed for redirect timers, see WebCoreBridge::reportClientRedirectToURL
+	wxDateTime getFireDate() const; 
 
 private:    
     wxTimer *m_timer;
+	wxDateTime m_fireDate;
 	void (*m_monitorFunction)(void *context);
     void *m_monitorFunctionContext;
     KWQSignal m_timeoutSignal;

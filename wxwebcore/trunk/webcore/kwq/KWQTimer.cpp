@@ -51,6 +51,7 @@ void QTimer::start(int msec, bool singleShot)
 {
     stop();
 	m_timer->Start(msec, singleShot);
+	m_fireDate = wxDateTime::Now().Add(wxTimeSpan(0, 0, 0, msec));
 	
 	if (m_monitorFunction) {
         m_monitorFunction(m_monitorFunctionContext);
@@ -63,6 +64,7 @@ void QTimer::stop()
         return;
     }
     m_timer->Stop();
+	m_fireDate = wxDateTime::Now();
 	
 	if (m_monitorFunction) {
         m_monitorFunction(m_monitorFunctionContext);
@@ -75,6 +77,11 @@ void QTimer::setMonitor(void (*monitorFunction)(void *context), void *context)
     ASSERT(!m_monitorFunction);
     m_monitorFunction = monitorFunction;
     m_monitorFunctionContext = context;
+}
+
+wxDateTime QTimer::getFireDate() const
+{
+	return m_fireDate;
 }
 
 void QTimer::singleShot(int msec, QObject *receiver, const char *member)

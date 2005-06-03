@@ -34,6 +34,7 @@
 #include "KWQEvent.h"
 #include "KWQStringList.h"
 #include "KWQPtrList.h"
+#include "KWQMap.h"
 
 #import <wx/defs.h>
 #import <wx/timer.h>
@@ -67,10 +68,10 @@ class QTimer;
 class QImage;
 class QVariant;
 
+
 class KWQGuardedPtrBase;
 class KWQSignal;
-
-class wxTimer;
+class KWQObjectTimerTarget;
 
 class QObject : public Qt {
 public:
@@ -115,9 +116,12 @@ private:
     QObject &operator=(const QObject &);
     
     KWQSignal *findSignal(const char *signalName) const;
+	
+	void timerFired(const wxTimerEvent& event);
     
     QPtrList<QObject> _guardedPtrDummyList;
-    
+    QMap<int, KWQObjectTimerTarget*> timers;
+	
     mutable KWQSignal *_signalListHead;
     bool _signalsBlocked;
     static const QObject *_sender;
