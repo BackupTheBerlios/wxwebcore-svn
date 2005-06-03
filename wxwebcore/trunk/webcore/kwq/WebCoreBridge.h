@@ -51,15 +51,17 @@ namespace khtml {
 
 typedef khtml::RenderPart KHTMLRenderPart;
 
-class DOMCSSStyleDeclaration;
-class DOMDocument;
-class DOMDocumentFragment;
-class DOMElement;
-class DOMHTMLElement;
-class DOMNode;
-class DOMRange;
+class wxDOMCSSStyleDeclaration;
+class wxDOMDocument;
+class wxDOMDocumentFragment;
+class wxDOMElement;
+class wxDOMHTMLElement;
+class wxDOMNode;
+class wxDOMRange;
 class WebCoreSettings;
 class WebScriptObject;
+class FontData;
+class FormData;
 
 // just a placeholder name for now, until we determine the best match for NSArray
 class wxArray; 
@@ -69,6 +71,8 @@ class wxArray;
 class NSDictionary;
 class NSAttributedString; //basically a string which stores formatting info
 class NSRange;
+class NSNotification;
+class NSURLResponse;
 typedef unsigned int NSDraggingOperation;
 // possible values are here: 
 // http://developer.apple.com/documentation/Cocoa/Reference/ApplicationKit/ObjC_classic/TypesAndConstants/AppKitTypes.html#//apple_ref/doc/uid/20000019-BAJJFEEE
@@ -211,13 +215,13 @@ public:
 	void setParent(WebCoreBridge *parent);
 	
 	void provisionalLoadStarted();
-	void openURL(wxURL* URL, bool reload, const wxString& contentType, const wxString& refresh, const wxDateTime& lastModified, NSDictionary* pageCache);
+	void openURL(const wxString& URL, bool reload, const wxString& contentType, const wxString& refresh, const wxDateTime& lastModified, NSDictionary* pageCache);
 	void setEncoding(const wxFontEncoding& encoding, bool userChosen);
 	void addData(void* data);
 	void closeURL();
 	
-	void didNotOpenURL(wxURL* URL, NSDictionary* pageCache);
-	bool canLoadURL(wxURL* URL, const wxString& referrer, bool hideReferrer);
+	void didNotOpenURL(const wxString& URL, NSDictionary* pageCache);
+	bool canLoadURL(const wxString& URL, const wxString& referrer, bool hideReferrer);
 	
 	void saveDocumentState();
 	void restoreDocumentState();
@@ -228,14 +232,14 @@ public:
 	void end();
 	void stop();
 	
-	wxURL* GetURL();
-	wxURL* GetBaseURL();
+	wxString& GetURL() const;
+	wxString& GetBaseURL() const;
 	
 	void installInFrame(wxWindow* window);
 	void removeFromFrame();
 	
 	void scrollToAnchor(const wxString& anchor);
-	void scrollToAnchorWithURL(wxURL* URL);
+	void scrollToAnchorWithURL(const wxString& URL);
 	
 	bool scrollOverflowInDirection(WebScrollDirection direction, WebScrollGranularity granularity);
 	bool scrollOverflowWithScrollWheelEvent(wxEvent* event);
@@ -278,7 +282,7 @@ public:
 	wxString& renderTreeAsExternalRepresentation() const;
 	
 	NSDictionary* elementAtPoint(const wxPoint& point);
-	wxURL* URLWithAttributeString(const wxString& string);
+	wxString& URLWithAttributeString(const wxString& string) const;
 	
 	DOMElement* elementWithName(const wxString& name, DOMElement* form);
 	DOMElement* elementForView(wxWindow* view);
@@ -485,22 +489,23 @@ public:
 	virtual void frameDetached();
 	virtual wxWindow* documentView();
 
-	virtual void loadURL(wxURL* URL, const wxString& referrer, bool reload, bool userGesture, const wxString& target, wxEvent* triggerEvent, DOMElement* form, NSDictionary* formValues);
-	virtual void postWithURL(wxURL* URL, const wxString& referrer, const wxString& target, const wxList& data, const wxString& contentType, wxEvent* triggerEvent, DOMElement* form, NSDictionary* formValues);
+	virtual void loadURL(const wxString& URL, const wxString& referrer, bool reload, bool userGesture, const wxString& target, wxEvent* triggerEvent, wxDOMElement* form, QMap<QString, QString>* formValues);
+	virtual void postWithURL(const wxString& URL, const wxString& referrer, const wxString& target, FormData* data, const wxString& contentType, wxEvent* triggerEvent, wxDOMElement* form, QMap<QString, QString>* formValues);
 
-	virtual WebCoreBridge* createWindowWithURL(wxURL* URL, const wxString& name);
+	virtual WebCoreBridge* createWindowWithURL(const wxString& URL, const wxString& name);
 	virtual void showWindow();
 
-	virtual wxString& userAgentForURL(wxURL* URL) const;
+	virtual wxString& userAgentForURL(const wxString& URL) const;
 
 	virtual void setTitle(const wxString& title);
 	virtual void setStatusText(const wxString& status);
 
-	virtual void setIconURL(wxURL* URL);
-	virtual void setIconURL(wxURL* URL, const wxString& withType);
+	virtual void setIconURL(const wxString& URL);
+	virtual void setIconURL(const wxString& URL, const wxString& withType);
 
-	virtual WebCoreBridge* createChildFrameNamed(const wxString& frameName, wxURL* withURL);
-    virtual void referrer(const wxString& referrer);
+	virtual WebCoreBridge* createChildFrameNamed(const wxString& frameName, const wxString& withURL);
+    virtual wxString& referrer() const;
+	virtual void setReferrer(const wxString& referrer);
     virtual void renderPart(KHTMLRenderPart *renderPart);
     virtual void allowsScrolling(bool allowsScrolling, int marginWidth, int marginHeight);
 
@@ -529,40 +534,48 @@ public:
 
 //heck, we're probably not going to use some of this anyways, so I'll be lazy. :-)
 #if 0
-
 - (id <WebCoreResourceHandle>)startLoadingResource:(id <WebCoreResourceLoader>)loader withURL:(NSURL *)URL customHeaders:(NSDictionary *)customHeaders;
 - (id <WebCoreResourceHandle>)startLoadingResource:(id <WebCoreResourceLoader>)loader withURL:(NSURL *)URL customHeaders:(NSDictionary *)customHeaders postData:(NSArray *)data;
+
 - (void)objectLoadedFromCacheWithURL:(NSURL *)URL response:(NSURLResponse *)response data:(NSData *)data;
 
 - (NSData *)syncLoadResourceWithURL:(NSURL *)URL customHeaders:(NSDictionary *)requestHeaders postData:(NSArray *)postData finalURL:(NSURL **)finalNSURL responseHeaders:(NSDictionary **)responseHeaderDict statusCode:(int *)statusCode;
 
-- (BOOL)isReloading;
-- (time_t)expiresTimeForResponse:(NSURLResponse *)response;
 
-- (void)reportClientRedirectToURL:(NSURL *)URL delay:(NSTimeInterval)seconds fireDate:(NSDate *)date lockHistory:(BOOL)lockHistory isJavaScriptFormAction:(BOOL)isJavaScriptFormAction;
-- (void)reportClientRedirectCancelled:(BOOL)cancelWithLoadInProgress;
+#endif
 
-- (void)focusWindow;
-- (void)unfocusWindow;
+	bool isReloading();
+	time_t expiresTimeForResponse(NSURLResponse *response);
 
-- (NSView *)nextKeyViewOutsideWebFrameViews;
-- (NSView *)nextValidKeyViewOutsideWebFrameViews;
-- (NSView *)previousKeyViewOutsideWebFrameViews;
+	void reportClientRedirectToURL(const wxString& URL, int seconds, const wxDateTime& fireDate, bool lockHistory, bool isJavaScriptFormAction);
+	void reportClientRedirectCancelled(bool cancelWithLoadInProgress);
 
-- (BOOL)defersLoading;
-- (void)setDefersLoading:(BOOL)loading;
+	void focusWindow;
+	void unfocusWindow;
+
+	wxWindow* nextKeyViewOutsideWebFrameViews();
+	wxWindow* nextValidKeyViewOutsideWebFrameViews();
+	wxWindow* previousKeyViewOutsideWebFrameViews();
+
+	bool defersLoading();
+	void setDefersLoading(bool loading);
+
+// TODO: Need to decide what to do for these NSArrays...
+#if 0
 - (void)saveDocumentState:(NSArray *)documentState;
 - (NSArray *)documentState;
+#endif
 
-- (void)setNeedsReapplyStyles;
+	void setNeedsReapplyStyles();
 
-- (void)tokenizerProcessedData;
+	void tokenizerProcessedData();
 
 // OK to be an wxString rather than an NSURL.
 // This URL is only used for coloring visited links.
-- (wxString *)requestedURLString;
-- (wxString *)incomingReferrer;
+	wxString& requestedURLString() const;
+	wxString& incomingReferrer() const;
 
+#if 0
 - (NSView *)viewForPluginWithURL:(NSURL *)URL
                   attributeNames:(NSArray *)attributeNames
                  attributeValues:(NSArray *)attributeValues
@@ -571,32 +584,34 @@ public:
                         attributeNames:(NSArray *)attributeNames
                        attributeValues:(NSArray *)attributeValues
                                baseURL:(NSURL *)baseURL;
+#endif
 
-- (BOOL)saveDocumentToPageCache:(id)documentInfo;
+	bool saveDocumentToPageCache(void* documentInfo);
 
-- (int)getObjectCacheSize;
+	int getObjectCacheSize();
 
-- (BOOL)frameRequiredForMIMEType:(wxString*)MIMEType URL:(NSURL *)URL;
+	bool frameRequiredForMIMEType(const wxString& MIMEType, const wxString& URL);
 
-- (void)loadEmptyDocumentSynchronously;
+	void loadEmptyDocumentSynchronously();
 
-- (wxString *)MIMETypeForPath:(wxString *)path;
+	wxString& MIMETypeForPath(const wxString& path) const;
 
-- (void)allowDHTMLDrag:(BOOL *)flagDHTML UADrag:(BOOL *)flagUA;
-- (BOOL)startDraggingImage:(NSImage *)dragImage at:(NSPoint)dragLoc operation:(NSDragOperation)op event:(NSEvent *)event sourceIsDHTML:(BOOL)flag DHTMLWroteData:(BOOL)dhtmlWroteData;
-- (void)handleAutoscrollForMouseDragged:(NSEvent *)event;
-- (BOOL)mayStartDragAtEventLocation:(NSPoint)location;
+	void allowDHTMLDrag(bool* flagDHTML, bool* UADrag);
+	bool startDraggingImage(wxImage *dragImage, const wxPoint& dragLoc, NSDragOperation operation, const wxEvent& event, bool sourceIsDHTML, bool dhtmlWroteData);
+	void handleAutoscrollForMouseDragged(const wxEvent& event);
+	bool mayStartDragAtEventLocation(const wxPoint& location);
 
-- (BOOL)selectWordBeforeMenuEvent;
+	bool selectWordBeforeMenuEvent();
 
-- (int)historyLength;
-- (void)goBackOrForward:(int)distance;
-- (BOOL)canGoBackOrForward:(int)distance;
+	int historyLength();
+	void goBackOrForward(int distance);
+	bool canGoBackOrForward(int distance);
 
-- (void)controlTextDidBeginEditing:(NSNotification *)obj;
-- (void)controlTextDidEndEditing:(NSNotification *)obj;
-- (void)controlTextDidChange:(NSNotification *)obj;
+	void controlTextDidBeginEditing(NSNotification *obj);
+	void controlTextDidEndEditing(NSNotification *obj);
+	void controlTextDidChange(NSNotification *obj);
 
+#if 0
 - (BOOL)control:(NSControl *)control textShouldBeginEditing:(NSText *)fieldEditor;
 - (BOOL)control:(NSControl *)control textShouldEndEditing:(NSText *)fieldEditor;
 - (BOOL)control:(NSControl *)control didFailToFormatString:(wxString *)string errorDescription:(wxString *)error;
