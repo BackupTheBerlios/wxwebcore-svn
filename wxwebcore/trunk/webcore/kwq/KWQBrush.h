@@ -29,7 +29,8 @@
 #include "KWQColor.h"
 #include "KWQNamespace.h"
 
-#include <wx/gdicmn.h>
+#include <wx/defs.h>
+#include <wx/brush.h>
 
 class QBrush : public Qt {
 public: 

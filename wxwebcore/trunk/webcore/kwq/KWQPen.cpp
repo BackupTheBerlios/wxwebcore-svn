@@ -71,11 +71,11 @@ bool QPen::operator!=(const QPen &compareTo) const
     return !(*this == compareTo);
 }
 
-wxPen QPen::operator wxPen() const
+QPen::operator wxPen() const
 {
 	int style;
 	PenStyle thisStyle;
-	select (thisStyle){
+	switch (thisStyle){
 		case SolidLine:
 			style = wxSOLID;
 			break;

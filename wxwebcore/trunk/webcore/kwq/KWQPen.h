@@ -29,6 +29,9 @@
 #include "KWQNamespace.h"
 #include "KWQColor.h"
 
+#include <wx/defs.h>
+#include <wx/pen.h>
+
 class QPen : public Qt {
 public:
     QPen(const QColor &c = Qt::black, uint w = 0, PenStyle ps = SolidLine);

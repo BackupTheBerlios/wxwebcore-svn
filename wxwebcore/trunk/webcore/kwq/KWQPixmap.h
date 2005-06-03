@@ -88,11 +88,11 @@ public:
     
     void flushRasterCache();
     
-    wxBitmap* imageRef();
-    
     static bool shouldUseThreadedDecoding();
 
     void resetAnimation();
+	
+	operator wxBitmap() const;
     
 private:
 

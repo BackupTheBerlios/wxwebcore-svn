@@ -38,7 +38,7 @@
 #include "KWQFontMetrics.h"
 
 #include <wx/defs.h>
-#include <wx/dc.h>
+#include <wx/dcclient.h>
 
 // FIXME: temporary compilation fix
 typedef int CGContextRef;

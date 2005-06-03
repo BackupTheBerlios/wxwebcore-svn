@@ -129,12 +129,12 @@ QPixmap::~QPixmap()
 	}
 }
 
-wxBitmap* QPixmap::imageRef()
+QPixmap::operator wxBitmap() const
 {
-	if (m_bitmap.Ok())
-		return &m_bitmap;
+	if (m_bitmap.Ok()) 
+		return m_bitmap;
 	
-	return NULL;
+	return wxBitmap();
 }
 
 void QPixmap::resetAnimation()
