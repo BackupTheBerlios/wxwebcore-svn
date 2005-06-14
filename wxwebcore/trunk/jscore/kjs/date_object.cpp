@@ -53,6 +53,10 @@
 #include <locale.h>
 #include <ctype.h>
 
+#ifdef _WIN32
+#define strncasecmp(a,b,n) strnicmp(a,b,n)
+#endif
+
 #include "date_object.h"
 #include "error_object.h"
 #include "operations.h"
@@ -319,6 +323,83 @@ static UString formatLocaleDate(KJS::ExecState *exec,time_t tv, bool includeDate
 #endif // APPLE_CHANGES
 
 using namespace KJS;
+
+// come constants
+const double hoursPerDay = 24;
+const double minutesPerHour = 60;
+const double secondsPerMinute = 60;
+const double msPerSecond = 1000;
+const double msPerMinute = msPerSecond * secondsPerMinute;
+const double msPerHour = msPerMinute * minutesPerHour;
+const double msPerDay = msPerHour * hoursPerDay;
+
+static double dayFromYear(int year)
+{
+  return 365.0 * (year - 1970)
+    + floor((year - 1969) / 4.0)
+    - floor((year - 1901) / 100.0)
+    + floor((year - 1601) / 400.0);
+}
+
+// depending on whether it's a leap year or not
+static int daysInYear(int year)
+{
+  if (year % 4 != 0)
+    return 365;
+  else if (year % 400 == 0)
+    return 366;
+  else if (year % 100 == 0)
+    return 365;
+  else
+    return 366;
+}
+
+// time value of the start of a year
+double timeFromYear(int year)
+{
+  return msPerDay * dayFromYear(year);
+}
+
+static double makeTime(struct tm *t, int ms, bool utc)
+{
+    int utcOffset;
+    if (utc) {
+	time_t zero = 0;
+#if defined BSD || defined(__linux__) || defined(__APPLE__)
+	struct tm t3;
+       	localtime_r(&zero, &t3);
+        utcOffset = t3.tm_gmtoff;
+        t->tm_isdst = t3.tm_isdst;
+#else
+        (void)localtime(&zero);
+#  if defined(__BORLANDC__)
+        utcOffset = - _timezone;
+#  else
+        utcOffset = - timezone;
+#  endif
+        t->tm_isdst = 0;
+#endif
+    } else {
+	utcOffset = 0;
+	t->tm_isdst = -1;
+    }
+
+    double yearOffset = 0.0;
+    if (t->tm_year < (1970 - 1900) || t->tm_year > (2038 - 1900)) {
+      // we'll fool mktime() into believing that this year is within
+      // its normal, portable range (1970-2038) by setting tm_year to
+      // 2000 or 2001 and adding the difference in milliseconds later.
+      // choice between offset will depend on whether the year is a
+      // leap year or not.
+      int y = t->tm_year + 1900;
+      int baseYear = daysInYear(y) == 365 ? 2001 : 2000;
+      const double baseTime = timeFromYear(baseYear);
+      yearOffset = timeFromYear(y) - baseTime;
+      t->tm_year = baseYear - 1900;
+    }
+
+    return (mktime(t) + utcOffset) * 1000.0 + ms + yearOffset;
+}
 
 // ------------------------------ DateInstanceImp ------------------------------
 
@@ -638,11 +719,7 @@ Value DateProtoFuncImp::call(ExecState *exec, Object &thisObj, const List &args)
   if (id == SetYear || id == SetMilliSeconds || id == SetSeconds ||
       id == SetMinutes || id == SetHours || id == SetDate ||
       id == SetMonth || id == SetFullYear ) {
-    time_t mktimeResult = utc ? timegm(t) : mktime(t);
-    if (mktimeResult == invalidDate)
-      result = Number(NaN);
-    else
-      result = Number(mktimeResult * 1000.0 + ms);
+    result = Number(makeTime(t, ms, utc));
     thisObj.setInternalValue(result);
   }
 
@@ -810,10 +887,7 @@ Value DateObjectFuncImp::call(ExecState *exec, Object &/*thisObj*/, const List &
     t.tm_min = (n >= 5) ? args[4].toInt32(exec) : 0;
     t.tm_sec = (n >= 6) ? args[5].toInt32(exec) : 0;
     int ms = (n >= 7) ? args[6].toInt32(exec) : 0;
-    time_t mktimeResult = timegm(&t);
-    if (mktimeResult == invalidDate)
-      return Number(NaN);
-    return Number(mktimeResult * 1000.0 + ms);
+    return Number(makeTime(&t, ms, true));
   }
 }
 
@@ -1209,10 +1283,13 @@ time_t KJS::KRFCDate_parseDate(const UString &_date)
 
 double KJS::timeClip(double t)
 {
-    if (!isfinite(t))
+    if (isInf(t))
         return NaN;
     double at = fabs(t);
     if (at > 8.64E15)
         return NaN;
-    return copysign(floor(at), t);
+    if (t < 0 || (t == 0 && IS_NEGATIVE_ZERO(t)))
+        return -floor(at);
+    else
+        return floor(at);
 }

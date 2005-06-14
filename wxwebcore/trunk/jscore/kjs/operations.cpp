@@ -74,7 +74,7 @@ bool KJS::isInf(double d)
 
 bool KJS::isPosInf(double d)
 {
-#if APPLE_CHANGES
+#if 0 // APPLE_CHANGES
   return isinf(d) && d > 0;
 #else
 #if defined(HAVE_FUNC_ISINF)
@@ -91,7 +91,7 @@ bool KJS::isPosInf(double d)
 
 bool KJS::isNegInf(double d)
 {
-#if APPLE_CHANGES
+#if 0 // APPLE_CHANGES
   return isinf(d) && d < 0;
 #else
 #if defined(HAVE_FUNC_ISINF)

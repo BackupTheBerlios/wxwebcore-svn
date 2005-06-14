@@ -6,7 +6,11 @@
     <!-- Common definitions etc.: -->
 
     <include file="presets/simple.bkl"/>
+
+
+    <set var="WX_DEBUG_VARIABLE">DEBUG</set>
     <include file="presets/wx.bkl"/>
+
 
     <set var="BUILDDIR">obj-$(FORMAT)</set>
 
@@ -66,6 +70,17 @@
             
             <cppflags>$(LIBXML_CFLAGS)</cppflags>
             <ldflags>$(LIBXML_LDFLAGS)</ldflags>
+        </if>
+
+        <if cond="PLATFORM_WIN32=='1'">
+            <include>win32</include>
+            <define>HAVE_SYS_TIMEB_H=1</define>
+            <define>HAVE_FLOAT_H=1</define>
+            <define>HAVE_FUNC__FINITE=1</define>
+        </if>
+
+        <if cond="FORMAT in ['msvc', 'msvc6prj']">
+            <include>win32/msvc</include>
         </if>
     </template>
 

@@ -4504,11 +4504,13 @@ for (;;)
           {
 #if PCRE_UTF16
           ichar c1 = (ecode[0] << 8) | ecode[1];
-          ecode += 2;
 #else
           ichar c1 = *ecode++;
 #endif
           ichar c2 = *eptr++;
+#if PCRE_UTF16
+          ecode += 2;
+#endif
           if (MAPCHAR(md->lcc, c1) != MAPCHAR(md->lcc, c2))
             return FALSE;
           }
@@ -4593,11 +4595,12 @@ for (;;)
         {
         for (i = min;; i++)
           {
+          ichar c2;
           if (match(eptr, ecode, offset_top, md, ims, eptrb, 0))
             return TRUE;
           if (i >= max || eptr >= md->end_subject)
             return FALSE;
-          ichar c2 = *eptr++;
+          c2 = *eptr++;
           if (c != MAPCHAR(md->lcc, c2))
             return FALSE;
           }
@@ -4654,13 +4657,14 @@ for (;;)
     /* Match a negated single character */
 
     case OP_NOT: {
+    int c;
     if (eptr >= md->end_subject) return FALSE;
 #if PCRE_UTF16
-    int c = (ecode[1] << 8) | ecode[2];
+    c = (ecode[1] << 8) | ecode[2];
     ecode += 3;
 #else
     ecode++;
-    int c = *ecode++;
+    c = *ecode++;
 #endif
     if ((ims & PCRE_CASELESS) != 0)
       {
@@ -4742,11 +4746,12 @@ for (;;)
         {
         for (i = min;; i++)
           {
+          ichar c2;
           if (match(eptr, ecode, offset_top, md, ims, eptrb, 0))
             return TRUE;
           if (i >= max || eptr >= md->end_subject)
             return FALSE;
-          ichar c2 = *eptr++;
+          c2 = *eptr++;
           if (c == MAPCHAR(md->lcc, c2))
             return FALSE;
           }

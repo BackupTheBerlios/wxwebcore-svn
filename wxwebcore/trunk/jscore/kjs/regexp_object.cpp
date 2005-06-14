@@ -200,7 +200,7 @@ Object RegExpObjectImp::arrayOfMatches(ExecState *exec, const UString &result) c
   // The returned array contains 'result' as first item, followed by the list of matches
   list.append(String(result));
   if ( lastOvector )
-    for ( uint i = 1 ; i < lastNrSubPatterns + 1 ; ++i )
+    for ( unsigned int i = 1 ; i < lastNrSubPatterns + 1 ; ++i )
     {
       int start = lastOvector[2*i];
       if (start == -1)

@@ -230,7 +230,7 @@ Value NumberProtoFuncImp::call(ExecState *exec, Object &thisObj, const List &arg
       int decimalAdjust = 0;
       if (!fractionDigits.isA(UndefinedType)) {
           double logx = floor(log10(x));
-          x /= pow(10,logx);
+          x /= pow(double(10),logx);
           double fx = floor(x*pow(10,f))/pow(10,f);
           double cx = ceil(x*pow(10,f))/pow(10,f);
           

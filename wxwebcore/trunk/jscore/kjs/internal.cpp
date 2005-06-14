@@ -1007,7 +1007,10 @@ double KJS::roundValue(ExecState *exec, const Value &v)
   double ad = fabs(d);
   if (ad == 0 || isNaN(d) || isInf(d))
     return d;
-  return copysign(floor(ad), d);
+  if (d < 0 || (d == 0 && IS_NEGATIVE_ZERO(d)))
+      return -floor(ad);
+  else
+      return floor(ad);
 }
 
 #ifndef NDEBUG
