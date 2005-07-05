@@ -25,6 +25,8 @@
 
 #import "KWQApplication.h"
 
+#include <wx/display.h>
+
 int QDesktopWidget::width()
 {
     return (int)screenGeometry().width();
@@ -39,18 +41,17 @@ int QDesktopWidget::height()
 // a different screen from the key window at the time the script is run. If so, keep in mind
 // that the result of screenGeometry is intersected with the result of KWinModule::workArea.
 
-int QDesktopWidget::screenNumber(QWidget *)
+int QDesktopWidget::screenNumber(QWidget *w)
 {
-    // Always returns 0, which is fine since this is only passed to screenGeometry,
-    // which ignores the screen number parameter.
-    return 0;
+    return wxDisplay::GetFromWindow(w->getView());
 }
 
 QRect QDesktopWidget::screenGeometry(int screenNumber)
 {
-    // Ignores the screen number, and always returns the geometry of the main screen,
-    // which is the screen that the key window is on.
-	wxDisplay thisDisplay(0);
+    if (screenNumber == -1)
+        screenNumber = primaryScreen();
+
+    wxDisplay thisDisplay(screenNumber);
     return QRect(thisDisplay.GetGeometry());
 }
 

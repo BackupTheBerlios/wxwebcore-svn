@@ -32,9 +32,9 @@ QPaintDeviceMetrics::QPaintDeviceMetrics(const QPaintDevice *)
 {
 }
 
-int QPaintDeviceMetrics::logicalDpiY() const 
+int QPaintDeviceMetrics::logicalDpiY() const
 {
-    return 96;
+    return 96; // FIXME: take this from associated wxDC
 }
 
 int QPaintDeviceMetrics::depth() const

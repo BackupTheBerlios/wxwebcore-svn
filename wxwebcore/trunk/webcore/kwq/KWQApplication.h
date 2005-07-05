@@ -44,8 +44,9 @@ QApplication * const qApp = 0;
 
 class QDesktopWidget : public QWidget {
 public:
+    static int primaryScreen() { return 0; }
     static int screenNumber(QWidget *);
-    static QRect screenGeometry(int screenNumber);
+    static QRect screenGeometry(int screenNumber = -1);
     static int width();
     static int height();
 };

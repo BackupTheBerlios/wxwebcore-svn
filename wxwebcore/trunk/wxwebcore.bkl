@@ -132,31 +132,40 @@
     </set>
    
     <set var="WEBCORE_KWQ_SRC">
+        webcore/kwq/KWQApplication.cpp
         webcore/kwq/KWQArrayImpl.cpp
         webcore/kwq/KWQBuffer.cpp
         webcore/kwq/KWQChar.cpp
         webcore/kwq/KWQCharsets.cpp
+        webcore/kwq/KWQCollection.cpp
         webcore/kwq/KWQColor.cpp
         webcore/kwq/KWQColorData.c
         webcore/kwq/KWQCursor.cpp
         webcore/kwq/KWQCString.cpp
         webcore/kwq/KWQDateTime.cpp
+        webcore/kwq/KWQDOMNode.cpp
         webcore/kwq/KWQFile.cpp
         webcore/kwq/KWQFont.cpp
         webcore/kwq/KWQGlobal.cpp
         webcore/kwq/KWQGuardedPtr.cpp
+        webcore/kwq/KWQKCharsets.cpp
         webcore/kwq/KWQKCookieJar.cpp
         webcore/kwq/KWQKCursor.cpp
         webcore/kwq/KWQKGlobalSettings.cpp
+        webcore/kwq/KWQKHTMLFactory.cpp
+        webcore/kwq/KWQKHTMLView.cpp
         webcore/kwq/KWQKJob.cpp
         webcore/kwq/KWQKPartsEvent.cpp
         webcore/kwq/KWQKPartsPart.cpp
         webcore/kwq/KWQKStandardDirs.cpp
         webcore/kwq/KWQKStringHandler.cpp
+        webcore/kwq/KWQKURL.cpp
+        webcore/kwq/KWQKWin.cpp
         webcore/kwq/KWQKWinModule.cpp
         webcore/kwq/KWQLabel.cpp
         webcore/kwq/KWQListImpl.cpp
         webcore/kwq/KWQMapImpl.cpp
+        webcore/kwq/KWQMovie.cpp
         webcore/kwq/KWQPaintDeviceMetrics.cpp
         webcore/kwq/KWQPen.cpp
         webcore/kwq/KWQPixmap.cpp
@@ -166,7 +175,9 @@
         webcore/kwq/KWQRect.cpp
         webcore/kwq/KWQRegExp.cpp
         webcore/kwq/KWQRegion.cpp
+        webcore/kwq/KWQRenderTreeDebug.cpp
         webcore/kwq/KWQSignal.cpp
+        webcore/kwq/KWQSignalStubs.cpp
         webcore/kwq/KWQSize.cpp
         webcore/kwq/KWQString.cpp
         webcore/kwq/KWQStringList.cpp

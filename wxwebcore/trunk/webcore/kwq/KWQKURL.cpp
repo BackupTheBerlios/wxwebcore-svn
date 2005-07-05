@@ -869,7 +869,11 @@ QString KURL::prettyURL() const
 
 QString KURL::decode_string(const QString &urlString, const QTextCodec *codec)
 {
-    static const QTextCodec UTF8Codec(kCFStringEncodingUTF8);
+    if (!codec)
+    {
+        static const QTextCodec *UTF8Codec = QTextCodec::codecForName("UTF-8");
+        codec = UTF8Codec;
+    }
 
     QString result("");
 
@@ -914,7 +918,7 @@ QString KURL::decode_string(const QString &urlString, const QTextCodec *codec)
         }
 
         // Decode the bytes into Unicode characters.
-        QString decoded = (codec ? codec : &UTF8Codec)->toUnicode(buffer, p - buffer);
+        QString decoded = codec->toUnicode(buffer, p - buffer);
         if (decoded.isEmpty()) {
             continue;
         }
@@ -1624,16 +1628,16 @@ static char *encodeRelativeString(const KURL &base, const QString &rel, const QT
 
     char *strBuffer;
 
-    static const QTextCodec UTF8Codec(kCFStringEncodingUTF8);
+    static const QTextCodec *UTF8Codec = QTextCodec::codecForName("UTF-8");
 
-    const QTextCodec *pathCodec = codec ? codec : &UTF8Codec;
+    const QTextCodec *pathCodec = codec ? codec : UTF8Codec;
     const QTextCodec *otherCodec = pathCodec;
     
     // Always use UTF-8 for mailto URLs because that's what mail applications expect.
     // Always use UTF-8 for paths in file and help URLs, since they are local filesystem paths,
     // and help content is often defined with this in mind, but use native encoding for the
     // non-path parts of the URL.
-    if (*pathCodec != UTF8Codec) {
+    if (*pathCodec != *UTF8Codec) {
         QString protocol;
         if (rel.length() > 0 && isSchemeFirstChar(rel.at(0).latin1())) {
             for (uint i = 1; i < rel.length(); i++) {
@@ -1652,10 +1656,10 @@ static char *encodeRelativeString(const KURL &base, const QString &rel, const QT
         }
         protocol = protocol.lower();
         if (protocol == "file" || protocol == "help") {
-            pathCodec = &UTF8Codec;
+            pathCodec = UTF8Codec;
         } else if (protocol == "mailto") {
-            pathCodec = &UTF8Codec;
-            otherCodec = &UTF8Codec;
+            pathCodec = UTF8Codec;
+            otherCodec = UTF8Codec;
         }
     }
     
