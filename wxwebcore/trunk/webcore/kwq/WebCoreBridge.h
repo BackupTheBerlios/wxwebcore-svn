@@ -219,6 +219,7 @@ public:
 	void setEncoding(const wxFontEncoding& encoding, bool userChosen);
 	void addData(void* data);
 	void closeURL();
+	void stopLoading();
 	
 	void didNotOpenURL(const wxString& URL, NSDictionary* pageCache);
 	bool canLoadURL(const wxString& URL, const wxString& referrer, bool hideReferrer);
